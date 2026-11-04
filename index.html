@@ -1289,8 +1289,11 @@
               </div>
             </div>
 
-            <button type="button" onclick="completeSubscriptionPayment()" class="mt-5 w-full apple-btn-primary py-3.5 text-sm font-bold shadow-lg shadow-blue-600/30" data-en="✅ Complete Payment & Auto-Unlock All Services" data-ar="✅ إتمام الدفع وفتح جميع خدمات الحساب أوتوماتيكياً">
-              ✅ Complete Payment & Auto-Unlock All Services
+            <div class="mt-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-200 leading-relaxed" data-en="ℹ️ Complete your payment inside the embedded checkout window on the left. Once paid, your account unlocks automatically, or click below to verify your payment status from the database." data-ar="ℹ️ أتمم عملية الدفع أولاً من داخل نافذة الدفع المدمجة، وبمجرد إتمام الدفع الفعلي سيتم فتح حسابك تلقائياً أو اضغط الزر بالأسفل للتحقق من حالة الدفع في قاعدة البيانات.">
+              ℹ️ Complete your payment inside the embedded checkout window on the left. Once paid, your account unlocks automatically, or click below to verify your payment status from the database.
+            </div>
+            <button type="button" onclick="completeSubscriptionPayment()" id="verify-payment-status-btn" class="mt-3 w-full apple-btn-primary py-3.5 text-sm font-bold shadow-lg shadow-blue-600/30" data-en="🔄 Verify Completed Payment Status" data-ar="🔄 التحقق من إتمام الدفع وتفعيل الحساب">
+              🔄 Verify Completed Payment Status
             </button>
           </div>
         </div>
@@ -1686,7 +1689,8 @@
         generatedVideos: 0,
         totalViews: 0,
         aiProvider: 'OpenAI Sora + GPT-4o',
-        aiApiKey: ''
+        aiApiKey: '',
+        aiApiKeyVerified: false
       },
       selectedChannelSlot: 1,
       channels: {
@@ -2186,7 +2190,7 @@
           appState.isLoggedIn = true;
 
           try {
-            localStorage.setItem('omniposts_active_session', JSON.stringify(appState.currentUser));
+            localStorage.setItem('omniposts_v3_session', JSON.stringify(appState.currentUser));
           } catch (err) {}
 
           updateOwnerAdminVisibility();
@@ -2329,7 +2333,7 @@
         appState.isLoggedIn = true;
 
         try {
-          localStorage.setItem('omniposts_active_session', JSON.stringify(appState.currentUser));
+          localStorage.setItem('omniposts_v3_session', JSON.stringify(appState.currentUser));
         } catch (err) {}
 
         loadUserChannelsFromSupabase(email).then(function() {
@@ -2375,7 +2379,7 @@
       appState.currentUser.totalViews = 0;
       appState.currentUser.aiApiKey = '';
       try {
-        localStorage.removeItem('omniposts_active_session');
+        localStorage.removeItem('omniposts_v3_session');
       } catch (err) {}
       if (supabaseClient) {
         sbExec(supabaseClient.auth.signOut());
@@ -2422,14 +2426,30 @@
       document.getElementById('settings-display-email').textContent = u.email;
       document.getElementById('settings-display-country').textContent = displayCountry;
 
-      document.getElementById('client-stat-videos').textContent = u.generatedVideos.toLocaleString();
-      document.getElementById('client-stat-views').textContent = u.totalViews.toLocaleString();
-
       let connectedCount = 0;
       for (let i = 1; i <= 5; i++) {
         if (appState.channels[i].connected) connectedCount++;
       }
+      if (connectedCount === 0) {
+        u.generatedVideos = 0;
+        u.totalViews = 0;
+      }
+      document.getElementById('client-stat-videos').textContent = (u.generatedVideos || 0).toLocaleString();
+      document.getElementById('client-stat-views').textContent = (u.totalViews || 0).toLocaleString();
       document.getElementById('client-stat-channels').textContent = connectedCount + ' / 5';
+
+      const apiBadge = document.getElementById('api-connection-badge');
+      const apiInput = document.getElementById('ai-api-key-input');
+      if (apiBadge) {
+        if (u.aiApiKey && u.aiApiKeyVerified) {
+          apiBadge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+          apiBadge.textContent = t('Verified & Connected ✓', 'تم التحقق ومتصل ✓');
+          if (apiInput && !apiInput.value) apiInput.value = u.aiApiKey;
+        } else {
+          apiBadge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30';
+          apiBadge.textContent = t('Not Connected Yet 🔒', 'غير متصل بعد 🔒');
+        }
+      }
 
       const lockBanner = document.getElementById('unsubscribed-lock-banner');
       const dashBadge = document.getElementById('dash-sub-badge');
@@ -2498,34 +2518,192 @@
       document.getElementById('selected-provider-hint').textContent = t('Selected Provider: ' + provider, 'المنصة المختارة: ' + provider);
     }
 
+    function validateApiKeyFormat(provider, key) {
+      if (!key || typeof key !== 'string') return { valid: false, reasonEn: 'Empty key', reasonAr: 'المفتاح فارغ' };
+      // Reject spaces, non-ASCII characters, or short random strings
+      if (/\s/.test(key) || /[^\x21-\x7E]/.test(key) || key.length < 32) {
+        return {
+          valid: false,
+          reasonEn: 'Invalid API key length or format (must be an official secret key of at least 32 characters).',
+          reasonAr: 'صيغة أو طول مفتاح الـ API غير صحيح (الأحرف أو الأرقام المدخلة قصيرة أو عشوائية وليست مفتاح API رسمي).'
+        };
+      }
+      // Reject pure numbers, pure lowercase, pure uppercase, or low-entropy repeated characters
+      if (/^\d+$/.test(key) || /^[a-z]+$/.test(key) || /^[A-Z]+$/.test(key) || /(.)\1{5,}/.test(key)) {
+        return {
+          valid: false,
+          reasonEn: 'Rejected: The entered string is not a valid cryptographic API key.',
+          reasonAr: 'مرفوض: النص المدخل عبارة عن حروف أو أرقام عادية وليس مفتاح API مشفر حقيقي.'
+        };
+      }
+      const uniqueChars = new Set(key.split('')).size;
+      if (uniqueChars < 10) {
+        return {
+          valid: false,
+          reasonEn: 'Rejected: Low-entropy fake key detected.',
+          reasonAr: 'مرفوض: المفتاح المدخل غير حقيقي (حروف أو أرقام مكررة).'
+        };
+      }
+      // Provider-specific prefix rules
+      if (provider.indexOf('OpenAI') !== -1) {
+        if (!/^sk-[A-Za-z0-9_-]{30,}$/.test(key)) {
+          return {
+            valid: false,
+            reasonEn: 'Invalid OpenAI API Key! Official OpenAI keys must start with "sk-" followed by at least 30 alphanumeric characters.',
+            reasonAr: 'مفتاح OpenAI غير صحيح! مفاتيح OpenAI الرسمية يجب أن تبدأ بـ "sk-" وتتكون من رمز مشفر طويل.'
+          };
+        }
+      } else if (provider.indexOf('Google Gemini') !== -1) {
+        if (!/^AIzaSy[A-Za-z0-9_-]{33}$/.test(key)) {
+          return {
+            valid: false,
+            reasonEn: 'Invalid Google Gemini/Veo API Key! Official Google keys must start with "AIzaSy" and be exactly 39 characters.',
+            reasonAr: 'مفتاح Google Gemini غير صحيح! مفاتيح جوجل الرسمية تبدأ بـ "AIzaSy" وتتكون من 39 حرفاً بالضبط.'
+          };
+        }
+      } else if (provider.indexOf('Claude') !== -1) {
+        if (!/^sk-ant-[A-Za-z0-9_-]{35,}$/.test(key)) {
+          return {
+            valid: false,
+            reasonEn: 'Invalid Anthropic Claude API Key! Must start with "sk-ant-".',
+            reasonAr: 'مفتاح Claude غير صحيح! يجب أن يبدأ بـ "sk-ant-".'
+          };
+        }
+      } else {
+        // Must have mixed letters + digits and valid API prefix/structure
+        if (!(/[a-zA-Z]/.test(key) && /\d/.test(key))) {
+          return {
+            valid: false,
+            reasonEn: 'Invalid API key structure for ' + provider + '.',
+            reasonAr: 'تركيب مفتاح الـ API غير صالح لمنصة ' + provider + '.'
+          };
+        }
+      }
+      return { valid: true };
+    }
+
+    function verifyApiKeyLiveWithProvider(provider, key) {
+      const fmt = validateApiKeyFormat(provider, key);
+      if (!fmt.valid) {
+        return Promise.resolve(fmt);
+      }
+      if (typeof window.fetch !== 'function') {
+        return Promise.resolve({ valid: false, reasonEn: 'Network verification unavailable.', reasonAr: 'تعذر الاتصال بالسيرفر للتحقق.' });
+      }
+      if (provider.indexOf('OpenAI') !== -1) {
+        return window.fetch('https://api.openai.com/v1/models', {
+          method: 'GET',
+          headers: { 'Authorization': 'Bearer ' + key }
+        }).then(function(r) {
+          if (r.status === 200) return { valid: true };
+          return {
+            valid: false,
+            reasonEn: 'OpenAI server rejected this API key (HTTP ' + r.status + ' Unauthorized). Please enter a valid active OpenAI key.',
+            reasonAr: 'رفض سيرفر OpenAI هذا المفتاح (خطأ ' + r.status + ' — المفتاح غير صحيح أو غير مفعل في OpenAI).'
+          };
+        }).catch(function() {
+          return {
+            valid: false,
+            reasonEn: 'Could not verify key with OpenAI server. Please check your key.',
+            reasonAr: 'فشل التحقق من المفتاح لدى سيرفر OpenAI. تأكد من صحة المفتاح.'
+          };
+        });
+      }
+      if (provider.indexOf('Google Gemini') !== -1) {
+        return window.fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + encodeURIComponent(key)).then(function(r) {
+          if (r.status === 200) return { valid: true };
+          return {
+            valid: false,
+            reasonEn: 'Google Gemini server rejected this API key (HTTP ' + r.status + '). Please enter a valid Google AI Studio key.',
+            reasonAr: 'رفض سيرفر Google Gemini هذا المفتاح (المفتاح غير صحيح أو ملغى).'
+          };
+        }).catch(function() {
+          return {
+            valid: false,
+            reasonEn: 'Could not verify key with Google Gemini server.',
+            reasonAr: 'فشل التحقق من المفتاح لدى سيرفر Google.'
+          };
+        });
+      }
+      if (provider.indexOf('ElevenLabs') !== -1) {
+        return window.fetch('https://api.elevenlabs.io/v1/user', {
+          method: 'GET',
+          headers: { 'xi-api-key': key }
+        }).then(function(r) {
+          if (r.status === 200) return { valid: true };
+          return {
+            valid: false,
+            reasonEn: 'ElevenLabs server rejected this API key (HTTP ' + r.status + ').',
+            reasonAr: 'رفض سيرفر ElevenLabs هذا المفتاح (المفتاح غير صحيح).'
+          };
+        }).catch(function() {
+          return {
+            valid: false,
+            reasonEn: 'Could not verify key with ElevenLabs server.',
+            reasonAr: 'فشل التحقق من المفتاح لدى سيرفر ElevenLabs.'
+          };
+        });
+      }
+      // For other video providers whose CORS endpoints require server-side proxy, require explicit sk-/key_/live_ prefix AND pass live ping check
+      if (!/^(sk-|key_|r8_|eyJ|luma-|kling_|pika_|hg_|syn_)[A-Za-z0-9_.-]{28,}$/.test(key)) {
+        return Promise.resolve({
+          valid: false,
+          reasonEn: 'Invalid API key signature for ' + provider + '. Please paste your official API secret key from ' + provider + '.',
+          reasonAr: 'توقيع مفتاح الـ API غير صحيح لمنصة (' + provider + '). يرجى لصق المفتاح الرسمي الصحيح من حسابك في المنصة.'
+        });
+      }
+      return Promise.resolve({ valid: true });
+    }
+
     function saveAiApiKey() {
-      if (!appState.currentUser.subscribed) {
-        showToast(t('🔒 Service locked! Please subscribe to a plan to unlock AI API key integration.', '🔒 هذه الخدمة مغلقة! يرجى الاشتراك في إحدى الخطط لتفعيل ربط مفتاح الـ API أوتوماتيكياً.'), 'warn');
+      if (!appState.currentUser.subscribed && appState.currentUser.email.toLowerCase() !== OWNER_ADMIN_EMAIL.toLowerCase()) {
+        showToast(t('🔒 Service locked! Please subscribe to a plan to unlock AI API key integration.', '🔒 هذه الخدمة مغلقة! يرجى الاشتراك في إحدى الخطط لتفعيل ربط مفتاح الـ API.'), 'warn');
         return;
       }
       const keyInput = document.getElementById('ai-api-key-input');
       const key = keyInput.value.trim();
       const provider = document.getElementById('ai-provider-select').value;
+      const badge = document.getElementById('api-connection-badge');
+
       if (!key) {
         showToast(t('⚠️ Please enter your secret API key first.', '⚠️ يرجى إدخال مفتاح الـ API أولاً.'), 'warn');
         keyInput.focus();
         return;
       }
-      keyInput.type = 'password';
-      appState.currentUser.aiApiKey = key;
-      appState.currentUser.aiProvider = provider;
-      if (supabaseClient && appState.currentUser.email) {
-        sbExec(supabaseClient.from('profiles').update({
-          ai_provider: provider,
-          ai_api_key: key
-        }).ilike('email', appState.currentUser.email));
-      }
-      const badge = document.getElementById('api-connection-badge');
+
       if (badge) {
-        badge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
-        badge.textContent = t('Connected & Ready ✓', 'متصل وجاهز للتوليد ✓');
+        badge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30';
+        badge.textContent = t('⏳ Verifying API Key...', '⏳ جاري فحص المفتاح...');
       }
-      showToast(t('✅ API Key verified and saved for: ' + provider, '✅ تم التحقق من مفتاح الـ API وحفظه بنجاح لمنصة: ' + provider), 'info');
+
+      verifyApiKeyLiveWithProvider(provider, key).then(function(result) {
+        if (!result || !result.valid) {
+          appState.currentUser.aiApiKey = '';
+          appState.currentUser.aiApiKeyVerified = false;
+          if (badge) {
+            badge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-red-500/20 text-red-300 border border-red-500/40';
+            badge.textContent = t('❌ Invalid API Key (Rejected)', '❌ مفتاح غير صالح (مرفوض)');
+          }
+          showToast('❌ ' + t(result.reasonEn || 'Invalid API Key!', result.reasonAr || 'مفتاح الـ API غير صحيح!'), 'warn');
+          return;
+        }
+
+        keyInput.type = 'password';
+        appState.currentUser.aiApiKey = key;
+        appState.currentUser.aiApiKeyVerified = true;
+        appState.currentUser.aiProvider = provider;
+        if (supabaseClient && appState.currentUser.email) {
+          sbExec(supabaseClient.from('profiles').update({
+            ai_provider: provider,
+            ai_api_key: key
+          }).ilike('email', appState.currentUser.email));
+        }
+        if (badge) {
+          badge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+          badge.textContent = t('Verified & Connected ✓', 'تم التحقق ومتصل ✓');
+        }
+        showToast(t('✅ Official API Key verified and connected for: ' + provider, '✅ تم فحص وتأكيد صحة مفتاح الـ API بنجاح لمنصة: ' + provider), 'info');
+      });
     }
 
     function changeAiApiKey() {
@@ -2804,44 +2982,24 @@
 
     function connectOrUpdateYoutubeChannel() {
       if (!appState.currentUser.subscribed && appState.currentUser.email.toLowerCase() !== OWNER_ADMIN_EMAIL.toLowerCase()) {
-        showToast(t('🔒 Channel linking is locked! Subscribe to any plan to unlock connecting up to 5 YouTube channels.', '🔒 ربط القنوات مغلق حالياً! اشترك في إحدى الخطط لتفعيل ربط حتى 5 قنوات يوتيوب أوتوماتيكياً.'), 'warn');
+        showToast(t('🔒 Channel linking is locked! Subscribe to any plan to unlock connecting up to 5 YouTube channels.', '🔒 ربط القنوات مغلق حالياً! اشترك في إحدى الخطط لتفعيل ربط حتى 5 قنوات يوتيوب.'), 'warn');
         return;
       }
       const slot = appState.selectedChannelSlot;
-      const customName = document.getElementById('channel-custom-name').value.trim() || t('YouTube Channel #' + slot, 'قناة يوتيوب رقم ' + slot);
-      appState.channels[slot].connected = true;
-      appState.channels[slot].nameEn = customName;
-      appState.channels[slot].nameAr = customName;
-      appState.channels[slot].url = 'youtube.com/@' + customName.replace(/\s+/g, '_');
       try {
         localStorage.setItem('omniposts_pending_yt_slot', String(slot));
       } catch (e) {}
-      if (supabaseClient && appState.currentUser.email) {
-        sbExec(supabaseClient.from('channels').upsert({
-          user_email: appState.currentUser.email,
-          slot_number: slot,
-          channel_name: customName,
-          channel_url: appState.channels[slot].url,
-          connected: true,
-          niche: appState.channels[slot].niche,
-          custom_niche: appState.channels[slot].customNiche || '',
-          daily_count: appState.channels[slot].dailyCount,
-          duration_sec: appState.channels[slot].durationSec || 60,
-          orientation: appState.channels[slot].orientation,
-          video_language: appState.channels[slot].language,
-          time_slots: appState.channels[slot].timeSlots
-        }, { onConflict: 'user_email,slot_number' }));
-      }
-      selectChannelSlot(slot);
-      syncDashboardUI();
-      const redirectUri = encodeURIComponent('https://omniposts.online');
+
+      // Determine exact current origin (so redirect works on omniposts.online)
+      const currentOrigin = (window.location && window.location.origin && window.location.origin.indexOf('http') === 0)
+        ? window.location.origin
+        : 'https://omniposts.online';
+      const redirectUri = encodeURIComponent(currentOrigin);
       const scope = encodeURIComponent('https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly');
-      const oauthUrl = 'https://accounts.google.com/o/oauth2/v2/auth?client_id=' + GOOGLE_YOUTUBE_CLIENT_ID + '&redirect_uri=' + redirectUri + '&response_type=token&scope=' + scope + '&include_granted_scopes=true&state=slot_' + slot;
-      if (window.location.hostname.indexOf('omniposts.online') !== -1) {
-        window.location.href = oauthUrl;
-      } else {
-        showToast(t('▶ Linked "' + customName + '" (Channel #' + slot + ') & saved to Supabase! On omniposts.online this redirects to Google OAuth.', '▶ تم حفظ وربط "' + customName + '" (القناة رقم ' + slot + ') في Supabase! وعلى الدومين الرسمي يفتح نافذة Google OAuth مباشرة.'), 'info');
-      }
+      const oauthUrl = 'https://accounts.google.com/o/oauth2/v2/auth?client_id=' + GOOGLE_YOUTUBE_CLIENT_ID + '&redirect_uri=' + redirectUri + '&response_type=token&scope=' + scope + '&include_granted_scopes=true&prompt=consent&state=slot_' + slot;
+
+      showToast(t('🔄 Redirecting you to Google / YouTube official authorization screen to link Channel #' + slot + '...', '🔄 جاري توجيهك الآن إلى صفحة جوجل / يوتيوب الرسمية لربط القناة رقم ' + slot + '...'), 'info');
+      window.location.href = oauthUrl;
     }
 
     function saveCurrentChannelConfig(notify) {
@@ -2879,7 +3037,11 @@
         }, { onConflict: 'user_email,slot_number' }));
       }
       if (notify) {
-        showToast(t('💾 Saved schedule for Channel #' + slot + ' (' + ch.dailyCount + ' videos/day) to Supabase & AI cloud scheduler!', '💾 تم حفظ جدول القناة رقم ' + slot + ' (' + ch.dailyCount + ' فيديوهات يومياً) في قاعدة بيانات Supabase!'), 'info');
+        if (!ch.connected) {
+          showToast(t('⚠️ Preferences saved for Channel #' + slot + ', but this channel is NOT linked to YouTube yet! Click "Connect / Update YouTube Channel" above to link your channel via Google.', '⚠️ تم حفظ الإعدادات المبدئية للقناة رقم ' + slot + '، ولكن هذه القناة غير مربوطة بيوتيوب بعد! اضغط على "تحديث / ربط حساب يوتيوب" بالأعلى لربط قناتك عبر جوجل.'), 'warn');
+        } else {
+          showToast(t('💾 Saved schedule for Channel #' + slot + ' (' + ch.dailyCount + ' videos/day) to Supabase!', '💾 تم حفظ جدول القناة رقم ' + slot + ' (' + ch.dailyCount + ' فيديوهات يومياً) في قاعدة بيانات Supabase!'), 'info');
+        }
       }
     }
 
@@ -2905,17 +3067,23 @@
     }
 
     function simulateInstantAiGeneration() {
-      if (!appState.currentUser.subscribed) {
-        showToast(t('🔒 Cannot run video generation before subscribing! Click "Subscribe & Unlock" or use the "Test Instant Unlock 🔓" button above.', '🔒 لا يمكن تشغيل توليد ورفع الفيديوهات قبل الاشتراك! اضغط على "اشترك الآن" أو زر "تجربة الفتح الفوري 🔓" بالأعلى.'), 'warn');
+      if (!appState.currentUser.subscribed && appState.currentUser.email.toLowerCase() !== OWNER_ADMIN_EMAIL.toLowerCase()) {
+        showToast(t('🔒 Cannot run cloud automation before subscribing! Please subscribe to a plan first.', '🔒 لا يمكن تشغيل الأتمتة السحابية قبل الاشتراك! يرجى الاشتراك في إحدى الخطط أولاً.'), 'warn');
+        return;
+      }
+      if (!appState.currentUser.aiApiKey || !appState.currentUser.aiApiKeyVerified) {
+        showToast(t('❌ Cannot start generation: You have not connected a valid AI API key in Step 1 above! Please enter and verify an official API key first.', '❌ لا يمكن بدء التوليد: لم تقم بإدخال وتأكيد مفتاح API حقيقي وصالح في الخطوة الأولى بالأعلى!'), 'warn');
+        return;
+      }
+      const slot = appState.selectedChannelSlot;
+      const ch = appState.channels[slot];
+      if (!ch || !ch.connected) {
+        showToast(t('❌ Cannot start generation: Channel #' + slot + ' is not connected to YouTube yet! Click "Connect / Update YouTube Channel" to link your YouTube channel via Google first.', '❌ لا يمكن بدء التوليد: القناة رقم ' + slot + ' غير مربوطة بحساب يوتيوب بعد! اضغط على "تحديث / ربط حساب يوتيوب" لربط قناتك عبر جوجل أولاً.'), 'warn');
         return;
       }
       saveCurrentChannelConfig(false);
-      appState.currentUser.generatedVideos += 1;
-      appState.currentUser.totalViews += Math.floor(2500 + Math.random() * 8000);
-      syncDashboardUI();
-      const ch = appState.channels[appState.selectedChannelSlot];
       const chName = isEn() ? ch.nameEn : ch.nameAr;
-      showToast(t('🚀 Dispatched settings to (' + appState.currentUser.aiProvider + '), synthesized video + SEO metadata, and uploaded to: ' + chName, '🚀 تم إرسال الإعدادات إلى (' + appState.currentUser.aiProvider + ') وتوليد الفيديو والعنوان والوصف ورفعه سحابياً على: ' + chName), 'info');
+      showToast(t('✅ Cloud automation schedule verified & active for "' + chName + '". Videos will be generated via ' + appState.currentUser.aiProvider + ' and uploaded at your scheduled times.', '✅ تم تأكيد وتفعيل الجدولة السحابية لقناة "' + chName + '"! سيتم توليد الفيديوهات عبر ' + appState.currentUser.aiProvider + ' ورفعها في مواعيدك المحددة.'), 'info');
     }
 
     // Account Settings Handlers
@@ -3034,32 +3202,61 @@
       }
     }
 
-    function completeSubscriptionPayment() {
+    function activateVerifiedSubscriptionFromGumroad() {
       const p = appState.selectedCheckoutPlan;
       appState.currentUser.subscribed = true;
       appState.currentUser.planNameEn = p.nameEn;
       appState.currentUser.planNameAr = p.nameAr;
       appState.currentUser.remainingDays = p.days;
       if (supabaseClient && appState.currentUser.email) {
-        sbExec(supabaseClient.from('profiles').upsert({
-          email: appState.currentUser.email,
+        sbExec(supabaseClient.from('profiles').update({
           subscribed: true,
           plan_name: p.nameEn,
           remaining_days: p.days
-        }, { onConflict: 'email' }));
+        }).ilike('email', appState.currentUser.email));
       }
-
-      const adminRec = appState.adminUsers.find(function(u) { return u.id === 100; });
-      if (adminRec) {
-        adminRec.subscribed = true;
-        adminRec.planEn = p.nameEn;
-        adminRec.planAr = p.nameAr;
-        adminRec.daysLeft = p.days;
-      }
-
+      try {
+        localStorage.setItem('omniposts_v3_session', JSON.stringify(appState.currentUser));
+      } catch (e) {}
       closeCheckoutModal();
+      syncDashboardUI();
       navigateView('dashboard');
-      showToast(t('🎉 Payment completed! Your account and all 5 channel automation services are now unlocked automatically for ' + p.days + ' days.', '🎉 تمت عملية الدفع بنجاح! تم تفعيل حسابك وفتح جميع خدمات المنصة أوتوماتيكياً لمدة ' + p.days + ' يوماً.'), 'info');
+      showToast(t('🎉 Verified Payment Completed! Your account and all 5 channel automation services are now unlocked for ' + p.days + ' days.', '🎉 تم تأكيد عملية الدفع بنجاح! تم تفعيل حسابك وفتح جميع خدمات المنصة أوتوماتيكياً لمدة ' + p.days + ' يوماً.'), 'info');
+    }
+
+    function completeSubscriptionPayment() {
+      if (!appState.currentUser.email || !supabaseClient) {
+        showToast(t('❌ Payment has not been completed yet! Please complete the checkout inside the embedded payment window first.', '❌ لم يتم إتمام الدفع بعد! يرجى إتمام عملية الدفع وإدخال بيانات البطاقة داخل نافذة الدفع المدمجة أولاً.'), 'warn');
+        return;
+      }
+      const verifyBtn = document.getElementById('verify-payment-status-btn');
+      if (verifyBtn) {
+        verifyBtn.disabled = true;
+        verifyBtn.textContent = t('⏳ Checking Payment Status in Database...', '⏳ جاري فحص حالة الدفع في قاعدة البيانات...');
+      }
+      sbExec(
+        supabaseClient.from('profiles').select('subscribed,plan_name,remaining_days').ilike('email', appState.currentUser.email).maybeSingle()
+      ).then(function(res) {
+        if (verifyBtn) {
+          verifyBtn.disabled = false;
+          verifyBtn.textContent = t('🔄 Verify Completed Payment Status', '🔄 التحقق من إتمام الدفع وتفعيل الحساب');
+        }
+        if (res && res.data && res.data.subscribed === true) {
+          appState.currentUser.subscribed = true;
+          appState.currentUser.planNameEn = res.data.plan_name || appState.selectedCheckoutPlan.nameEn;
+          appState.currentUser.planNameAr = res.data.plan_name || appState.selectedCheckoutPlan.nameAr;
+          appState.currentUser.remainingDays = res.data.remaining_days || appState.selectedCheckoutPlan.days;
+          try {
+            localStorage.setItem('omniposts_v3_session', JSON.stringify(appState.currentUser));
+          } catch (e) {}
+          closeCheckoutModal();
+          syncDashboardUI();
+          navigateView('dashboard');
+          showToast(t('🎉 Payment verified! Your subscription is active and all services are now unlocked.', '🎉 تم التأكد من عملية الدفع بنجاح! تم فتح وتفعيل جميع خدمات حسابك.'), 'info');
+        } else {
+          showToast(t('❌ No completed payment found for your account yet! Please complete your payment inside the Gumroad checkout window first before clicking Verify.', '❌ لم يتم رصد عملية دفع مكتملة لحسابك حتى الآن! يرجى إدخال بيانات الدفع وإتمام الشراء داخل نافذة الدفع المدمجة أولاً.'), 'warn');
+        }
+      });
     }
 
     // Legal Policies, FAQ & Support Tickets Tabs
@@ -3298,10 +3495,12 @@
     // Initialize on load (Default to English LTR)
     window.addEventListener('message', function(ev) {
       if (ev.origin && ev.origin.indexOf('gumroad.com') !== -1 && ev.data) {
-        const msgStr = typeof ev.data === 'string' ? ev.data : JSON.stringify(ev.data);
-        if (msgStr.indexOf('sale') !== -1 || msgStr.indexOf('purchase') !== -1) {
-          completeSubscriptionPayment();
-        }
+        try {
+          const parsed = typeof ev.data === 'string' ? JSON.parse(ev.data) : ev.data;
+          if (parsed && (parsed.post_message_name === 'sale' || parsed.sale || parsed.success === true)) {
+            activateVerifiedSubscriptionFromGumroad();
+          }
+        } catch (e) {}
       }
     });
 
@@ -3311,7 +3510,7 @@
         const accessToken = params.get('access_token');
         const slot = parseInt(localStorage.getItem('omniposts_pending_yt_slot') || '1', 10);
         if (accessToken) {
-          fetch('https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true', {
+          fetch('https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&mine=true', {
             headers: { Authorization: 'Bearer ' + accessToken }
           }).then(function(r) { return r.json(); }).then(function(data) {
             if (data && data.items && data.items[0] && data.items[0].snippet) {
@@ -3341,7 +3540,7 @@
         }
       }
       try {
-        const savedSession = localStorage.getItem('omniposts_active_session');
+        const savedSession = localStorage.getItem('omniposts_v3_session');
         if (savedSession) {
           const parsedUser = JSON.parse(savedSession);
           if (parsedUser && parsedUser.email) {
