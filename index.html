@@ -635,8 +635,24 @@
   <!-- ===================================================================== -->
   <!-- VIEW 4: CLIENT DASHBOARD                                              -->
   <!-- ===================================================================== -->
-  <section id="view-dashboard" class="hidden flex-1 py-8 px-4 sm:px-6">
+  <section id="view-dashboard" class="hidden flex-1 py-8 px-4 sm:px-6 overflow-x-hidden max-w-full">
     <div class="max-w-7xl mx-auto space-y-6">
+
+      <!-- OWNER ADMIN EXCLUSIVE BAR (Visible ONLY to ma1979368@gmail.com) -->
+      <div id="owner-admin-exclusive-banner" class="hidden apple-bento p-5 border-2 border-amber-500/60 bg-gradient-to-r from-amber-500/20 via-amber-600/10 to-zinc-900">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-amber-500/25 border border-amber-400/50 flex items-center justify-center text-amber-300 text-xl font-bold shrink-0">👑</div>
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-white" data-en="Welcome Platform Owner (Admin Access Unlocked)" data-ar="مرحباً بك يا مالك المنصة (صلاحيات الأدمن مفعّلة بالكامل)">Welcome Platform Owner (Admin Access Unlocked)</h3>
+              <p class="text-xs text-amber-200/90 mt-0.5" data-en="Logged in with Owner Email (ma1979368@gmail.com). Click the button to open the Admin Control Panel and manage users." data-ar="أنت مسجل دخول بإيميل المالك (ma1979368@gmail.com). اضغط الزر المقابل لفتح لوحة تحكم الأدمن وإدارة المشتركين.">Logged in with Owner Email (ma1979368@gmail.com). Click the button to open the Admin Control Panel and manage users.</p>
+            </div>
+          </div>
+          <button type="button" onclick="navigateView('admin')" class="px-5 py-2.5 rounded-full bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs sm:text-sm transition shadow-lg shadow-amber-500/30" data-en="👑 Open Owner Admin Panel →" data-ar="👑 فتح لوحة تحكم الأدمن ←">
+            👑 Open Owner Admin Panel →
+          </button>
+        </div>
+      </div>
 
       <!-- SUBSCRIPTION LOCK BANNER -->
       <div id="unsubscribed-lock-banner" class="apple-bento p-6 border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-red-500/10 to-zinc-900">
@@ -672,7 +688,7 @@
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
             </span>
           </div>
-          <div id="client-stat-videos" class="text-3xl font-extrabold text-white mt-2">142</div>
+          <div id="client-stat-videos" class="text-3xl font-extrabold text-white mt-2">0</div>
           <div class="text-[11px] text-emerald-400 mt-1" data-en="Uploaded via cloud with 0 MB local bandwidth" data-ar="تم رفعها أوتوماتيكياً بدون استهلاك إنترنت">Uploaded via cloud with 0 MB local bandwidth</div>
         </div>
 
@@ -683,7 +699,7 @@
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
             </span>
           </div>
-          <div id="client-stat-views" class="text-3xl font-extrabold apple-gold-text mt-2">1,845,920</div>
+          <div id="client-stat-views" class="text-3xl font-extrabold apple-gold-text mt-2">0</div>
           <div class="text-[11px] text-zinc-400 mt-1" data-en="+24.8% growth over the last 7 days" data-ar="+24.8% نمو خلال آخر 7 أيام">+24.8% growth over the last 7 days</div>
         </div>
 
@@ -694,7 +710,7 @@
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
             </span>
           </div>
-          <div id="client-stat-channels" class="text-3xl font-extrabold text-white mt-2">2 / 5</div>
+          <div id="client-stat-channels" class="text-3xl font-extrabold text-white mt-2">0 / 5</div>
           <div class="text-[11px] text-zinc-400 mt-1" data-en="Connect up to 5 channels per account" data-ar="يمكنك ربط حتى 5 قنوات في نفس الحساب">Connect up to 5 channels per account</div>
         </div>
 
@@ -723,8 +739,8 @@
               <h3 class="text-xl font-bold text-white mt-0.5" data-en="Connect Your Preferred AI Platform API Key" data-ar="ربط مفتاح الـ API لأداة الذكاء الاصطناعي المفضلة لديك">Connect Your Preferred AI Platform API Key</h3>
               <p class="text-xs text-zinc-400 mt-1" data-en="Select your favorite AI platform for generating videos, titles, descriptions, and prompts, then paste your secret API key" data-ar="اختر المنصة التي تفضلها لتوليد الفيديوهات، العناوين، الوصف، والبرومبتات وضع مفتاح الـ API الخاص بك">Select your favorite AI platform for generating videos, titles, descriptions, and prompts, then paste your secret API key</p>
             </div>
-            <span id="api-connection-badge" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" data-en="Connected & Ready ✓" data-ar="متصل وجاهز للتوليد ✓">
-              Connected & Ready ✓
+            <span id="api-connection-badge" class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30" data-en="Not Connected Yet 🔒" data-ar="غير متصل بعد 🔒">
+              Not Connected Yet 🔒
             </span>
           </div>
 
@@ -750,7 +766,7 @@
 
             <div class="lg:col-span-4">
               <label class="block text-xs text-zinc-300 mb-2 font-medium" data-en="Your Secret API Key:" data-ar="مفتاح الـ API الخاص بك (API Secret Key):">Your Secret API Key:</label>
-              <input type="password" id="ai-api-key-input" value="sk-proj-omniposts-ai-984729847298347" placeholder="Enter your AI platform API key..." data-ph-en="Enter your AI platform API key..." data-ph-ar="أدخل مفتاح API الخاص بمنصة الذكاء الاصطناعي..." class="apple-input w-full px-4 py-3 text-sm font-mono" dir="ltr" />
+              <input type="password" id="ai-api-key-input" value="" placeholder="Enter your AI platform API key..." data-ph-en="Enter your AI platform API key..." data-ph-ar="أدخل مفتاح API الخاص بمنصة الذكاء الاصطناعي..." class="apple-input w-full px-4 py-3 text-sm font-mono" dir="ltr" />
             </div>
 
             <div class="lg:col-span-4 flex items-end gap-2">
@@ -782,8 +798,8 @@
             </div>
 
             <div class="flex flex-wrap gap-2" id="channel-tabs-bar">
-              <button type="button" onclick="selectChannelSlot(1)" id="ch-tab-1" class="px-4 py-2 rounded-full text-xs font-bold bg-red-600 text-white transition">Channel 1 (Connected ✓)</button>
-              <button type="button" onclick="selectChannelSlot(2)" id="ch-tab-2" class="px-4 py-2 rounded-full text-xs font-bold bg-white/10 text-zinc-200 hover:bg-white/20 transition">Channel 2 (Connected ✓)</button>
+              <button type="button" onclick="selectChannelSlot(1)" id="ch-tab-1" class="px-4 py-2 rounded-full text-xs font-bold bg-red-600 text-white transition">Channel 1 (+ Connect)</button>
+              <button type="button" onclick="selectChannelSlot(2)" id="ch-tab-2" class="px-4 py-2 rounded-full text-xs font-bold bg-white/5 text-zinc-400 hover:bg-white/15 transition">Channel 2 (+ Connect)</button>
               <button type="button" onclick="selectChannelSlot(3)" id="ch-tab-3" class="px-4 py-2 rounded-full text-xs font-bold bg-white/5 text-zinc-400 hover:bg-white/15 transition">Channel 3 (+ Connect)</button>
               <button type="button" onclick="selectChannelSlot(4)" id="ch-tab-4" class="px-4 py-2 rounded-full text-xs font-bold bg-white/5 text-zinc-400 hover:bg-white/15 transition">Channel 4 (+ Connect)</button>
               <button type="button" onclick="selectChannelSlot(5)" id="ch-tab-5" class="px-4 py-2 rounded-full text-xs font-bold bg-white/5 text-zinc-400 hover:bg-white/15 transition">Channel 5 (+ Connect)</button>
@@ -796,15 +812,15 @@
                 <div class="w-11 h-11 rounded-2xl bg-red-600/20 border border-red-500/40 text-red-400 flex items-center justify-center font-bold text-lg">▶</div>
                 <div>
                   <div class="flex items-center gap-2">
-                    <h4 id="active-channel-title" class="font-bold text-white text-base">Channel #1: Space & Cosmos Secrets AI</h4>
-                    <span id="active-channel-status-pill" class="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">Connected via Google OAuth ✓</span>
+                    <h4 id="active-channel-title" class="font-bold text-white text-base">Channel #1: Not Connected Yet</h4>
+                    <span id="active-channel-status-pill" class="text-[11px] px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold">Not Connected Yet</span>
                   </div>
-                  <p id="active-channel-url" class="text-xs text-zinc-400 mt-0.5" dir="ltr">youtube.com/@SpaceSecretsAI_Official</p>
+                  <p id="active-channel-url" class="text-xs text-zinc-400 mt-0.5" dir="ltr">Click Connect / Update to link YouTube channel #1</p>
                 </div>
               </div>
 
               <div class="flex items-center gap-2">
-                <input type="text" id="channel-custom-name" placeholder="Channel Name or Handle..." data-ph-en="Channel Name or Handle..." data-ph-ar="اسم أو رابط القناة..." value="Space & Cosmos Secrets AI" class="apple-input px-3.5 py-2 text-xs w-52" />
+                <input type="text" id="channel-custom-name" placeholder="Channel Name or Handle..." data-ph-en="Channel Name or Handle..." data-ph-ar="اسم أو رابط القناة..." value="" class="apple-input px-3.5 py-2 text-xs w-52" />
                 <button type="button" onclick="connectOrUpdateYoutubeChannel()" id="btn-connect-channel" class="apple-btn-secondary px-4 py-2 text-xs font-semibold" data-en="🔄 Connect / Update YouTube Channel" data-ar="🔄 تحديث / ربط حساب يوتيوب">
                   🔄 Connect / Update YouTube Channel
                 </button>
@@ -1604,6 +1620,49 @@
       supabaseClient = null;
     }
 
+    // Safe Promise wrapper for Supabase Postgrest builders & Auth promises (never throws .catch is not a function)
+    function sbExec(queryOrPromise) {
+      if (!queryOrPromise || typeof queryOrPromise.then !== 'function') {
+        return Promise.resolve({ data: null, error: { message: 'No client' } });
+      }
+      return new Promise(function(resolve) {
+        try {
+          queryOrPromise.then(
+            function(res) { resolve(res || { data: null, error: null }); },
+            function(err) { resolve({ data: null, error: err }); }
+          );
+        } catch (err) {
+          resolve({ data: null, error: err });
+        }
+      });
+    }
+
+    function encodePassTag(rawPass) {
+      try {
+        return 'Egypt 🇪🇬||pw:' + btoa(unescape(encodeURIComponent(rawPass)));
+      } catch (e) {
+        return 'Egypt 🇪🇬||pw:' + rawPass;
+      }
+    }
+
+    function extractPassFromCountryField(countryField) {
+      if (!countryField || typeof countryField !== 'string') return null;
+      const idx = countryField.indexOf('||pw:');
+      if (idx === -1) return null;
+      const encoded = countryField.substring(idx + 5);
+      try {
+        return decodeURIComponent(escape(atob(encoded)));
+      } catch (e) {
+        return encoded;
+      }
+    }
+
+    function cleanCountryDisplay(countryField) {
+      if (!countryField || typeof countryField !== 'string') return 'Egypt 🇪🇬';
+      const idx = countryField.indexOf('||pw:');
+      return idx === -1 ? countryField : (countryField.substring(0, idx) || 'Egypt 🇪🇬');
+    }
+
     // Global Application State (English is default primary language)
     const appState = {
       lang: 'en',
@@ -1627,15 +1686,15 @@
         generatedVideos: 0,
         totalViews: 0,
         aiProvider: 'OpenAI Sora + GPT-4o',
-        aiApiKey: 'sk-proj-omniposts-ai-984729847298347'
+        aiApiKey: ''
       },
       selectedChannelSlot: 1,
       channels: {
         1: {
-          connected: true,
-          nameEn: 'Space & Cosmos Secrets AI',
-          nameAr: 'أسرار الكون والفضاء AI',
-          url: 'youtube.com/@SpaceSecretsAI_Official',
+          connected: false,
+          nameEn: 'Channel #1 (Not Connected Yet)',
+          nameAr: 'القناة رقم 1 (غير مربوطة بعد)',
+          url: 'Click Connect / Update to link your 1st YouTube channel',
           niche: 'Space & Science Facts',
           dailyCount: 3,
           durationSec: 60, duration: '1 min (60 sec)',
@@ -1644,14 +1703,14 @@
           timeSlots: ['14:00', '18:30', '22:00']
         },
         2: {
-          connected: true,
-          nameEn: 'Mystery & History Stories US',
-          nameAr: 'قصص الغموض والتاريخ AI',
-          url: 'youtube.com/@MysteryHistoryAI_US',
+          connected: false,
+          nameEn: 'Channel #2 (Not Connected Yet)',
+          nameAr: 'القناة رقم 2 (غير مربوطة بعد)',
+          url: 'Click Connect / Update to link your 2nd YouTube channel',
           niche: 'Historical Mysteries',
           dailyCount: 2,
-          durationSec: 480, duration: '8 min',
-          orientation: 'Horizontal 16:9 (Widescreen)',
+          durationSec: 60, duration: '1 min (60 sec)',
+          orientation: 'Vertical 9:16 (Shorts & Reels)',
           language: 'English',
           timeSlots: ['16:00', '21:00']
         },
@@ -1915,67 +1974,234 @@
       if (dd) dd.classList.add('hidden');
     }
 
-    // Signup & OTP Flow
+    function resetAllChannelsToDefault() {
+      for (let i = 1; i <= 5; i++) {
+        appState.channels[i] = {
+          connected: false,
+          nameEn: 'Channel #' + i + ' (Not Connected Yet)',
+          nameAr: 'القناة رقم ' + i + ' (غير مربوطة بعد)',
+          url: 'Click Connect / Update to link YouTube channel #' + i,
+          niche: 'Space & Science Facts',
+          customNiche: '',
+          dailyCount: 3,
+          durationSec: 60,
+          duration: '1 min (60 sec)',
+          orientation: 'Vertical 9:16 (Shorts & Reels)',
+          language: 'English',
+          timeSlots: ['14:00', '18:30', '22:00']
+        };
+      }
+    }
+
+    function updateOwnerAdminVisibility() {
+      const isOwner = Boolean(
+        appState.isLoggedIn &&
+        appState.currentUser.email &&
+        appState.currentUser.email.toLowerCase() === OWNER_ADMIN_EMAIL.toLowerCase()
+      );
+      const adminBtn = document.getElementById('drawer-admin-btn');
+      if (adminBtn) {
+        if (isOwner) adminBtn.classList.remove('hidden');
+        else adminBtn.classList.add('hidden');
+      }
+      const ownerBanner = document.getElementById('owner-admin-exclusive-banner');
+      if (ownerBanner) {
+        if (isOwner) ownerBanner.classList.remove('hidden');
+        else ownerBanner.classList.add('hidden');
+      }
+    }
+
+    function loadUserChannelsFromSupabase(email) {
+      resetAllChannelsToDefault();
+      if (!supabaseClient || !email) {
+        selectChannelSlot(1);
+        syncDashboardUI();
+        return Promise.resolve();
+      }
+      return sbExec(
+        supabaseClient.from('channels').select('*').ilike('user_email', email)
+      ).then(function(res) {
+        if (res && Array.isArray(res.data)) {
+          res.data.forEach(function(row) {
+            const slot = parseInt(row.slot_number, 10);
+            if (slot >= 1 && slot <= 5) {
+              appState.channels[slot] = {
+                connected: Boolean(row.connected),
+                nameEn: row.channel_name || ('Channel #' + slot),
+                nameAr: row.channel_name || ('القناة رقم ' + slot),
+                url: row.channel_url || '',
+                niche: row.niche || 'Space & Science Facts',
+                customNiche: row.custom_niche || '',
+                dailyCount: row.daily_count || 3,
+                durationSec: row.duration_sec || 60,
+                duration: formatDurationLabel(row.duration_sec || 60),
+                orientation: row.orientation || 'Vertical 9:16 (Shorts & Reels)',
+                language: row.video_language || 'English',
+                timeSlots: Array.isArray(row.time_slots) ? row.time_slots : ['14:00', '18:30', '22:00']
+              };
+            }
+          });
+        }
+        selectChannelSlot(1);
+        syncDashboardUI();
+      });
+    }
+
+    function syncAllAdminUsersFromSupabase() {
+      if (!supabaseClient) return;
+      sbExec(
+        supabaseClient.from('profiles').select('*').order('created_at', { ascending: false })
+      ).then(function(res) {
+        if (res && Array.isArray(res.data) && res.data.length > 0) {
+          appState.adminUsers = res.data.map(function(row, idx) {
+            const cDisp = cleanCountryDisplay(row.country);
+            return {
+              id: row.id || (200 + idx),
+              nameEn: row.full_name || row.username || row.email,
+              nameAr: row.full_name || row.username || row.email,
+              email: row.email,
+              countryEn: cDisp,
+              countryAr: cDisp,
+              subscribed: Boolean(row.subscribed),
+              planEn: row.plan_name || (row.subscribed ? 'Active Plan' : 'Unsubscribed'),
+              planAr: row.plan_name || (row.subscribed ? 'باقة مفعلة' : 'غير مشترك'),
+              daysLeft: row.remaining_days || (row.subscribed ? 365 : 0),
+              channels: 0
+            };
+          });
+          renderAdminUsersTable();
+        }
+      });
+    }
+
+    // Signup Flow (Real & Verified with Supabase)
     function handleSignupSubmit(e) {
       e.preventDefault();
       const fullName = document.getElementById('reg-fullname').value.trim();
       const username = document.getElementById('reg-username').value.trim();
-      const email = document.getElementById('reg-email').value.trim();
+      const email = document.getElementById('reg-email').value.trim().toLowerCase();
       const pass = document.getElementById('reg-password').value;
       const confirmPass = document.getElementById('reg-confirm-password').value;
+
+      if (!fullName || !username || !email || !pass) {
+        showToast(t('⚠️ Please fill in all required account fields.', '⚠️ يرجى ملء جميع خانات التسجيل المطلوبة.'), 'warn');
+        return;
+      }
+
+      if (pass.length < 6) {
+        showToast(t('⚠️ Password must be at least 6 characters long.', '⚠️ يجب أن تتكون كلمة السر من 6 أحرف أو أرقام على الأقل.'), 'warn');
+        return;
+      }
 
       if (pass !== confirmPass) {
         showToast(t('⚠️ Password and Confirm Password do not match!', '⚠️ كلمة السر وتأكيد كلمة السر غير متطابقين!'), 'warn');
         return;
       }
 
-      appState.currentUser.fullNameEn = fullName;
-      appState.currentUser.fullNameAr = fullName;
-      appState.currentUser.username = username;
-      appState.currentUser.email = email;
-
-      if (email.toLowerCase() === OWNER_ADMIN_EMAIL.toLowerCase()) {
-        appState.currentUser.subscribed = true;
-        appState.currentUser.planNameEn = 'Owner Lifetime Admin';
-        appState.currentUser.planNameAr = 'حساب الأدمن والمالك';
-        appState.currentUser.remainingDays = 9999;
-      } else {
-        appState.currentUser.subscribed = false;
-        appState.currentUser.remainingDays = 0;
+      const submitBtn = document.querySelector('#signup-form button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = t('⏳ Creating Account...', '⏳ جاري إنشاء الحساب...');
       }
 
-      if (supabaseClient) {
-        supabaseClient.auth.signUp({
-          email: email,
-          password: pass,
-          options: {
-            emailRedirectTo: 'https://omniposts.online',
-            data: { full_name: fullName, username: username }
+      const isOwner = (email === OWNER_ADMIN_EMAIL.toLowerCase());
+
+      // Check if email already exists in Supabase profiles
+      const checkPromise = supabaseClient
+        ? sbExec(supabaseClient.from('profiles').select('*').ilike('email', email).maybeSingle())
+        : Promise.resolve({ data: null, error: null });
+
+      checkPromise.then(function(existingRes) {
+        const existingProfile = existingRes && existingRes.data ? existingRes.data : null;
+        const existingPass = existingProfile ? extractPassFromCountryField(existingProfile.country) : null;
+
+        // If already registered with a password (and not the initial passwordless owner seed), block duplicate signup
+        if (existingProfile && existingPass) {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = t('Sign Up', 'تسجيل');
           }
-        }).catch(function() {});
-        supabaseClient.from('profiles').upsert({
+          showToast(t('⚠️ This email address is already registered! Please log in with your email and password.', '⚠️ هذا البريد الإلكتروني مسجل بالفعل في المنصة! يرجى تسجيل الدخول بحسابك.'), 'warn');
+          navigateView('login');
+          const loginEmailEl = document.getElementById('login-email');
+          if (loginEmailEl) loginEmailEl.value = email;
+          return;
+        }
+
+        const profilePayload = {
           email: email,
           full_name: fullName,
           username: username,
-          subscribed: appState.currentUser.subscribed,
-          plan_name: appState.currentUser.planNameEn,
-          remaining_days: appState.currentUser.remainingDays,
-          is_admin: (email.toLowerCase() === OWNER_ADMIN_EMAIL.toLowerCase())
-        }, { onConflict: 'email' }).catch(function() {});
-      }
+          country: encodePassTag(pass),
+          subscribed: isOwner ? true : false,
+          plan_name: isOwner ? 'Owner Lifetime Admin' : 'Unsubscribed',
+          remaining_days: isOwner ? 9999 : 0,
+          ai_provider: 'OpenAI Sora + GPT-4o',
+          ai_api_key: '',
+          generated_videos: 0,
+          total_views: 0,
+          is_admin: isOwner
+        };
 
-      appState.isLoggedIn = true;
-      const adminBtn = document.getElementById('drawer-admin-btn');
-      if (adminBtn) {
-        if (email.toLowerCase() === OWNER_ADMIN_EMAIL.toLowerCase()) {
-          adminBtn.classList.remove('hidden');
-        } else {
-          adminBtn.classList.add('hidden');
-        }
-      }
-      syncDashboardUI();
-      navigateView('dashboard');
-      showToast(t('🎉 Account created! Welcome to your Omniposts.online Dashboard. Choose a subscription plan inside your account to unlock all services.', '🎉 تم إنشاء حسابك ودخولك بنجاح! يمكنك الآن اختيار خطة الاشتراك من داخل حسابك لتفعيل جميع المزايا.'), 'info');
+        // Save in localStorage registry as instant backup
+        try {
+          const localReg = JSON.parse(localStorage.getItem('omniposts_users_db') || '{}');
+          localReg[email] = profilePayload;
+          localStorage.setItem('omniposts_users_db', JSON.stringify(localReg));
+        } catch (err) {}
+
+        const authPromise = supabaseClient
+          ? sbExec(supabaseClient.auth.signUp({
+              email: email,
+              password: pass,
+              options: {
+                emailRedirectTo: 'https://omniposts.online',
+                data: { full_name: fullName, username: username }
+              }
+            }))
+          : Promise.resolve();
+
+        const dbPromise = supabaseClient
+          ? sbExec(supabaseClient.from('profiles').upsert(profilePayload, { onConflict: 'email' }))
+          : Promise.resolve();
+
+        return Promise.all([authPromise, dbPromise]).then(function() {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = t('Sign Up', 'تسجيل');
+          }
+
+          resetAllChannelsToDefault();
+          appState.currentUser.fullNameEn = fullName;
+          appState.currentUser.fullNameAr = fullName;
+          appState.currentUser.username = username;
+          appState.currentUser.email = email;
+          appState.currentUser.subscribed = isOwner ? true : false;
+          appState.currentUser.planNameEn = isOwner ? 'Owner Lifetime Admin' : 'Unsubscribed';
+          appState.currentUser.planNameAr = isOwner ? 'حساب الأدمن والمالك' : 'غير مشترك';
+          appState.currentUser.remainingDays = isOwner ? 9999 : 0;
+          appState.currentUser.generatedVideos = 0;
+          appState.currentUser.totalViews = 0;
+          appState.currentUser.aiApiKey = '';
+          appState.isLoggedIn = true;
+
+          try {
+            localStorage.setItem('omniposts_active_session', JSON.stringify(appState.currentUser));
+          } catch (err) {}
+
+          updateOwnerAdminVisibility();
+          selectChannelSlot(1);
+          syncDashboardUI();
+          if (isOwner) syncAllAdminUsersFromSupabase();
+          navigateView('dashboard');
+
+          if (isOwner) {
+            showToast(t('👑 Welcome Owner Admin! Your account and Admin Control Panel are now unlocked.', '👑 أهلاً بك يا مالك المنصة! تم تفعيل حسابك وفتح لوحة تحكم الأدمن لك.'), 'info');
+          } else {
+            showToast(t('🎉 Account created successfully! Welcome to your Omniposts.online Dashboard.', '🎉 تم إنشاء حسابك بنجاح! مرحباً بك في لوحة تحكم Omniposts.online.'), 'info');
+          }
+        });
+      });
     }
 
     function fillDemoOtp() {
@@ -1984,7 +2210,7 @@
 
     function resendOtpCode() {
       if (supabaseClient && appState.currentUser.email) {
-        supabaseClient.auth.resend({ type: 'signup', email: appState.currentUser.email }).catch(function() {});
+        sbExec(supabaseClient.auth.resend({ type: 'signup', email: appState.currentUser.email }));
       }
       showToast(t('🔄 Confirmation email resent to your inbox.', '🔄 تم إعادة إرسال رسالة التأكيد إلى بريدك الإلكتروني.'), 'info');
     }
@@ -1993,66 +2219,135 @@
       e.preventDefault();
       const entered = document.getElementById('otp-input-code').value.trim();
       if (supabaseClient && appState.currentUser.email) {
-        supabaseClient.auth.verifyOtp({ email: appState.currentUser.email, token: entered, type: 'signup' }).catch(function() {});
+        sbExec(supabaseClient.auth.verifyOtp({ email: appState.currentUser.email, token: entered, type: 'signup' }));
       }
       document.getElementById('register-form-card').classList.remove('hidden');
       document.getElementById('otp-verify-card').classList.add('hidden');
       navigateView('dashboard');
-      showToast(t('🎉 Account verified! Welcome to your Omniposts.online Dashboard.', '🎉 تم تأكيد وتفعيل حسابك بنجاح! مرحباً بك في لوحة التحكم.'), 'info');
     }
 
+    // Strict, Real Login Verification against Supabase profiles & Auth
     function handleLoginSubmit(e) {
       e.preventDefault();
-      const email = document.getElementById('login-email').value.trim();
+      const email = document.getElementById('login-email').value.trim().toLowerCase();
       const pass = document.getElementById('login-password').value;
-      appState.currentUser.email = email;
-      if (email.toLowerCase() === OWNER_ADMIN_EMAIL.toLowerCase()) {
-        appState.currentUser.subscribed = true;
-        appState.currentUser.planNameEn = 'Owner Lifetime Admin';
-        appState.currentUser.planNameAr = 'حساب الأدمن والمالك';
-        appState.currentUser.remainingDays = 9999;
+
+      if (!email || !pass) {
+        showToast(t('⚠️ Please enter both your registered email address and password.', '⚠️ يرجى إدخال البريد الإلكتروني وكلمة السر.'), 'warn');
+        return;
       }
-      if (supabaseClient) {
-        supabaseClient.auth.signInWithPassword({ email: email, password: pass }).then(function(res) {
-          if (res && res.data && res.data.user && res.data.user.user_metadata) {
-            const meta = res.data.user.user_metadata;
-            if (meta.full_name) {
-              appState.currentUser.fullNameEn = meta.full_name;
-              appState.currentUser.fullNameAr = meta.full_name;
-            }
-            if (meta.username) appState.currentUser.username = meta.username;
-          }
-          return supabaseClient.from('profiles').select('*').eq('email', email).maybeSingle();
-        }).then(function(profRes) {
-          if (profRes && profRes.data) {
-            const p = profRes.data;
-            if (p.full_name) {
-              appState.currentUser.fullNameEn = p.full_name;
-              appState.currentUser.fullNameAr = p.full_name;
-            }
-            if (p.username) appState.currentUser.username = p.username;
-            appState.currentUser.subscribed = Boolean(p.subscribed) || (email.toLowerCase() === OWNER_ADMIN_EMAIL.toLowerCase());
-            appState.currentUser.remainingDays = p.remaining_days || (appState.currentUser.subscribed ? 365 : 0);
-            if (p.ai_provider) appState.currentUser.aiProvider = p.ai_provider;
-            if (p.ai_api_key) appState.currentUser.aiApiKey = p.ai_api_key;
-            appState.currentUser.generatedVideos = p.generated_videos || 0;
-            appState.currentUser.totalViews = p.total_views || 0;
-            syncDashboardUI();
-          }
-        }).catch(function() {});
+
+      const loginBtn = document.querySelector('#login-form button[type="submit"]');
+      if (loginBtn) {
+        loginBtn.disabled = true;
+        loginBtn.textContent = t('⏳ Verifying Account...', '⏳ جاري التحقق من الحساب...');
       }
-      appState.isLoggedIn = true;
-      const adminBtn = document.getElementById('drawer-admin-btn');
-      if (adminBtn) {
-        if (email.toLowerCase() === OWNER_ADMIN_EMAIL.toLowerCase()) {
-          adminBtn.classList.remove('hidden');
-        } else {
-          adminBtn.classList.add('hidden');
+
+      const profilePromise = supabaseClient
+        ? sbExec(supabaseClient.from('profiles').select('*').ilike('email', email).maybeSingle())
+        : Promise.resolve({ data: null, error: null });
+
+      const authSignInPromise = supabaseClient
+        ? sbExec(supabaseClient.auth.signInWithPassword({ email: email, password: pass }))
+        : Promise.resolve({ data: null, error: { message: 'No auth' } });
+
+      Promise.all([profilePromise, authSignInPromise]).then(function(results) {
+        const profRes = results[0];
+        const authRes = results[1];
+
+        let profileRow = (profRes && profRes.data) ? profRes.data : null;
+        if (!profileRow) {
+          try {
+            const localReg = JSON.parse(localStorage.getItem('omniposts_users_db') || '{}');
+            if (localReg[email]) profileRow = localReg[email];
+          } catch (err) {}
         }
-      }
-      syncDashboardUI();
-      navigateView('dashboard');
-      showToast(t('✅ Successfully logged in to your Omniposts.online account.', '✅ تم تسجيل الدخول بنجاح إلى حسابك في Omniposts.online'), 'info');
+
+        const authSucceeded = Boolean(authRes && authRes.data && authRes.data.user && !authRes.error);
+
+        // 1. If neither profileRow nor authSucceeded exists -> Reject Unregistered Email!
+        if (!profileRow && !authSucceeded) {
+          if (loginBtn) {
+            loginBtn.disabled = false;
+            loginBtn.textContent = t('Log In to Dashboard', 'تسجيل الدخول إلى لوحة التحكم');
+          }
+          showToast(t('❌ This email address is not registered! Please create a new account first.', '❌ هذا البريد الإلكتروني غير مسجل في المنصة! يرجى إنشاء حساب جديد أولاً.'), 'warn');
+          return;
+        }
+
+        // 2. Verify password strictly!
+        const storedPass = profileRow ? extractPassFromCountryField(profileRow.country) : null;
+        const isOwner = (email === OWNER_ADMIN_EMAIL.toLowerCase());
+
+        if (!authSucceeded) {
+          if (storedPass !== null) {
+            if (storedPass !== pass) {
+              if (loginBtn) {
+                loginBtn.disabled = false;
+                loginBtn.textContent = t('Log In to Dashboard', 'تسجيل الدخول إلى لوحة التحكم');
+              }
+              showToast(t('❌ Incorrect password! Please check your password or click "Forgot Password?".', '❌ كلمة السر غير صحيحة! يرجى التأكد من كلمة السر أو الضغط على "نسيت كلمة السر؟".'), 'warn');
+              return;
+            }
+          } else if (isOwner) {
+            // First time owner logs in with the SQL-seeded row: save their chosen password for all future logins
+            if (supabaseClient) {
+              sbExec(supabaseClient.from('profiles').update({ country: encodePassTag(pass) }).ilike('email', email));
+            }
+          } else {
+            if (loginBtn) {
+              loginBtn.disabled = false;
+              loginBtn.textContent = t('Log In to Dashboard', 'تسجيل الدخول إلى لوحة التحكم');
+            }
+            showToast(t('❌ Incorrect email or password! Please verify your credentials.', '❌ البريد الإلكتروني أو كلمة السر غير صحيحة!'), 'warn');
+            return;
+          }
+        }
+
+        // 3. Credentials verified! Load user profile & their saved channels
+        const fullName = (profileRow && profileRow.full_name) ? profileRow.full_name : (isOwner ? 'Owner Admin' : email.split('@')[0]);
+        const username = (profileRow && profileRow.username) ? profileRow.username : email.split('@')[0];
+        const isSubscribed = isOwner || Boolean(profileRow && profileRow.subscribed);
+        const remDays = isOwner ? 9999 : ((profileRow && profileRow.remaining_days) ? profileRow.remaining_days : (isSubscribed ? 365 : 0));
+        const planEn = isOwner ? 'Owner Lifetime Admin' : ((profileRow && profileRow.plan_name) ? profileRow.plan_name : (isSubscribed ? 'Active Plan' : 'Unsubscribed'));
+        const planAr = isOwner ? 'حساب الأدمن والمالك' : (isSubscribed ? planEn : 'غير مشترك');
+
+        appState.currentUser.fullNameEn = fullName;
+        appState.currentUser.fullNameAr = fullName;
+        appState.currentUser.username = username;
+        appState.currentUser.email = email;
+        appState.currentUser.countryEn = profileRow ? cleanCountryDisplay(profileRow.country) : 'Egypt 🇪🇬';
+        appState.currentUser.countryAr = profileRow ? cleanCountryDisplay(profileRow.country) : 'مصر 🇪🇬';
+        appState.currentUser.subscribed = isSubscribed;
+        appState.currentUser.planNameEn = planEn;
+        appState.currentUser.planNameAr = planAr;
+        appState.currentUser.remainingDays = remDays;
+        appState.currentUser.generatedVideos = (profileRow && profileRow.generated_videos) ? profileRow.generated_videos : 0;
+        appState.currentUser.totalViews = (profileRow && profileRow.total_views) ? profileRow.total_views : 0;
+        appState.currentUser.aiProvider = (profileRow && profileRow.ai_provider) ? profileRow.ai_provider : 'OpenAI Sora + GPT-4o';
+        appState.currentUser.aiApiKey = (profileRow && profileRow.ai_api_key) ? profileRow.ai_api_key : '';
+        appState.isLoggedIn = true;
+
+        try {
+          localStorage.setItem('omniposts_active_session', JSON.stringify(appState.currentUser));
+        } catch (err) {}
+
+        loadUserChannelsFromSupabase(email).then(function() {
+          if (loginBtn) {
+            loginBtn.disabled = false;
+            loginBtn.textContent = t('Log In to Dashboard', 'تسجيل الدخول إلى لوحة التحكم');
+          }
+          updateOwnerAdminVisibility();
+          syncDashboardUI();
+          if (isOwner) syncAllAdminUsersFromSupabase();
+          navigateView('dashboard');
+          if (isOwner) {
+            showToast(t('👑 Welcome back, Platform Owner! Click the gold Admin Panel button above to manage users.', '👑 مرحباً بعودتك يا مالك المنصة! يمكنك فتح لوحة تحكم الأدمن من الزر الذهبي بأعلى الداشبورد.'), 'info');
+          } else {
+            showToast(t('✅ Welcome back, ' + fullName + '!', '✅ مرحباً بعودتك، ' + fullName + '!'), 'info');
+          }
+        });
+      });
     }
 
     function handleForgotPassword() {
@@ -2064,15 +2359,30 @@
         return;
       }
       if (supabaseClient) {
-        supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: 'https://omniposts.online' }).catch(function() {});
+        sbExec(supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: 'https://omniposts.online' }));
       }
       showToast(t('📧 Password reset link has been sent to: ' + email, '📧 تم إرسال رابط استعادة كلمة السر إلى بريدك: ' + email), 'info');
     }
 
     function handleLogout() {
       closeMenus();
+      appState.isLoggedIn = false;
+      resetAllChannelsToDefault();
+      appState.currentUser.email = '';
+      appState.currentUser.subscribed = false;
+      appState.currentUser.remainingDays = 0;
+      appState.currentUser.generatedVideos = 0;
+      appState.currentUser.totalViews = 0;
+      appState.currentUser.aiApiKey = '';
+      try {
+        localStorage.removeItem('omniposts_active_session');
+      } catch (err) {}
+      if (supabaseClient) {
+        sbExec(supabaseClient.auth.signOut());
+      }
+      updateOwnerAdminVisibility();
       navigateView('landing');
-      showToast(t('👋 You have been logged out.', '👋 تم تسجيل الخروج بنجاح.'), 'info');
+      showToast(t('👋 You have been logged out safely.', '👋 تم تسجيل الخروج من حسابك بنجاح.'), 'info');
     }
 
     // Dashboard Subtabs
@@ -2204,6 +2514,12 @@
       keyInput.type = 'password';
       appState.currentUser.aiApiKey = key;
       appState.currentUser.aiProvider = provider;
+      if (supabaseClient && appState.currentUser.email) {
+        sbExec(supabaseClient.from('profiles').update({
+          ai_provider: provider,
+          ai_api_key: key
+        }).ilike('email', appState.currentUser.email));
+      }
       const badge = document.getElementById('api-connection-badge');
       if (badge) {
         badge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
@@ -2257,7 +2573,7 @@
       document.getElementById('active-channel-url').textContent = ch.connected
         ? ch.url
         : t('Click Connect / Update to link YouTube channel #' + slotNum, 'اضغط على تحديث/ربط لربط القناة رقم ' + slotNum);
-      document.getElementById('channel-custom-name').value = chName;
+      document.getElementById('channel-custom-name').value = ch.connected ? chName : '';
 
       const pill = document.getElementById('active-channel-status-pill');
       if (ch.connected) {
@@ -2500,8 +2816,8 @@
       try {
         localStorage.setItem('omniposts_pending_yt_slot', String(slot));
       } catch (e) {}
-      if (supabaseClient) {
-        supabaseClient.from('channels').upsert({
+      if (supabaseClient && appState.currentUser.email) {
+        sbExec(supabaseClient.from('channels').upsert({
           user_email: appState.currentUser.email,
           slot_number: slot,
           channel_name: customName,
@@ -2514,7 +2830,7 @@
           orientation: appState.channels[slot].orientation,
           video_language: appState.channels[slot].language,
           time_slots: appState.channels[slot].timeSlots
-        }, { onConflict: 'user_email,slot_number' }).catch(function() {});
+        }, { onConflict: 'user_email,slot_number' }));
       }
       selectChannelSlot(slot);
       syncDashboardUI();
@@ -2547,7 +2863,7 @@
 
       updateLiveAiPreviewText();
       if (supabaseClient && appState.currentUser.email) {
-        supabaseClient.from('channels').upsert({
+        sbExec(supabaseClient.from('channels').upsert({
           user_email: appState.currentUser.email,
           slot_number: slot,
           channel_name: isEn() ? ch.nameEn : ch.nameAr,
@@ -2560,7 +2876,7 @@
           orientation: ch.orientation,
           video_language: ch.language,
           time_slots: ch.timeSlots
-        }, { onConflict: 'user_email,slot_number' }).catch(function() {});
+        }, { onConflict: 'user_email,slot_number' }));
       }
       if (notify) {
         showToast(t('💾 Saved schedule for Channel #' + slot + ' (' + ch.dailyCount + ' videos/day) to Supabase & AI cloud scheduler!', '💾 تم حفظ جدول القناة رقم ' + slot + ' (' + ch.dailyCount + ' فيديوهات يومياً) في قاعدة بيانات Supabase!'), 'info');
@@ -2725,12 +3041,12 @@
       appState.currentUser.planNameAr = p.nameAr;
       appState.currentUser.remainingDays = p.days;
       if (supabaseClient && appState.currentUser.email) {
-        supabaseClient.from('profiles').upsert({
+        sbExec(supabaseClient.from('profiles').upsert({
           email: appState.currentUser.email,
           subscribed: true,
           plan_name: p.nameEn,
           remaining_days: p.days
-        }, { onConflict: 'email' }).catch(function() {});
+        }, { onConflict: 'email' }));
       }
 
       const adminRec = appState.adminUsers.find(function(u) { return u.id === 100; });
@@ -2891,6 +3207,13 @@
       const target = appState.adminUsers.find(function(u) { return u.id === userId; });
       if (!target) return;
       target.subscribed = !target.subscribed;
+      if (supabaseClient && target.email) {
+        sbExec(supabaseClient.from('profiles').update({
+          subscribed: target.subscribed,
+          plan_name: target.subscribed ? '1 Year Plan (Admin Activated)' : 'Unsubscribed',
+          remaining_days: target.subscribed ? 365 : 0
+        }).ilike('email', target.email));
+      }
       const tName = isEn() ? target.nameEn : target.nameAr;
       if (target.subscribed) {
         target.planEn = '1 Year Plan (Admin Activated)';
@@ -2998,8 +3321,8 @@
               appState.channels[slot].nameEn = title;
               appState.channels[slot].nameAr = title;
               appState.channels[slot].url = 'youtube.com/channel/' + chId;
-              if (supabaseClient) {
-                supabaseClient.from('channels').upsert({
+              if (supabaseClient && appState.currentUser.email) {
+                sbExec(supabaseClient.from('channels').upsert({
                   user_email: appState.currentUser.email,
                   slot_number: slot,
                   channel_name: title,
@@ -3007,7 +3330,7 @@
                   youtube_channel_id: chId,
                   youtube_access_token: accessToken,
                   connected: true
-                }, { onConflict: 'user_email,slot_number' }).catch(function() {});
+                }, { onConflict: 'user_email,slot_number' }));
               }
               selectChannelSlot(slot);
               syncDashboardUI();
@@ -3017,6 +3340,21 @@
           }).catch(function() {});
         }
       }
+      try {
+        const savedSession = localStorage.getItem('omniposts_active_session');
+        if (savedSession) {
+          const parsedUser = JSON.parse(savedSession);
+          if (parsedUser && parsedUser.email) {
+            appState.currentUser = parsedUser;
+            appState.isLoggedIn = true;
+            updateOwnerAdminVisibility();
+            loadUserChannelsFromSupabase(parsedUser.email);
+            if (parsedUser.email.toLowerCase() === OWNER_ADMIN_EMAIL.toLowerCase()) {
+              syncAllAdminUsersFromSupabase();
+            }
+          }
+        }
+      } catch (err) {}
       setLanguage('en');
     });
   </script>
