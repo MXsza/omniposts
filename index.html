@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en" dir="ltr" class="dark">
 <head>
@@ -23,11 +22,15 @@
     * {
       box-sizing: border-box;
     }
-    body {
+    html, body {
       background-color: #000000;
       color: #f5f5f7;
       font-family: 'Inter', 'IBM Plex Sans Arabic', -apple-system, BlinkMacSystemFont, sans-serif;
-      overflow-x: hidden;
+      overflow-x: hidden !important;
+      max-width: 100vw !important;
+      width: 100% !important;
+      position: relative;
+      overscroll-behavior-x: none;
       margin: 0;
       padding: 0;
       -webkit-font-smoothing: antialiased;
@@ -294,7 +297,7 @@
           </span>
           <span data-en="Platform Policies & Copyright" data-ar="سياسات المنصة وحقوق النشر">Platform Policies & Copyright</span>
         </button>
-        <button type="button" onclick="navigateView('admin'); closeMenus();" class="w-full text-start px-3 py-2.5 rounded-xl hover:bg-amber-500/20 text-sm font-medium text-amber-300 flex items-center gap-3 transition">
+        <button type="button" id="drawer-admin-btn" onclick="navigateView('admin'); closeMenus();" class="w-full text-start px-3 py-2.5 rounded-xl hover:bg-amber-500/20 text-sm font-medium text-amber-300 flex items-center gap-3 transition">
           <span class="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-300 shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
           </span>
@@ -310,12 +313,12 @@
   </aside>
 
   <!-- TOAST NOTIFICATION CONTAINER -->
-  <div id="toast-container" class="fixed bottom-5 end-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+  <div id="toast-container" class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-5 z-50 flex flex-col gap-2 sm:max-w-sm pointer-events-none"></div>
 
   <!-- ===================================================================== -->
   <!-- VIEW 1: APPLE-STYLE LANDING PAGE                                      -->
   <!-- ===================================================================== -->
-  <main id="view-landing" class="flex-1">
+  <main id="view-landing" class="flex-1 overflow-x-hidden max-w-full">
     <section class="relative hero-glow pt-12 pb-20 px-4 sm:px-6 overflow-hidden">
       <div class="max-w-6xl mx-auto text-center">
         <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full apple-glass text-xs sm:text-sm text-zinc-200 mb-6 border border-white/15">
@@ -342,7 +345,7 @@
           <button type="button" onclick="navigateView('login')" class="apple-btn-secondary px-8 py-4 text-base sm:text-lg font-medium" data-en="Log In to Your Account" data-ar="تسجيل الدخول لحسابك">
             Log In to Your Account
           </button>
-          <button type="button" onclick="navigateView('dashboard')" class="px-6 py-4 rounded-full text-sm text-blue-400 hover:text-blue-300 underline underline-offset-4" data-en="Preview Client Dashboard Live" data-ar="معاينة لوحة تحكم العميل مباشرة">
+          <button type="button" onclick="navigateView('dashboard')" class="hidden px-6 py-4 rounded-full text-sm text-blue-400 hover:text-blue-300 underline underline-offset-4" data-en="Preview Client Dashboard Live" data-ar="معاينة لوحة تحكم العميل مباشرة">
             Preview Client Dashboard Live
           </button>
         </div>
@@ -488,9 +491,10 @@
     <section class="py-14 px-4 sm:px-6 bg-zinc-950 border-t border-white/10">
       <div class="max-w-6xl mx-auto text-center">
         <h2 class="text-2xl sm:text-4xl font-bold text-white" data-en="Ready to turn your channels into an autonomous publishing machine?" data-ar="جاهز لتحويل قنواتك إلى ماكينة نشر ذكية؟">Ready to turn your channels into an autonomous publishing machine?</h2>
-        <p class="mt-3 text-zinc-400 text-sm sm:text-base" data-en="Pick your plan and start immediately — instant automatic account unlocking upon payment in USD or EGP." data-ar="اختر خطتك وابدأ فوراً — تفعيل أوتوماتيكي للحساب فور الدفع بالجنيه المصري أو الدولار.">Pick your plan and start immediately — instant automatic account unlocking upon payment in USD or EGP.</p>
+        <p class="mt-3 text-zinc-400 text-sm sm:text-base" data-en="Create your free account now to access your dashboard and choose your activation plan inside your account." data-ar="أنشئ حسابك مجاناً الآن للدخول إلى لوحة التحكم واختيار خطة التفعيل من داخل حسابك.">Create your free account now to access your dashboard and choose your activation plan inside your account.</p>
         <div class="mt-7 flex flex-wrap justify-center gap-3">
-          <button type="button" onclick="navigateView('pricing')" class="apple-btn-primary px-7 py-3 text-sm font-semibold" data-en="View Subscription Plans & Pricing" data-ar="عرض خطط الاشتراك والأسعار">View Subscription Plans & Pricing</button>
+          <button type="button" onclick="navigateView('register')" class="apple-btn-primary px-7 py-3 text-sm font-semibold" data-en="Create Your Account Now" data-ar="أنشئ حسابك الآن وابدأ فوراً">Create Your Account Now</button>
+          <button type="button" onclick="navigateView('pricing')" class="hidden apple-btn-primary px-7 py-3 text-sm font-semibold" data-en="View Subscription Plans & Pricing" data-ar="عرض خطط الاشتراك والأسعار">View Subscription Plans & Pricing</button>
           <button type="button" onclick="openPolicyTab('faq')" class="apple-btn-secondary px-6 py-3 text-sm" data-en="FAQ & Channel Linking Guide" data-ar="الأسئلة الشائعة ودليل الربط">FAQ & Channel Linking Guide</button>
           <button type="button" onclick="openPolicyTab('tickets')" class="apple-btn-secondary px-6 py-3 text-sm" data-en="Open Support Ticket / Contact Us" data-ar="فتح تذكرة دعم / اتصل بنا">Open Support Ticket / Contact Us</button>
           <button type="button" onclick="openPolicyTab('terms')" class="apple-btn-secondary px-6 py-3 text-sm" data-en="Legal Policies & Terms" data-ar="سياسات المنصة القانونية">Legal Policies & Terms</button>
@@ -502,7 +506,7 @@
   <!-- ===================================================================== -->
   <!-- VIEW 2: REGISTER & EMAIL OTP VERIFICATION                             -->
   <!-- ===================================================================== -->
-  <section id="view-register" class="hidden flex-1 py-12 px-4 sm:px-6">
+  <section id="view-register" class="hidden flex-1 py-12 px-4 sm:px-6 overflow-x-hidden max-w-full">
     <div class="max-w-md mx-auto">
       <div id="register-form-card" class="apple-bento p-7 sm:p-9">
         <div class="text-center mb-6">
@@ -596,7 +600,7 @@
   <!-- ===================================================================== -->
   <!-- VIEW 3: LOGIN PAGE                                                    -->
   <!-- ===================================================================== -->
-  <section id="view-login" class="hidden flex-1 py-14 px-4 sm:px-6">
+  <section id="view-login" class="hidden flex-1 py-14 px-4 sm:px-6 overflow-x-hidden max-w-full">
     <div class="max-w-md mx-auto apple-bento p-7 sm:p-9">
       <div class="text-center mb-6">
         <div class="w-12 h-12 rounded-2xl bg-blue-600/20 border border-blue-500/40 text-blue-400 flex items-center justify-center mx-auto mb-3 font-bold text-xl">O</div>
@@ -1086,7 +1090,7 @@
   <!-- ===================================================================== -->
   <!-- VIEW 5: SUBSCRIPTIONS & DUAL PAYMENT GATEWAYS                         -->
   <!-- ===================================================================== -->
-  <section id="view-pricing" class="hidden flex-1 py-12 px-4 sm:px-6">
+  <section id="view-pricing" class="hidden flex-1 py-12 px-4 sm:px-6 overflow-x-hidden max-w-full">
     <div class="max-w-6xl mx-auto">
       <div class="text-center max-w-3xl mx-auto mb-10">
         <span class="px-3.5 py-1 rounded-full bg-blue-500/15 text-blue-400 text-xs font-semibold border border-blue-500/30" data-en="Instant Automated Account Unlock" data-ar="تفعيل فوري أوتوماتيكي للحساب">Instant Automated Account Unlock</span>
@@ -1233,32 +1237,17 @@
               </div>
             </div>
 
-            <!-- International USD Payment Gateway Box -->
+            <!-- International USD Payment Gateway Box (Embedded In-Page Checkout) -->
             <div id="intl-gateway-methods" class="space-y-3">
-              <div class="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-xs text-purple-200" data-en="🌍 International Payment Gateway (Pay in USD via Stripe / PayPal): Encrypted global checkout with instant automatic account activation:" data-ar="🌍 بوابة الدفع العالمية لباقي الدول (بالدولار الأمريكي USD عبر Stripe / PayPal): دفع آمن ومشفر بالكامل مع تفعيل فوري:">
-                🌍 International Payment Gateway (Pay in USD via Stripe / PayPal): Encrypted global checkout with instant automatic account activation:
+              <div class="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-xs text-purple-200" data-en="🌍 Secure In-Site USD Checkout: Complete your payment directly below inside Omniposts.online without leaving the site. Your account unlocks automatically upon payment:" data-ar="🌍 الدفع المباشر داخل الموقع بالدولار (USD): أتمم عملية الدفع بالأسفل داخل موقع Omniposts.online مباشرة دون الخروج من الصفحة، وسيتم فتح حسابك أوتوماتيكياً فور الدفع:">
+                🌍 Secure In-Site USD Checkout: Complete your payment directly below inside Omniposts.online without leaving the site. Your account unlocks automatically upon payment:
               </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                <label class="p-3.5 rounded-xl bg-white/5 border border-blue-500/40 flex items-center gap-2.5 cursor-pointer">
-                  <input type="radio" name="pay_method_intl" checked class="accent-blue-500" />
-                  <span>💳 Visa / Mastercard / Amex (Stripe Global)</span>
-                </label>
-                <label class="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-center gap-2.5 cursor-pointer">
-                  <input type="radio" name="pay_method_intl" class="accent-blue-500" />
-                  <span>🍎 Apple Pay / Google Pay</span>
-                </label>
-                <label class="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-center gap-2.5 cursor-pointer">
-                  <input type="radio" name="pay_method_intl" class="accent-blue-500" />
-                  <span>🅿️ PayPal Express Checkout</span>
-                </label>
-                <label class="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-center gap-2.5 cursor-pointer">
-                  <input type="radio" name="pay_method_intl" class="accent-blue-500" />
-                  <span>🪙 USDT Crypto (TRC20 / BEP20)</span>
-                </label>
+              <div class="rounded-2xl overflow-hidden border border-white/15 bg-zinc-950 shadow-2xl">
+                <iframe id="gumroad-inline-iframe" src="https://omniposts.gumroad.com/l/pmuiu?embed=true&wanted=true" class="w-full border-0" style="height: 540px; min-height: 480px;" allow="payment *"></iframe>
               </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            <div id="egypt-Manual-Fields" class="hidden grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               <input type="text" id="checkout-payer-info" placeholder="Card / Wallet Number (Demo)" data-ph-en="Card / Wallet Number (Demo)" data-ph-ar="رقم المحفظة أو رقم البطاقة (تجريبي)" value="4242 •••• •••• 4242" class="apple-input px-4 py-2.5 text-sm" dir="ltr" />
               <input type="text" id="checkout-payer-name" placeholder="Cardholder / Payer Name" data-ph-en="Cardholder / Payer Name" data-ph-ar="اسم صاحب الدفع" value="Alex Carter" class="apple-input px-4 py-2.5 text-sm" />
             </div>
@@ -1297,7 +1286,7 @@
   <!-- ===================================================================== -->
   <!-- VIEW 6: REAL POLICIES, FAQ, CHANNEL GUIDE & SUPPORT TICKETS           -->
   <!-- ===================================================================== -->
-  <section id="view-policies" class="hidden flex-1 py-10 px-4 sm:px-6">
+  <section id="view-policies" class="hidden flex-1 py-10 px-4 sm:px-6 overflow-x-hidden max-w-full">
     <div class="max-w-6xl mx-auto">
       <div class="text-center mb-8">
         <h2 class="text-3xl font-bold text-white" data-en="Legal Center, Platform Policies, FAQ & Support Tickets" data-ar="المركز القانوني، السياسات، الدعم الفني والأسئلة الشائعة">Legal Center, Platform Policies, FAQ & Support Tickets</h2>
@@ -1618,6 +1607,7 @@
     // Global Application State (English is default primary language)
     const appState = {
       lang: 'en',
+      isLoggedIn: false,
       currentView: 'landing',
       gatewayRegion: 'INTL', // 'INTL' (USD) default for English, or 'EGY' (Egypt EGP)
       egpRate: 50,
@@ -1831,6 +1821,14 @@
 
     // Navigation Between All Views
     function navigateView(viewName) {
+      if ((viewName === 'pricing' || viewName === 'dashboard' || viewName === 'admin') && !appState.isLoggedIn) {
+        showToast(t('🔒 Please create your account or log in first so your subscription is linked to your account.', '🔒 يرجى إنشاء حسابك أو تسجيل الدخول أولاً حتى يتم ربط الاشتراك بحسابك وتفعيله أوتوماتيكياً.'), 'warn');
+        viewName = 'register';
+      }
+      if (viewName === 'admin' && appState.currentUser.email.toLowerCase() !== OWNER_ADMIN_EMAIL.toLowerCase()) {
+        showToast(t('🔒 Owner Admin Panel is restricted to the platform owner only.', '🔒 لوحة تحكم الأدمن مخصصة لمالك المنصة فقط.'), 'warn');
+        viewName = 'dashboard';
+      }
       const views = ['landing', 'register', 'login', 'dashboard', 'pricing', 'policies', 'admin'];
       views.forEach(function(v) {
         const el = document.getElementById('view-' + v);
@@ -1966,8 +1964,18 @@
         }, { onConflict: 'email' }).catch(function() {});
       }
 
+      appState.isLoggedIn = true;
+      const adminBtn = document.getElementById('drawer-admin-btn');
+      if (adminBtn) {
+        if (email.toLowerCase() === OWNER_ADMIN_EMAIL.toLowerCase()) {
+          adminBtn.classList.remove('hidden');
+        } else {
+          adminBtn.classList.add('hidden');
+        }
+      }
+      syncDashboardUI();
       navigateView('dashboard');
-      showToast(t('🎉 Account registered! Check your email inbox to confirm your email address.', '🎉 تم إنشاء حسابك بنجاح! يرجى مراجعة بريدك الإلكتروني لتأكيد الحساب.'), 'info');
+      showToast(t('🎉 Account created! Welcome to your Omniposts.online Dashboard. Choose a subscription plan inside your account to unlock all services.', '🎉 تم إنشاء حسابك ودخولك بنجاح! يمكنك الآن اختيار خطة الاشتراك من داخل حسابك لتفعيل جميع المزايا.'), 'info');
     }
 
     function fillDemoOtp() {
@@ -2033,6 +2041,16 @@
           }
         }).catch(function() {});
       }
+      appState.isLoggedIn = true;
+      const adminBtn = document.getElementById('drawer-admin-btn');
+      if (adminBtn) {
+        if (email.toLowerCase() === OWNER_ADMIN_EMAIL.toLowerCase()) {
+          adminBtn.classList.remove('hidden');
+        } else {
+          adminBtn.classList.add('hidden');
+        }
+      }
+      syncDashboardUI();
       navigateView('dashboard');
       showToast(t('✅ Successfully logged in to your Omniposts.online account.', '✅ تم تسجيل الدخول بنجاح إلى حسابك في Omniposts.online'), 'info');
     }
@@ -2670,18 +2688,13 @@
       panel.classList.remove('hidden');
       updateCheckoutSummary();
       panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      if (appState.gatewayRegion === 'INTL') {
-        const gumroadUrl = GUMROAD_PLAN_URLS[usdPrice] || GUMROAD_PLAN_URLS[32];
-        let gumLink = document.getElementById('dynamic-gumroad-trigger');
-        if (!gumLink) {
-          gumLink = document.createElement('a');
-          gumLink.id = 'dynamic-gumroad-trigger';
-          gumLink.className = 'gumroad-button hidden';
-          gumLink.setAttribute('data-gumroad-overlay-checkout', 'true');
-          document.body.appendChild(gumLink);
-        }
-        gumLink.href = gumroadUrl;
-        gumLink.click();
+      const iframe = document.getElementById('gumroad-inline-iframe');
+      if (iframe) {
+        const baseGumUrl = (usdPrice === 20)
+          ? 'https://omniposts.gumroad.com/l/qmlde'
+          : (usdPrice === 39 ? 'https://omniposts.gumroad.com/l/ipano' : 'https://omniposts.gumroad.com/l/pmuiu');
+        const userEmailParam = appState.currentUser.email ? '&email=' + encodeURIComponent(appState.currentUser.email) : '';
+        iframe.src = baseGumUrl + '?embed=true&wanted=true' + userEmailParam;
       }
     }
 
@@ -2707,10 +2720,6 @@
 
     function completeSubscriptionPayment() {
       const p = appState.selectedCheckoutPlan;
-      if (appState.gatewayRegion === 'INTL') {
-        const gumUrl = GUMROAD_PLAN_URLS[p.usdPrice] || GUMROAD_PLAN_URLS[32];
-        window.open(gumUrl, '_blank');
-      }
       appState.currentUser.subscribed = true;
       appState.currentUser.planNameEn = p.nameEn;
       appState.currentUser.planNameAr = p.nameAr;
@@ -3013,4 +3022,3 @@
   </script>
 </body>
 </html>
-```
