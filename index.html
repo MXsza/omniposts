@@ -3756,12 +3756,39 @@
             headers: { Authorization: 'Bearer ' + accessToken }
           }).then(function(r) { return r.json(); }).then(function(data) {
             if (data && data.items && data.items[0] && data.items[0].snippet) {
-              const title = data.items[0].snippet.title;
-              const chId = data.items[0].id;
+              const item = data.items[0];
+              const title = item.snippet.title;
+              const chId = item.id;
+              const stats = item.statistics || {};
+              const ytViews = parseInt(stats.viewCount, 10) || 0;
+              const ytVideos = parseInt(stats.videoCount, 10) || 0;
+
               appState.channels[slot].connected = true;
               appState.channels[slot].nameEn = title;
               appState.channels[slot].nameAr = title;
               appState.channels[slot].url = 'youtube.com/channel/' + chId;
+              appState.channels[slot].ytViews = ytViews;
+              appState.channels[slot].ytVideos = ytVideos;
+
+              // Sum real views and videos across all connected channels for this user
+              let sumViews = 0;
+              let sumVideos = 0;
+              for (let cIdx = 1; cIdx <= 5; cIdx++) {
+                if (appState.channels[cIdx] && appState.channels[cIdx].connected) {
+                  sumViews += (appState.channels[cIdx].ytViews || 0);
+                  sumVideos += (appState.channels[cIdx].ytVideos || 0);
+                }
+              }
+              appState.currentUser.totalViews = Math.max(appState.currentUser.totalViews || 0, sumViews);
+              appState.currentUser.generatedVideos = Math.max(appState.currentUser.generatedVideos || 0, sumVideos);
+
+              try {
+                localStorage.setItem('omniposts_v3_session', JSON.stringify(appState.currentUser));
+                if (window.history && window.history.replaceState) {
+                  window.history.replaceState(null, document.title, window.location.pathname);
+                }
+              } catch (e) {}
+
               if (supabaseClient && appState.currentUser.email) {
                 sbExec(supabaseClient.from('channels').upsert({
                   user_email: appState.currentUser.email,
@@ -3772,11 +3799,15 @@
                   youtube_access_token: accessToken,
                   connected: true
                 }, { onConflict: 'user_email,slot_number' }));
+                sbExec(supabaseClient.from('profiles').update({
+                  total_views: appState.currentUser.totalViews,
+                  generated_videos: appState.currentUser.generatedVideos
+                }).ilike('email', appState.currentUser.email));
               }
               selectChannelSlot(slot);
               syncDashboardUI();
               navigateView('dashboard');
-              showToast(t('🎉 Official YouTube Channel "' + title + '" linked successfully!', '🎉 تم ربط قناتك الرسمية على يوتيوب "' + title + '" بنجاح!'), 'info');
+              showToast(t('🎉 Official YouTube Channel "' + title + '" linked! Synced ' + ytViews.toLocaleString() + ' channel views.', '🎉 تم ربط قناتك الرسمية على يوتيوب "' + title + '" وسحب إحصائيات القناة (' + ytViews.toLocaleString() + ' مشاهدة) بنجاح!'), 'info');
             }
           }).catch(function() {});
         }
