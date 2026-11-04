@@ -308,7 +308,7 @@
 
     <div class="pt-4 border-t border-white/10 flex items-center justify-between text-xs text-zinc-400">
       <span>Omniposts.online v2.5</span>
-      <button type="button" onclick="navigateView('landing'); closeMenus();" class="text-red-400 hover:underline" data-en="Log Out" data-ar="تسجيل الخروج">Log Out</button>
+      <button type="button" onclick="handleLogout()" class="text-red-400 hover:underline" data-en="Log Out" data-ar="تسجيل الخروج">Log Out</button>
     </div>
   </aside>
 
@@ -1825,6 +1825,9 @@
     // Complete Language Switcher (English Default <-> Full Arabic)
     function setLanguage(lang) {
       appState.lang = lang;
+      try {
+        localStorage.setItem('omniposts_v3_lang', lang);
+      } catch (e) {}
       const htmlEl = document.documentElement;
       htmlEl.lang = lang;
       htmlEl.dir = lang === 'ar' ? 'rtl' : 'ltr';
@@ -1884,6 +1887,9 @@
 
     // Navigation Between All Views
     function navigateView(viewName) {
+      if (appState.isLoggedIn && (viewName === 'landing' || viewName === 'login' || viewName === 'register')) {
+        viewName = 'dashboard';
+      }
       if ((viewName === 'pricing' || viewName === 'dashboard' || viewName === 'admin') && !appState.isLoggedIn) {
         showToast(t('🔒 Please create your account or log in first so your subscription is linked to your account.', '🔒 يرجى إنشاء حسابك أو تسجيل الدخول أولاً حتى يتم ربط الاشتراك بحسابك وتفعيله أوتوماتيكياً.'), 'warn');
         viewName = 'register';
@@ -1912,6 +1918,11 @@
         }
       });
       appState.currentView = viewName;
+      if (appState.isLoggedIn) {
+        try {
+          localStorage.setItem('omniposts_v3_view', viewName);
+        } catch (e) {}
+      }
       const hamBtn = document.getElementById('hamburger-menu-btn');
       const dotsWrap = document.getElementById('three-dots-wrapper');
       const loginBtn = document.getElementById('header-login-btn');
@@ -2380,6 +2391,7 @@
       appState.currentUser.aiApiKey = '';
       try {
         localStorage.removeItem('omniposts_v3_session');
+        localStorage.removeItem('omniposts_v3_view');
       } catch (err) {}
       if (supabaseClient) {
         sbExec(supabaseClient.auth.signOut());
@@ -3539,6 +3551,12 @@
           }).catch(function() {});
         }
       }
+      let savedLang = 'en';
+      try {
+        savedLang = localStorage.getItem('omniposts_v3_lang') || 'en';
+      } catch (e) {}
+      setLanguage(savedLang);
+
       try {
         const savedSession = localStorage.getItem('omniposts_v3_session');
         if (savedSession) {
@@ -3547,6 +3565,9 @@
             appState.currentUser = parsedUser;
             appState.isLoggedIn = true;
             updateOwnerAdminVisibility();
+            const savedView = localStorage.getItem('omniposts_v3_view') || 'dashboard';
+            navigateView(savedView);
+            syncDashboardUI();
             loadUserChannelsFromSupabase(parsedUser.email);
             if (parsedUser.email.toLowerCase() === OWNER_ADMIN_EMAIL.toLowerCase()) {
               syncAllAdminUsersFromSupabase();
@@ -3554,7 +3575,24 @@
           }
         }
       } catch (err) {}
-      setLanguage('en');
+    });
+
+    // Also handle mobile browser Back/Forward cache (bfcache) when returning from an external page like Google OAuth
+    window.addEventListener('pageshow', function() {
+      try {
+        const savedSession = localStorage.getItem('omniposts_v3_session');
+        if (savedSession) {
+          const parsedUser = JSON.parse(savedSession);
+          if (parsedUser && parsedUser.email) {
+            appState.currentUser = parsedUser;
+            appState.isLoggedIn = true;
+            updateOwnerAdminVisibility();
+            const savedView = localStorage.getItem('omniposts_v3_view') || 'dashboard';
+            navigateView(savedView);
+            syncDashboardUI();
+          }
+        }
+      } catch (err) {}
     });
   </script>
 </body>
