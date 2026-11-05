@@ -2120,7 +2120,8 @@
                 language: row.video_language || prevLocal.language || 'English',
                 timeSlots: Array.isArray(row.time_slots) ? row.time_slots : (prevLocal.timeSlots || ['14:00', '18:30', '22:00']),
                 ytViews: prevLocal.ytViews || 0,
-                ytVideos: prevLocal.ytVideos || 0
+                ytVideos: prevLocal.ytVideos || 0,
+                accessToken: row.youtube_access_token || prevLocal.accessToken || ''
               };
             }
           });
@@ -3274,6 +3275,69 @@
       document.getElementById('ai-preview-prompt').textContent = '"Generate a viral high-retention video about [' + promptNiche + '] in [' + ch.language + '], aspect ratio [' + ch.orientation + '], duration [' + ch.duration + '], cinematic lighting, ultra-detailed..."';
     }
 
+    function resolveKieModelIdentifier(providerLabel) {
+      const p = String(providerLabel || '').toLowerCase();
+      if (p.indexOf('kling') !== -1) return 'kling-2.6/text-to-video';
+      if (p.indexOf('veo') !== -1) return 'veo3';
+      if (p.indexOf('wan') !== -1) return 'wan-2.6/text-to-video';
+      if (p.indexOf('hailuo') !== -1 || p.indexOf('minimax') !== -1) return 'hailuo/text-to-video';
+      if (p.indexOf('pixverse') !== -1 || p.indexOf('seedance') !== -1) return 'bytedance/seedance-2.0-fast';
+      return 'runway';
+    }
+
+    function uploadVideoBlobToYouTube(videoBlob, seoTitle, seoDesc, tagsList, accessToken) {
+      if (!accessToken) {
+        return Promise.reject(new Error(t('Missing YouTube OAuth access token. Please click "Link Official YouTube Channel" to refresh your YouTube permission.', 'انتهت صلاحية جلسة يوتيوب أو لم يتم منح صلاحية الرفع! يرجى الضغط على زر "ربط قناة اليوتيوب الرسمية" لتحديث التصريح.')));
+      }
+      const metadata = {
+        snippet: {
+          title: seoTitle.substring(0, 95),
+          description: seoDesc,
+          tags: tagsList,
+          categoryId: '22'
+        },
+        status: {
+          privacyStatus: 'public',
+          selfDeclaredMadeForKids: false
+        }
+      };
+
+      return window.fetch('https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + accessToken,
+          'Content-Type': 'application/json; charset=UTF-8',
+          'X-Upload-Content-Length': String(videoBlob.size),
+          'X-Upload-Content-Type': videoBlob.type || 'video/mp4'
+        },
+        body: JSON.stringify(metadata)
+      }).then(function(initRes) {
+        if (!initRes.ok) {
+          return initRes.text().then(function(errTxt) {
+            throw new Error(t('YouTube Upload Init Error (' + initRes.status + '): ' + errTxt.substring(0, 140), 'رفض يوتيوب بدء الرفع (كود ' + initRes.status + '): تأكد من تفعيل YouTube Data API v3 وإعطاء صلاحية إدارة فيديوهات يوتيوب عند ربط القناة.'));
+          });
+        }
+        const uploadUrl = initRes.headers.get('Location') || initRes.headers.get('location');
+        if (!uploadUrl) {
+          throw new Error(t('YouTube did not return a resumable upload Location URL.', 'لم يرجع يوتيوب رابط استكمال الرفع (Location).'));
+        }
+        return window.fetch(uploadUrl, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': videoBlob.type || 'video/mp4'
+          },
+          body: videoBlob
+        });
+      }).then(function(putRes) {
+        if (!putRes.ok) {
+          return putRes.text().then(function(errTxt) {
+            throw new Error(t('YouTube Video Stream Upload Failed (' + putRes.status + '): ' + errTxt.substring(0, 120), 'فشل رفع ملف الفيديو إلى يوتيوب (كود ' + putRes.status + ').'));
+          });
+        }
+        return putRes.json();
+      });
+    }
+
     function simulateInstantAiGeneration() {
       if (!appState.currentUser.subscribed && appState.currentUser.email.toLowerCase() !== OWNER_ADMIN_EMAIL.toLowerCase()) {
         showToast(t('🔒 Cannot generate & publish before subscribing! Please subscribe to a plan first.', '🔒 لا يمكن توليد ونشر الفيديو قبل الاشتراك! يرجى الاشتراك في إحدى الخطط أولاً.'), 'warn');
@@ -3293,7 +3357,22 @@
       saveCurrentChannelConfig(false);
       const chName = isEn() ? ch.nameEn : ch.nameAr;
       const activeNiche = (ch.customNiche && ch.customNiche.trim()) ? ch.customNiche.trim() : ch.niche;
-      const durLabel = formatDurationLabel(ch.durationSec || 60);
+      const durSec = Math.max(1, Math.min(900, parseInt(ch.durationSec, 10) || 5));
+      const durLabel = formatDurationLabel(durSec);
+      const isVertical = String(ch.orientation || '').indexOf('9:16') !== -1;
+      const aspectRatioStr = isVertical ? '9:16' : '16:9';
+      const apiKey = appState.currentUser.aiApiKey.trim();
+      const providerName = appState.currentUser.aiProvider;
+      const modelId = resolveKieModelIdentifier(providerName);
+
+      const seoTitle = isEn()
+        ? (activeNiche + ' — Mind-Blowing Facts (' + ch.language + ')' + (isVertical ? ' #Shorts' : ''))
+        : (activeNiche + ' — حقائق وأسرار مذهلة (' + ch.language + ')' + (isVertical ? ' #Shorts' : ''));
+      const seoDesc = isEn()
+        ? ('Generated autonomously via Omniposts.online (' + providerName + '). Topic: ' + activeNiche + '. Language: ' + ch.language + '. #AI #Shorts #' + activeNiche.replace(/\s+/g, ''))
+        : ('تم توليد هذا الفيديو أوتوماتيكياً عبر منصة Omniposts.online (' + providerName + '). المحتوى: ' + activeNiche + ' — اللغة: ' + ch.language + '.');
+      const engineeredPrompt = 'Ultra-detailed cinematic 8K video about ' + activeNiche + ', narrated/themed in ' + ch.language + ', aspect ratio ' + aspectRatioStr + ', duration ' + durSec + ' seconds, high retention visual storytelling, dramatic lighting, photorealistic.';
+
       const progCard = document.getElementById('live-publish-progress-card');
       const stepTitle = document.getElementById('live-publish-step-title');
       const pctEl = document.getElementById('live-publish-pct');
@@ -3301,47 +3380,196 @@
       const detailEl = document.getElementById('live-publish-detail');
       const genBtn = document.getElementById('btn-generate-publish-now');
 
-      if (progCard && stepTitle && pctEl && barEl && detailEl) {
-        progCard.classList.remove('hidden');
-        if (genBtn) genBtn.disabled = true;
+      if (!progCard || !stepTitle || !pctEl || !barEl || !detailEl) return;
 
-        stepTitle.textContent = t('⏳ Step 1/3: Generating Viral Script, SEO Title & Video Prompt...', '⏳ الخطوة 1/3: جاري توليد البرومبت الهندسي وعنوان ووصف الـ SEO...');
-        pctEl.textContent = '30%';
-        barEl.style.width = '30%';
+      progCard.classList.remove('hidden');
+      if (genBtn) genBtn.disabled = true;
+
+      stepTitle.textContent = t('⏳ Step 1/3: Dispatching Video Generation Task to Kie.ai API (' + modelId + ')...', '⏳ الخطوة 1/3: جاري إرسال طلب توليد الفيديو الفعلي إلى سيرفر Kie.ai (' + modelId + ')...');
+      pctEl.textContent = '15%';
+      barEl.style.width = '15%';
+      detailEl.textContent = t(
+        'Sending prompt to https://api.kie.ai/api/v1/jobs/createTask | Aspect: ' + aspectRatioStr + ' | Target Duration: ' + durLabel,
+        'جاري الاتصال بسيرفر https://api.kie.ai/api/v1/jobs/createTask | الأبعاد: ' + aspectRatioStr + ' | المدة: ' + durLabel
+      );
+
+      // Step 1: Call real Kie.ai createTask endpoint (with fallback to /api/v1/runway/generate)
+      const kieCreateBody = {
+        model: modelId,
+        input: {
+          prompt: engineeredPrompt,
+          duration: durSec <= 5 ? 5 : 10,
+          quality: '720p',
+          aspect_ratio: aspectRatioStr,
+          watermark: ''
+        }
+      };
+
+      window.fetch('https://api.kie.ai/api/v1/jobs/createTask', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + apiKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(kieCreateBody)
+      }).then(function(r) {
+        return r.json().catch(function() { return { code: r.status, msg: 'HTTP ' + r.status }; });
+      }).then(function(resJson) {
+        if (!resJson || resJson.code !== 200 || !resJson.data || !resJson.data.taskId) {
+          // Try legacy /api/v1/runway/generate endpoint in case model uses runway direct endpoint on Kie.ai
+          return window.fetch('https://api.kie.ai/api/v1/runway/generate', {
+            method: 'POST',
+            headers: {
+              'Authorization': 'Bearer ' + apiKey,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              prompt: engineeredPrompt,
+              duration: durSec <= 5 ? 5 : 10,
+              quality: '720p',
+              aspectRatio: aspectRatioStr,
+              waterMark: ''
+            })
+          }).then(function(r2) {
+            return r2.json().catch(function() { return resJson; });
+          }).then(function(resJson2) {
+            if (resJson2 && resJson2.code === 200 && resJson2.data && resJson2.data.taskId) {
+              return { taskId: resJson2.data.taskId, endpointType: 'runway' };
+            }
+            const errMsg = (resJson && (resJson.msg || resJson.message)) || (resJson2 && (resJson2.msg || resJson2.message)) || 'Rejected by AI provider';
+            const errCode = (resJson && resJson.code) || (resJson2 && resJson2.code) || 400;
+            throw new Error(t(
+              'Kie.ai API Error (Code ' + errCode + '): ' + errMsg + '. Please verify your Kie.ai credit balance and API key at https://kie.ai/api-key.',
+              'رد سيرفر Kie.ai (كود ' + errCode + '): ' + errMsg + ' — يرجى التأكد من وجود رصيد كافٍ (Credits) في حسابك على موقع Kie.ai وصحة المفتاح.'
+            ));
+          });
+        }
+        return { taskId: resJson.data.taskId, endpointType: 'jobs' };
+      }).then(function(taskInfo) {
+        const taskId = taskInfo.taskId;
+        stepTitle.textContent = t('🎬 Step 2/3: Kie.ai is Rendering Video (Task ID: ' + taskId + ')...', '🎬 الخطوة 2/3: سيرفر Kie.ai يقوم الآن بصناعة وريندر الفيديو (رقم المهمة: ' + taskId + ')...');
+        pctEl.textContent = '35%';
+        barEl.style.width = '35%';
         detailEl.textContent = t(
-          'Channel: ' + chName + ' | Niche: ' + activeNiche + ' | Language: ' + ch.language + ' | Duration: ' + durLabel + ' (' + ch.orientation + ')',
-          'القناة: ' + chName + ' | المحتوى: ' + activeNiche + ' | اللغة: ' + ch.language + ' | المدة: ' + durLabel + ' (' + ch.orientation + ')'
+          'Real AI video rendering takes 1 to 3 minutes. Polling Kie.ai every 5 seconds until the MP4 file is ready...',
+          'عملية ريندر الفيديو الحقيقية بالذكاء الاصطناعي تستغرق من 1 إلى 3 دقائق. يتم فحص حالة المهمة كل 5 ثوانٍ تلقائياً حتى يجهز ملف الفيديو...'
         );
 
-        setTimeout(function() {
-          stepTitle.textContent = t('🎬 Step 2/3: Synthesizing Video via ' + appState.currentUser.aiProvider + '...', '🎬 الخطوة 2/3: جاري صناعة وريندر الفيديو عبر (' + appState.currentUser.aiProvider + ')...');
-          pctEl.textContent = '70%';
-          barEl.style.width = '70%';
-        }, 900);
+        // Step 2: Poll Kie.ai every 5 seconds until state === 'success' or 'fail'
+        return new Promise(function(resolve, reject) {
+          let attempts = 0;
+          const maxAttempts = 120; // up to 10 minutes
+          const pollTimer = setInterval(function() {
+            attempts++;
+            const pollUrl = taskInfo.endpointType === 'runway'
+              ? ('https://api.kie.ai/api/v1/runway/record-detail?taskId=' + encodeURIComponent(taskId))
+              : ('https://api.kie.ai/api/v1/jobs/recordInfo?taskId=' + encodeURIComponent(taskId));
 
-        setTimeout(function() {
-          stepTitle.textContent = t('🚀 Step 3/3: Uploading Video Directly to YouTube Channel "' + chName + '"...', '🚀 الخطوة 3/3: جاري رفع ونشر الفيديو مباشرة على قناة يوتيوب "' + chName + '"...');
-          pctEl.textContent = '100%';
-          barEl.style.width = '100%';
+            window.fetch(pollUrl, {
+              method: 'GET',
+              headers: { 'Authorization': 'Bearer ' + apiKey }
+            }).then(function(pr) { return pr.json(); }).then(function(pJson) {
+              const d = (pJson && pJson.data) ? pJson.data : {};
+              const st = String(d.state || d.status || '').toLowerCase();
+              const prog = parseInt(d.progress, 10) || Math.min(85, 35 + attempts * 2);
 
-          appState.currentUser.generatedVideos = (appState.currentUser.generatedVideos || 0) + 1;
-          syncDashboardUI();
+              pctEl.textContent = prog + '%';
+              barEl.style.width = prog + '%';
+              detailEl.textContent = t(
+                'Kie.ai Status: [' + (st || 'generating') + '] — Elapsed: ' + (attempts * 5) + 's | Task ID: ' + taskId,
+                'حالة الريندر في Kie.ai: [' + (st || 'جاري التوليد') + '] — الوقت المنقضي: ' + (attempts * 5) + ' ثانية | رقم المهمة: ' + taskId
+              );
 
-          if (supabaseClient && appState.currentUser.email) {
-            sbExec(supabaseClient.from('profiles').update({
-              generated_videos: appState.currentUser.generatedVideos
-            }).ilike('email', appState.currentUser.email));
-          }
-          try {
-            localStorage.setItem('omniposts_v3_session', JSON.stringify(appState.currentUser));
-          } catch (e) {}
+              if (st === 'success' || st === 'completed') {
+                clearInterval(pollTimer);
+                let videoUrl = '';
+                if (d.videoInfo && d.videoInfo.videoUrl) {
+                  videoUrl = d.videoInfo.videoUrl;
+                } else if (d.resultJson) {
+                  try {
+                    const parsedRes = typeof d.resultJson === 'string' ? JSON.parse(d.resultJson) : d.resultJson;
+                    if (parsedRes && Array.isArray(parsedRes.resultUrls) && parsedRes.resultUrls[0]) {
+                      videoUrl = parsedRes.resultUrls[0];
+                    }
+                  } catch (e) {}
+                } else if (d.videoUrl) {
+                  videoUrl = d.videoUrl;
+                }
+                if (!videoUrl) {
+                  reject(new Error(t('Kie.ai finished task ' + taskId + ' but returned no video URL.', 'انتهت المهمة في Kie.ai ولكن لم يتم العثور على رابط ملف الفيديو.')));
+                } else {
+                  resolve(videoUrl);
+                }
+              } else if (st === 'fail' || st === 'failed' || st === 'error') {
+                clearInterval(pollTimer);
+                reject(new Error(t(
+                  'Kie.ai Generation Failed: ' + (d.failMsg || 'Task failed on provider server.'),
+                  'فشل توليد الفيديو في سيرفر Kie.ai: ' + (d.failMsg || 'تأكد من الرصيد أو إعدادات الموديل في Kie.ai.')
+                )));
+              } else if (attempts >= maxAttempts) {
+                clearInterval(pollTimer);
+                reject(new Error(t('Generation timed out after 10 minutes (Task ID: ' + taskId + ').', 'استغرق الريندر أكثر من 10 دقائق (رقم المهمة: ' + taskId + ').')));
+              }
+            }).catch(function(pollErr) {
+              if (attempts >= maxAttempts) {
+                clearInterval(pollTimer);
+                reject(pollErr);
+              }
+            });
+          }, 5000);
+        });
+      }).then(function(generatedVideoUrl) {
+        // Step 3: Download the generated MP4 video blob and upload it to the user's YouTube channel via YouTube Data API v3!
+        stepTitle.textContent = t('🚀 Step 3/3: Video Ready! Uploading MP4 to YouTube Channel "' + chName + '"...', '🚀 الخطوة 3/3: اكتمل صناعة الفيديو! جاري رفعه ونشره الآن على قناتك "' + chName + '"...');
+        pctEl.textContent = '90%';
+        barEl.style.width = '90%';
+        detailEl.textContent = t(
+          'Downloading generated MP4 from Kie.ai and uploading to YouTube Data API v3...',
+          'جاري سحب ملف الفيديو MP4 من سيرفر Kie.ai ورفعه مباشرة إلى يوتيوب عبر YouTube Data API v3...'
+        );
 
-          if (genBtn) genBtn.disabled = false;
-          showToast(t('🎉 Video generated (' + durLabel + ') and dispatched for immediate publishing on YouTube channel: "' + chName + '"!', '🎉 تم توليد الفيديو بمدة (' + durLabel + ') وإرساله للنشر المباشر على قناتك في يوتيوب: "' + chName + '" بنجاح!'), 'info');
-        }, 1800);
-      } else {
-        showToast(t('🚀 Video generation & publishing dispatched for "' + chName + '"!', '🚀 تم بدء توليد ونشر الفيديو لقناة "' + chName + '"!'), 'info');
-      }
+        return window.fetch(generatedVideoUrl).then(function(vRes) {
+          if (!vRes.ok) throw new Error(t('Could not fetch generated MP4 file from CDN.', 'تعذر تحميل ملف الفيديو المولد من رابط Kie.ai.'));
+          return vRes.blob();
+        }).then(function(videoBlob) {
+          return uploadVideoBlobToYouTube(
+            videoBlob,
+            seoTitle,
+            seoDesc,
+            ['AI', activeNiche, 'Omniposts'],
+            ch.accessToken
+          );
+        });
+      }).then(function(ytUploadRes) {
+        const ytVidId = (ytUploadRes && ytUploadRes.id) ? ytUploadRes.id : '';
+        stepTitle.textContent = t('✅ Published Successfully on YouTube Channel "' + chName + '"!', '✅ تم توليد ورفع ونشر الفيديو بنجاح على قناتك في يوتيوب "' + chName + '"!');
+        pctEl.textContent = '100%';
+        barEl.style.width = '100%';
+        detailEl.innerHTML = ytVidId
+          ? t('🎉 Live YouTube Video URL: <a href="https://www.youtube.com/watch?v=' + ytVidId + '" target="_blank" class="text-blue-400 underline font-bold">https://www.youtube.com/watch?v=' + ytVidId + '</a>', '🎉 رابط الفيديو المنشور على يوتيوب: <a href="https://www.youtube.com/watch?v=' + ytVidId + '" target="_blank" class="text-blue-400 underline font-bold">https://www.youtube.com/watch?v=' + ytVidId + '</a>')
+          : t('🎉 Video uploaded and published to your YouTube channel!', '🎉 تم رفع ونشر الفيديو على قناتك في يوتيوب بنجاح!');
+
+        appState.currentUser.generatedVideos = (appState.currentUser.generatedVideos || 0) + 1;
+        persistCurrentUserEverywhere();
+        syncDashboardUI();
+
+        if (supabaseClient && appState.currentUser.email) {
+          sbExec(supabaseClient.from('profiles').update({
+            generated_videos: appState.currentUser.generatedVideos
+          }).ilike('email', appState.currentUser.email));
+        }
+
+        if (genBtn) genBtn.disabled = false;
+        showToast(t('🎉 Video generated & published live to YouTube channel: "' + chName + '"!', '🎉 تم توليد الفيديو ورفعه ونشره فعلياً على قناتك في يوتيوب: "' + chName + '"!'), 'info');
+      }).catch(function(err) {
+        if (genBtn) genBtn.disabled = false;
+        const msg = (err && err.message) ? err.message : t('Generation or upload failed.', 'فشل التوليد أو الرفع.');
+        stepTitle.textContent = t('❌ Generation / Publishing Stopped', '❌ توقفت عملية التوليد أو النشر');
+        pctEl.textContent = '0%';
+        barEl.style.width = '0%';
+        detailEl.textContent = msg;
+        showToast('❌ ' + msg, 'warn');
+      });
     }
 
     // Account Settings Handlers
@@ -3833,6 +4061,7 @@
       appState.channels[slot].url = chId ? ('youtube.com/channel/' + chId) : ('youtube.com/@' + title.replace(/\s+/g, ''));
       appState.channels[slot].ytViews = ytViews || 0;
       appState.channels[slot].ytVideos = ytVideos || 0;
+      appState.channels[slot].accessToken = accessToken || '';
 
       let sumViews = 0;
       let sumVideos = 0;
