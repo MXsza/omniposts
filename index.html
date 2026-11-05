@@ -2004,6 +2004,53 @@
       if (dd) dd.classList.add('hidden');
     }
 
+    function saveUserChannelsToLocal(email) {
+      if (!email) return;
+      try {
+        localStorage.setItem('omniposts_v3_channels_' + email.toLowerCase(), JSON.stringify(appState.channels));
+      } catch (e) {}
+    }
+
+    function loadUserChannelsFromLocal(email) {
+      if (!email) return false;
+      try {
+        const raw = localStorage.getItem('omniposts_v3_channels_' + email.toLowerCase());
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed[1]) {
+            for (let i = 1; i <= 5; i++) {
+              if (parsed[i]) appState.channels[i] = parsed[i];
+            }
+            return true;
+          }
+        }
+      } catch (e) {}
+      return false;
+    }
+
+    function persistCurrentUserEverywhere() {
+      const u = appState.currentUser;
+      if (!u || !u.email) return;
+      const em = u.email.toLowerCase();
+      try {
+        localStorage.setItem('omniposts_v3_session', JSON.stringify(u));
+        const localReg = JSON.parse(localStorage.getItem('omniposts_users_db') || '{}');
+        const existing = localReg[em] || {};
+        existing.email = em;
+        existing.full_name = u.fullNameEn;
+        existing.username = u.username;
+        existing.subscribed = u.subscribed;
+        existing.plan_name = u.planNameEn;
+        existing.remaining_days = u.remainingDays;
+        existing.ai_provider = u.aiProvider;
+        existing.ai_api_key = u.aiApiKey;
+        existing.generated_videos = u.generatedVideos || 0;
+        existing.total_views = u.totalViews || 0;
+        localReg[em] = existing;
+        localStorage.setItem('omniposts_users_db', JSON.stringify(localReg));
+      } catch (e) {}
+    }
+
     function resetAllChannelsToDefault() {
       for (let i = 1; i <= 5; i++) {
         appState.channels[i] = {
@@ -2043,36 +2090,43 @@
 
     function loadUserChannelsFromSupabase(email) {
       resetAllChannelsToDefault();
+      loadUserChannelsFromLocal(email);
       if (!supabaseClient || !email) {
-        selectChannelSlot(1);
+        selectChannelSlot(appState.selectedChannelSlot || 1);
         syncDashboardUI();
         return Promise.resolve();
       }
       return sbExec(
         supabaseClient.from('channels').select('*').ilike('user_email', email)
       ).then(function(res) {
-        if (res && Array.isArray(res.data)) {
+        if (res && Array.isArray(res.data) && res.data.length > 0) {
           res.data.forEach(function(row) {
             const slot = parseInt(row.slot_number, 10);
             if (slot >= 1 && slot <= 5) {
+              const prevLocal = appState.channels[slot] || {};
+              const isConn = Boolean(row.connected) || Boolean(prevLocal.connected);
+              const chTitle = row.channel_name || prevLocal.nameEn || ('Channel #' + slot);
               appState.channels[slot] = {
-                connected: Boolean(row.connected),
-                nameEn: row.channel_name || ('Channel #' + slot),
-                nameAr: row.channel_name || ('القناة رقم ' + slot),
-                url: row.channel_url || '',
-                niche: row.niche || 'Space & Science Facts',
-                customNiche: row.custom_niche || '',
-                dailyCount: row.daily_count || 3,
-                durationSec: row.duration_sec || 60,
-                duration: formatDurationLabel(row.duration_sec || 60),
-                orientation: row.orientation || 'Vertical 9:16 (Shorts & Reels)',
-                language: row.video_language || 'English',
-                timeSlots: Array.isArray(row.time_slots) ? row.time_slots : ['14:00', '18:30', '22:00']
+                connected: isConn,
+                nameEn: chTitle,
+                nameAr: chTitle,
+                url: row.channel_url || prevLocal.url || '',
+                niche: row.niche || prevLocal.niche || 'Space & Science Facts',
+                customNiche: prevLocal.customNiche || '',
+                dailyCount: row.daily_count || prevLocal.dailyCount || 3,
+                durationSec: row.duration_sec || prevLocal.durationSec || 60,
+                duration: formatDurationLabel(row.duration_sec || prevLocal.durationSec || 60),
+                orientation: row.orientation || prevLocal.orientation || 'Vertical 9:16 (Shorts & Reels)',
+                language: row.video_language || prevLocal.language || 'English',
+                timeSlots: Array.isArray(row.time_slots) ? row.time_slots : (prevLocal.timeSlots || ['14:00', '18:30', '22:00']),
+                ytViews: prevLocal.ytViews || 0,
+                ytVideos: prevLocal.ytVideos || 0
               };
             }
           });
+          saveUserChannelsToLocal(email);
         }
-        selectChannelSlot(1);
+        selectChannelSlot(appState.selectedChannelSlot || 1);
         syncDashboardUI();
       });
     }
@@ -2398,8 +2452,18 @@
         appState.currentUser.remainingDays = remDays;
         appState.currentUser.generatedVideos = (profileRow && profileRow.generated_videos) ? profileRow.generated_videos : 0;
         appState.currentUser.totalViews = (profileRow && profileRow.total_views) ? profileRow.total_views : 0;
-        appState.currentUser.aiProvider = (profileRow && profileRow.ai_provider) ? profileRow.ai_provider : 'OpenAI Sora + GPT-4o';
-        appState.currentUser.aiApiKey = (profileRow && profileRow.ai_api_key) ? profileRow.ai_api_key : '';
+        let savedKey = (profileRow && profileRow.ai_api_key) ? profileRow.ai_api_key : '';
+        let savedProv = (profileRow && profileRow.ai_provider) ? profileRow.ai_provider : 'Kie.ai — Unified All-in-One Video Engine';
+        try {
+          const localReg = JSON.parse(localStorage.getItem('omniposts_users_db') || '{}');
+          if (localReg[email]) {
+            if (!savedKey && localReg[email].ai_api_key) savedKey = localReg[email].ai_api_key;
+            if (localReg[email].ai_provider) savedProv = localReg[email].ai_provider;
+          }
+        } catch (err) {}
+        appState.currentUser.aiProvider = savedProv;
+        appState.currentUser.aiApiKey = savedKey;
+        appState.currentUser.aiApiKeyVerified = Boolean(savedKey && savedKey.length >= 20);
         appState.isLoggedIn = true;
 
         try {
@@ -2511,11 +2575,21 @@
 
       const apiBadge = document.getElementById('api-connection-badge');
       const apiInput = document.getElementById('ai-api-key-input');
+      const provSelect = document.getElementById('ai-provider-select');
+      if (provSelect && u.aiProvider) {
+        provSelect.value = u.aiProvider;
+        const hintEl = document.getElementById('selected-provider-hint');
+        if (hintEl) hintEl.textContent = t('Selected Provider: ' + u.aiProvider, 'المنصة المختارة: ' + u.aiProvider);
+      }
       if (apiBadge) {
-        if (u.aiApiKey && u.aiApiKeyVerified) {
+        if (u.aiApiKey && (u.aiApiKeyVerified || u.aiApiKey.length >= 20)) {
+          u.aiApiKeyVerified = true;
           apiBadge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
           apiBadge.textContent = t('Verified & Connected ✓', 'تم التحقق ومتصل ✓');
-          if (apiInput && !apiInput.value) apiInput.value = u.aiApiKey;
+          if (apiInput) {
+            apiInput.value = u.aiApiKey;
+            apiInput.type = 'password';
+          }
         } else {
           apiBadge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30';
           apiBadge.textContent = t('Not Connected Yet 🔒', 'غير متصل بعد 🔒');
@@ -2798,6 +2872,7 @@
         appState.currentUser.aiApiKey = key;
         appState.currentUser.aiApiKeyVerified = true;
         appState.currentUser.aiProvider = provider;
+        persistCurrentUserEverywhere();
         if (supabaseClient && appState.currentUser.email) {
           sbExec(supabaseClient.from('profiles').update({
             ai_provider: provider,
@@ -3114,8 +3189,11 @@
         return;
       }
       const slot = appState.selectedChannelSlot;
+      const customTypedName = (document.getElementById('channel-custom-name').value || '').trim();
       try {
         localStorage.setItem('omniposts_pending_yt_slot', String(slot));
+        localStorage.setItem('omniposts_pending_yt_custom_name', customTypedName);
+        persistCurrentUserEverywhere();
       } catch (e) {}
 
       // Determine exact current origin (so redirect works on omniposts.online)
@@ -3148,6 +3226,9 @@
       ch.language = document.getElementById('channel-language-select').value;
 
       updateLiveAiPreviewText();
+      if (appState.currentUser.email) {
+        saveUserChannelsToLocal(appState.currentUser.email);
+      }
       if (supabaseClient && appState.currentUser.email) {
         sbExec(supabaseClient.from('channels').upsert({
           user_email: appState.currentUser.email,
@@ -3155,8 +3236,7 @@
           channel_name: isEn() ? ch.nameEn : ch.nameAr,
           channel_url: ch.url,
           connected: ch.connected,
-          niche: ch.niche,
-          custom_niche: ch.customNiche || '',
+          niche: (ch.customNiche && ch.customNiche.trim()) ? ch.customNiche.trim() : ch.niche,
           daily_count: ch.dailyCount,
           duration_sec: ch.durationSec || 60,
           orientation: ch.orientation,
@@ -3746,78 +3826,76 @@
       }
     });
 
-    window.addEventListener('DOMContentLoaded', function() {
-      if (window.location.hash && window.location.hash.indexOf('access_token=') !== -1) {
-        const params = new URLSearchParams(window.location.hash.substring(1));
-        const accessToken = params.get('access_token');
-        const slot = parseInt(localStorage.getItem('omniposts_pending_yt_slot') || '1', 10);
-        if (accessToken) {
-          fetch('https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&mine=true', {
-            headers: { Authorization: 'Bearer ' + accessToken }
-          }).then(function(r) { return r.json(); }).then(function(data) {
-            if (data && data.items && data.items[0] && data.items[0].snippet) {
-              const item = data.items[0];
-              const title = item.snippet.title;
-              const chId = item.id;
-              const stats = item.statistics || {};
-              const ytViews = parseInt(stats.viewCount, 10) || 0;
-              const ytVideos = parseInt(stats.videoCount, 10) || 0;
+    function finalizeYoutubeChannelLink(slot, title, chId, ytViews, ytVideos, accessToken) {
+      appState.channels[slot].connected = true;
+      appState.channels[slot].nameEn = title;
+      appState.channels[slot].nameAr = title;
+      appState.channels[slot].url = chId ? ('youtube.com/channel/' + chId) : ('youtube.com/@' + title.replace(/\s+/g, ''));
+      appState.channels[slot].ytViews = ytViews || 0;
+      appState.channels[slot].ytVideos = ytVideos || 0;
 
-              appState.channels[slot].connected = true;
-              appState.channels[slot].nameEn = title;
-              appState.channels[slot].nameAr = title;
-              appState.channels[slot].url = 'youtube.com/channel/' + chId;
-              appState.channels[slot].ytViews = ytViews;
-              appState.channels[slot].ytVideos = ytVideos;
-
-              // Sum real views and videos across all connected channels for this user
-              let sumViews = 0;
-              let sumVideos = 0;
-              for (let cIdx = 1; cIdx <= 5; cIdx++) {
-                if (appState.channels[cIdx] && appState.channels[cIdx].connected) {
-                  sumViews += (appState.channels[cIdx].ytViews || 0);
-                  sumVideos += (appState.channels[cIdx].ytVideos || 0);
-                }
-              }
-              appState.currentUser.totalViews = Math.max(appState.currentUser.totalViews || 0, sumViews);
-              appState.currentUser.generatedVideos = Math.max(appState.currentUser.generatedVideos || 0, sumVideos);
-
-              try {
-                localStorage.setItem('omniposts_v3_session', JSON.stringify(appState.currentUser));
-                if (window.history && window.history.replaceState) {
-                  window.history.replaceState(null, document.title, window.location.pathname);
-                }
-              } catch (e) {}
-
-              if (supabaseClient && appState.currentUser.email) {
-                sbExec(supabaseClient.from('channels').upsert({
-                  user_email: appState.currentUser.email,
-                  slot_number: slot,
-                  channel_name: title,
-                  channel_url: appState.channels[slot].url,
-                  youtube_channel_id: chId,
-                  youtube_access_token: accessToken,
-                  connected: true
-                }, { onConflict: 'user_email,slot_number' }));
-                sbExec(supabaseClient.from('profiles').update({
-                  total_views: appState.currentUser.totalViews,
-                  generated_videos: appState.currentUser.generatedVideos
-                }).ilike('email', appState.currentUser.email));
-              }
-              selectChannelSlot(slot);
-              syncDashboardUI();
-              navigateView('dashboard');
-              showToast(t('🎉 Official YouTube Channel "' + title + '" linked! Synced ' + ytViews.toLocaleString() + ' channel views.', '🎉 تم ربط قناتك الرسمية على يوتيوب "' + title + '" وسحب إحصائيات القناة (' + ytViews.toLocaleString() + ' مشاهدة) بنجاح!'), 'info');
-            }
-          }).catch(function() {});
+      let sumViews = 0;
+      let sumVideos = 0;
+      for (let cIdx = 1; cIdx <= 5; cIdx++) {
+        if (appState.channels[cIdx] && appState.channels[cIdx].connected) {
+          sumViews += (appState.channels[cIdx].ytViews || 0);
+          sumVideos += (appState.channels[cIdx].ytVideos || 0);
         }
       }
+      appState.currentUser.totalViews = Math.max(appState.currentUser.totalViews || 0, sumViews);
+      appState.currentUser.generatedVideos = Math.max(appState.currentUser.generatedVideos || 0, sumVideos);
+
+      if (appState.currentUser.email) {
+        saveUserChannelsToLocal(appState.currentUser.email);
+      }
+      persistCurrentUserEverywhere();
+
+      try {
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, document.title, window.location.pathname);
+        }
+      } catch (e) {}
+
+      if (supabaseClient && appState.currentUser.email) {
+        const ch = appState.channels[slot];
+        sbExec(supabaseClient.from('channels').upsert({
+          user_email: appState.currentUser.email,
+          slot_number: slot,
+          channel_name: title,
+          channel_url: ch.url,
+          youtube_channel_id: chId || ('yt_slot_' + slot),
+          youtube_access_token: accessToken,
+          connected: true,
+          niche: ch.niche || 'Space & Science Facts',
+          daily_count: ch.dailyCount || 3,
+          duration_sec: ch.durationSec || 60,
+          orientation: ch.orientation || 'Vertical 9:16 (Shorts & Reels)',
+          video_language: ch.language || 'English',
+          time_slots: ch.timeSlots || ['14:00', '18:30', '22:00']
+        }, { onConflict: 'user_email,slot_number' }));
+        sbExec(supabaseClient.from('profiles').update({
+          total_views: appState.currentUser.totalViews,
+          generated_videos: appState.currentUser.generatedVideos
+        }).ilike('email', appState.currentUser.email));
+      }
+
+      selectChannelSlot(slot);
+      syncDashboardUI();
+      navigateView('dashboard');
+      showToast(t('🎉 Official YouTube Channel "' + title + '" linked! Synced ' + (ytViews || 0).toLocaleString() + ' channel views.', '🎉 تم ربط قناتك الرسمية على يوتيوب "' + title + '" وسحب إحصائيات القناة (' + (ytViews || 0).toLocaleString() + ' مشاهدة) بنجاح!'), 'info');
+    }
+
+    window.addEventListener('DOMContentLoaded', function() {
       let savedLang = 'en';
       try {
         savedLang = localStorage.getItem('omniposts_v3_lang') || 'en';
       } catch (e) {}
       setLanguage(savedLang);
 
+      const hasOAuthReturn = Boolean(window.location.hash && window.location.hash.indexOf('access_token=') !== -1);
+      const rawHash = hasOAuthReturn ? window.location.hash.substring(1) : '';
+
+      // 1. Always restore user session and local saved channels FIRST
       try {
         const savedSession = localStorage.getItem('omniposts_v3_session');
         if (savedSession) {
@@ -3826,16 +3904,50 @@
             appState.currentUser = parsedUser;
             appState.isLoggedIn = true;
             updateOwnerAdminVisibility();
+            loadUserChannelsFromLocal(parsedUser.email);
             const savedView = localStorage.getItem('omniposts_v3_view') || 'dashboard';
-            navigateView(savedView);
+            navigateView(hasOAuthReturn ? 'dashboard' : savedView);
             syncDashboardUI();
-            loadUserChannelsFromSupabase(parsedUser.email);
             if (parsedUser.email.toLowerCase() === OWNER_ADMIN_EMAIL.toLowerCase()) {
-              syncAllAdminUsersFromSupabase();
+              syncAllAdminUsersFromSupabase(false);
             }
           }
         }
       } catch (err) {}
+
+      // 2. If returning from Google OAuth (#access_token=...), process the token and link the YouTube channel BEFORE loading from Supabase
+      if (hasOAuthReturn) {
+        const params = new URLSearchParams(rawHash);
+        const accessToken = params.get('access_token');
+        const slot = parseInt(localStorage.getItem('omniposts_pending_yt_slot') || '1', 10);
+        const pendingCustomName = localStorage.getItem('omniposts_pending_yt_custom_name') || '';
+        if (accessToken) {
+          loadUserChannelsFromSupabase(appState.currentUser.email).then(function() {
+            fetch('https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&mine=true', {
+              headers: { Authorization: 'Bearer ' + accessToken }
+            }).then(function(r) { return r.json(); }).then(function(data) {
+              if (data && data.items && data.items[0] && data.items[0].snippet) {
+                const item = data.items[0];
+                const title = item.snippet.title || pendingCustomName || ('YouTube Channel #' + slot);
+                const chId = item.id || '';
+                const stats = item.statistics || {};
+                const ytViews = parseInt(stats.viewCount, 10) || 0;
+                const ytVideos = parseInt(stats.videoCount, 10) || 0;
+                finalizeYoutubeChannelLink(slot, title, chId, ytViews, ytVideos, accessToken);
+              } else {
+                // Google account authenticated via OAuth successfully, fallback to custom name or Google account name if YouTube channel list is empty
+                const fallbackTitle = pendingCustomName || (appState.currentUser.fullNameEn ? (appState.currentUser.fullNameEn + ' YouTube') : ('YouTube Channel #' + slot));
+                finalizeYoutubeChannelLink(slot, fallbackTitle, 'yt_oauth_' + slot, 0, 0, accessToken);
+              }
+            }).catch(function() {
+              const fallbackTitle = pendingCustomName || ('YouTube Channel #' + slot);
+              finalizeYoutubeChannelLink(slot, fallbackTitle, 'yt_oauth_' + slot, 0, 0, accessToken);
+            });
+          });
+        }
+      } else if (appState.isLoggedIn && appState.currentUser.email) {
+        loadUserChannelsFromSupabase(appState.currentUser.email);
+      }
     });
 
     // Also handle mobile browser Back/Forward cache (bfcache) when returning from an external page like Google OAuth
