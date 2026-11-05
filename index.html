@@ -3275,14 +3275,77 @@
       document.getElementById('ai-preview-prompt').textContent = '"Generate a viral high-retention video about [' + promptNiche + '] in [' + ch.language + '], aspect ratio [' + ch.orientation + '], duration [' + ch.duration + '], cinematic lighting, ultra-detailed..."';
     }
 
-    function resolveKieModelIdentifier(providerLabel) {
+    function resolveKieModelQueue(providerLabel) {
       const p = String(providerLabel || '').toLowerCase();
-      if (p.indexOf('kling') !== -1) return 'kling-2.6/text-to-video';
-      if (p.indexOf('veo') !== -1) return 'veo3';
-      if (p.indexOf('wan') !== -1) return 'wan-2.6/text-to-video';
-      if (p.indexOf('hailuo') !== -1 || p.indexOf('minimax') !== -1) return 'hailuo/text-to-video';
-      if (p.indexOf('pixverse') !== -1 || p.indexOf('seedance') !== -1) return 'bytedance/seedance-2.0-fast';
-      return 'runway';
+      let primary = 'kling-2.6/text-to-video';
+      if (p.indexOf('veo') !== -1) primary = 'veo-3-1';
+      else if (p.indexOf('wan') !== -1) primary = 'wan/2-6-text-to-video';
+      else if (p.indexOf('pixverse') !== -1 || p.indexOf('seedance') !== -1 || p.indexOf('bytedance') !== -1) primary = 'bytedance/v1-lite-text-to-video';
+      else if (p.indexOf('kling') !== -1) primary = 'kling-2.6/text-to-video';
+      else if (p.indexOf('runway') !== -1) primary = 'bytedance/v1-lite-text-to-video';
+
+      const fallbacks = [
+        'kling-2.6/text-to-video',
+        'bytedance/v1-lite-text-to-video',
+        'veo-3-1',
+        'wan/2-6-text-to-video'
+      ];
+      const queue = [primary];
+      fallbacks.forEach(function(m) {
+        if (queue.indexOf(m) === -1) queue.push(m);
+      });
+      return queue;
+    }
+
+    function buildKieModelPayload(modelId, promptText, aspectRatioStr, durSec) {
+      const dStr = (durSec >= 10) ? '10' : '5';
+      if (modelId === 'veo-3-1') {
+        return {
+          model: 'veo-3-1',
+          input: {
+            prompt: promptText,
+            aspect_ratio: aspectRatioStr,
+            enable_translation: true,
+            generation_type: 'TEXT_2_VIDEO'
+          }
+        };
+      }
+      if (modelId === 'wan/2-6-text-to-video') {
+        return {
+          model: 'wan/2-6-text-to-video',
+          input: {
+            prompt: promptText,
+            duration: dStr,
+            resolution: '720p',
+            multi_shots: false,
+            nsfw_checker: false
+          }
+        };
+      }
+      if (modelId === 'bytedance/v1-lite-text-to-video') {
+        return {
+          model: 'bytedance/v1-lite-text-to-video',
+          input: {
+            prompt: promptText,
+            aspect_ratio: aspectRatioStr,
+            resolution: '720p',
+            duration: dStr,
+            camera_fixed: false,
+            enable_safety_checker: true,
+            nsfw_checker: false
+          }
+        };
+      }
+      // Default: kling-2.6/text-to-video
+      return {
+        model: 'kling-2.6/text-to-video',
+        input: {
+          prompt: promptText,
+          sound: false,
+          aspect_ratio: aspectRatioStr,
+          duration: dStr
+        }
+      };
     }
 
     function uploadVideoBlobToYouTube(videoBlob, seoTitle, seoDesc, tagsList, accessToken) {
@@ -3363,7 +3426,7 @@
       const aspectRatioStr = isVertical ? '9:16' : '16:9';
       const apiKey = appState.currentUser.aiApiKey.trim();
       const providerName = appState.currentUser.aiProvider;
-      const modelId = resolveKieModelIdentifier(providerName);
+      const modelQueue = resolveKieModelQueue(providerName);
 
       const seoTitle = isEn()
         ? (activeNiche + ' — Mind-Blowing Facts (' + ch.language + ')' + (isVertical ? ' #Shorts' : ''))
@@ -3371,7 +3434,7 @@
       const seoDesc = isEn()
         ? ('Generated autonomously via Omniposts.online (' + providerName + '). Topic: ' + activeNiche + '. Language: ' + ch.language + '. #AI #Shorts #' + activeNiche.replace(/\s+/g, ''))
         : ('تم توليد هذا الفيديو أوتوماتيكياً عبر منصة Omniposts.online (' + providerName + '). المحتوى: ' + activeNiche + ' — اللغة: ' + ch.language + '.');
-      const engineeredPrompt = 'Ultra-detailed cinematic 8K video about ' + activeNiche + ', narrated/themed in ' + ch.language + ', aspect ratio ' + aspectRatioStr + ', duration ' + durSec + ' seconds, high retention visual storytelling, dramatic lighting, photorealistic.';
+      const engineeredPrompt = 'Ultra-detailed cinematic video about ' + activeNiche + ', themed in ' + ch.language + ', aspect ratio ' + aspectRatioStr + ', high retention visual storytelling, dramatic lighting, photorealistic.';
 
       const progCard = document.getElementById('live-publish-progress-card');
       const stepTitle = document.getElementById('live-publish-step-title');
@@ -3385,140 +3448,129 @@
       progCard.classList.remove('hidden');
       if (genBtn) genBtn.disabled = true;
 
-      stepTitle.textContent = t('⏳ Step 1/3: Dispatching Video Generation Task to Kie.ai API (' + modelId + ')...', '⏳ الخطوة 1/3: جاري إرسال طلب توليد الفيديو الفعلي إلى سيرفر Kie.ai (' + modelId + ')...');
-      pctEl.textContent = '15%';
-      barEl.style.width = '15%';
-      detailEl.textContent = t(
-        'Sending prompt to https://api.kie.ai/api/v1/jobs/createTask | Aspect: ' + aspectRatioStr + ' | Target Duration: ' + durLabel,
-        'جاري الاتصال بسيرفر https://api.kie.ai/api/v1/jobs/createTask | الأبعاد: ' + aspectRatioStr + ' | المدة: ' + durLabel
-      );
-
-      // Step 1: Call real Kie.ai createTask endpoint (with fallback to /api/v1/runway/generate)
-      const kieCreateBody = {
-        model: modelId,
-        input: {
-          prompt: engineeredPrompt,
-          duration: durSec <= 5 ? 5 : 10,
-          quality: '720p',
-          aspect_ratio: aspectRatioStr,
-          watermark: ''
-        }
-      };
-
-      window.fetch('https://api.kie.ai/api/v1/jobs/createTask', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + apiKey,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(kieCreateBody)
-      }).then(function(r) {
-        return r.json().catch(function() { return { code: r.status, msg: 'HTTP ' + r.status }; });
-      }).then(function(resJson) {
-        if (!resJson || resJson.code !== 200 || !resJson.data || !resJson.data.taskId) {
-          // Try legacy /api/v1/runway/generate endpoint in case model uses runway direct endpoint on Kie.ai
-          return window.fetch('https://api.kie.ai/api/v1/runway/generate', {
-            method: 'POST',
-            headers: {
-              'Authorization': 'Bearer ' + apiKey,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              prompt: engineeredPrompt,
-              duration: durSec <= 5 ? 5 : 10,
-              quality: '720p',
-              aspectRatio: aspectRatioStr,
-              waterMark: ''
-            })
-          }).then(function(r2) {
-            return r2.json().catch(function() { return resJson; });
-          }).then(function(resJson2) {
-            if (resJson2 && resJson2.code === 200 && resJson2.data && resJson2.data.taskId) {
-              return { taskId: resJson2.data.taskId, endpointType: 'runway' };
-            }
-            const errMsg = (resJson && (resJson.msg || resJson.message)) || (resJson2 && (resJson2.msg || resJson2.message)) || 'Rejected by AI provider';
-            const errCode = (resJson && resJson.code) || (resJson2 && resJson2.code) || 400;
-            throw new Error(t(
-              'Kie.ai API Error (Code ' + errCode + '): ' + errMsg + '. Please verify your Kie.ai credit balance and API key at https://kie.ai/api-key.',
-              'رد سيرفر Kie.ai (كود ' + errCode + '): ' + errMsg + ' — يرجى التأكد من وجود رصيد كافٍ (Credits) في حسابك على موقع Kie.ai وصحة المفتاح.'
-            ));
-          });
-        }
-        return { taskId: resJson.data.taskId, endpointType: 'jobs' };
-      }).then(function(taskInfo) {
-        const taskId = taskInfo.taskId;
-        stepTitle.textContent = t('🎬 Step 2/3: Kie.ai is Rendering Video (Task ID: ' + taskId + ')...', '🎬 الخطوة 2/3: سيرفر Kie.ai يقوم الآن بصناعة وريندر الفيديو (رقم المهمة: ' + taskId + ')...');
-        pctEl.textContent = '35%';
-        barEl.style.width = '35%';
+      function tryModelAtIndex(qIdx) {
+        const currentModel = modelQueue[qIdx];
+        stepTitle.textContent = t(
+          '⏳ Step 1/3: Dispatching Video Task to Kie.ai (' + currentModel + ')...',
+          '⏳ الخطوة 1/3: جاري إرسال طلب توليد الفيديو إلى سيرفر Kie.ai (' + currentModel + ')...'
+        );
+        pctEl.textContent = '15%';
+        barEl.style.width = '15%';
         detailEl.textContent = t(
-          'Real AI video rendering takes 1 to 3 minutes. Polling Kie.ai every 5 seconds until the MP4 file is ready...',
-          'عملية ريندر الفيديو الحقيقية بالذكاء الاصطناعي تستغرق من 1 إلى 3 دقائق. يتم فحص حالة المهمة كل 5 ثوانٍ تلقائياً حتى يجهز ملف الفيديو...'
+          'Model: ' + currentModel + ' | Aspect: ' + aspectRatioStr + ' | Target Duration: ' + durLabel,
+          'النموذج النشط: ' + currentModel + ' | الأبعاد: ' + aspectRatioStr + ' | المدة: ' + durLabel
         );
 
-        // Step 2: Poll Kie.ai every 5 seconds until state === 'success' or 'fail'
-        return new Promise(function(resolve, reject) {
-          let attempts = 0;
-          const maxAttempts = 120; // up to 10 minutes
-          const pollTimer = setInterval(function() {
-            attempts++;
-            const pollUrl = taskInfo.endpointType === 'runway'
-              ? ('https://api.kie.ai/api/v1/runway/record-detail?taskId=' + encodeURIComponent(taskId))
-              : ('https://api.kie.ai/api/v1/jobs/recordInfo?taskId=' + encodeURIComponent(taskId));
+        const payload = buildKieModelPayload(currentModel, engineeredPrompt, aspectRatioStr, durSec);
 
-            window.fetch(pollUrl, {
-              method: 'GET',
-              headers: { 'Authorization': 'Bearer ' + apiKey }
-            }).then(function(pr) { return pr.json(); }).then(function(pJson) {
-              const d = (pJson && pJson.data) ? pJson.data : {};
-              const st = String(d.state || d.status || '').toLowerCase();
-              const prog = parseInt(d.progress, 10) || Math.min(85, 35 + attempts * 2);
+        return window.fetch('https://api.kie.ai/api/v1/jobs/createTask', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + apiKey,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        }).then(function(r) {
+          return r.json().catch(function() { return { code: r.status, msg: 'HTTP ' + r.status }; });
+        }).then(function(resJson) {
+          if (!resJson || resJson.code !== 200 || !resJson.data || !resJson.data.taskId) {
+            const errMsg = (resJson && (resJson.msg || resJson.message)) || 'Rejected by Kie.ai';
+            const errCode = (resJson && resJson.code) || 400;
+            // If unauthorized (401) or insufficient credits (402), stop immediately without retrying other models
+            if (errCode === 401 || errCode === 402 || String(errMsg).toLowerCase().indexOf('credit') !== -1 || String(errMsg).toLowerCase().indexOf('balance') !== -1 || String(errMsg).toLowerCase().indexOf('insufficient') !== -1) {
+              throw new Error(t(
+                'Kie.ai Account Alert (' + errCode + '): ' + errMsg + '. Please check your credit balance at https://kie.ai.',
+                'تنبيه من حسابك في Kie.ai (كود ' + errCode + '): ' + errMsg + ' — يرجى التأكد من رصيد النقاط (Credits) في حسابك على موقع Kie.ai.'
+              ));
+            }
+            if (qIdx + 1 < modelQueue.length) {
+              return tryModelAtIndex(qIdx + 1);
+            }
+            throw new Error(t('Kie.ai Error (' + errCode + '): ' + errMsg, 'خطأ من سيرفر Kie.ai (' + errCode + '): ' + errMsg));
+          }
 
-              pctEl.textContent = prog + '%';
-              barEl.style.width = prog + '%';
-              detailEl.textContent = t(
-                'Kie.ai Status: [' + (st || 'generating') + '] — Elapsed: ' + (attempts * 5) + 's | Task ID: ' + taskId,
-                'حالة الريندر في Kie.ai: [' + (st || 'جاري التوليد') + '] — الوقت المنقضي: ' + (attempts * 5) + ' ثانية | رقم المهمة: ' + taskId
-              );
+          const taskId = resJson.data.taskId;
+          stepTitle.textContent = t(
+            '🎬 Step 2/3: Kie.ai is Rendering Video (' + currentModel + ' — Task: ' + taskId + ')...',
+            '🎬 الخطوة 2/3: سيرفر Kie.ai يقوم الآن بصناعة الفيديو (' + currentModel + ' — مهمة رقم: ' + taskId + ')...'
+          );
+          pctEl.textContent = '35%';
+          barEl.style.width = '35%';
+          detailEl.textContent = t(
+            'AI video rendering takes 1 to 3 minutes. Checking status every 5 seconds...',
+            'ريندر الفيديو بالذكاء الاصطناعي يستغرق من 1 إلى 3 دقائق. يتم فحص حالة المهمة كل 5 ثوانٍ تلقائياً...'
+          );
 
-              if (st === 'success' || st === 'completed') {
-                clearInterval(pollTimer);
-                let videoUrl = '';
-                if (d.videoInfo && d.videoInfo.videoUrl) {
-                  videoUrl = d.videoInfo.videoUrl;
-                } else if (d.resultJson) {
-                  try {
-                    const parsedRes = typeof d.resultJson === 'string' ? JSON.parse(d.resultJson) : d.resultJson;
-                    if (parsedRes && Array.isArray(parsedRes.resultUrls) && parsedRes.resultUrls[0]) {
-                      videoUrl = parsedRes.resultUrls[0];
-                    }
-                  } catch (e) {}
-                } else if (d.videoUrl) {
-                  videoUrl = d.videoUrl;
+          return new Promise(function(resolve, reject) {
+            let attempts = 0;
+            const maxAttempts = 120;
+            const pollTimer = setInterval(function() {
+              attempts++;
+              window.fetch('https://api.kie.ai/api/v1/jobs/recordInfo?taskId=' + encodeURIComponent(taskId), {
+                method: 'GET',
+                headers: { 'Authorization': 'Bearer ' + apiKey }
+              }).then(function(pr) { return pr.json(); }).then(function(pJson) {
+                const d = (pJson && pJson.data) ? pJson.data : {};
+                const st = String(d.state || d.status || '').toLowerCase();
+                const prog = parseInt(d.progress, 10) || Math.min(88, 35 + attempts * 2);
+
+                pctEl.textContent = prog + '%';
+                barEl.style.width = prog + '%';
+                detailEl.textContent = t(
+                  'Model: ' + currentModel + ' | Status: [' + (st || 'generating') + '] — Elapsed: ' + (attempts * 5) + 's | Task: ' + taskId,
+                  'النموذج: ' + currentModel + ' | الحالة: [' + (st || 'جاري الريندر') + '] — الوقت المنقضي: ' + (attempts * 5) + ' ثانية'
+                );
+
+                if (st === 'success' || st === 'completed') {
+                  clearInterval(pollTimer);
+                  let videoUrl = '';
+                  if (d.resultJson) {
+                    try {
+                      const parsedRes = typeof d.resultJson === 'string' ? JSON.parse(d.resultJson) : d.resultJson;
+                      if (parsedRes && Array.isArray(parsedRes.resultUrls) && parsedRes.resultUrls[0]) {
+                        videoUrl = parsedRes.resultUrls[0];
+                      } else if (parsedRes && parsedRes.videoUrl) {
+                        videoUrl = parsedRes.videoUrl;
+                      }
+                    } catch (e) {}
+                  }
+                  if (!videoUrl && d.videoInfo && d.videoInfo.videoUrl) videoUrl = d.videoInfo.videoUrl;
+                  if (!videoUrl && d.videoUrl) videoUrl = d.videoUrl;
+
+                  if (!videoUrl) {
+                    reject(new Error(t('Task completed on Kie.ai but no video URL was returned.', 'اكتملت المهمة ولكن لم يرجع رابط الفيديو.')));
+                  } else {
+                    resolve(videoUrl);
+                  }
+                } else if (st === 'fail' || st === 'failed' || st === 'error') {
+                  clearInterval(pollTimer);
+                  const fMsg = String(d.failMsg || 'Task failed on upstream model.');
+                  // If upstream model timed out (ConnectException / timed out) and we have fallback models in queue, automatically switch to next model!
+                  if (qIdx + 1 < modelQueue.length && (fMsg.toLowerCase().indexOf('timeout') !== -1 || fMsg.toLowerCase().indexOf('timed out') !== -1 || fMsg.toLowerCase().indexOf('connectexception') !== -1)) {
+                    showToast(t('🔄 Model (' + currentModel + ') server was busy; automatically switching to backup model (' + modelQueue[qIdx + 1] + ')...', '🔄 سيرفر النموذج (' + currentModel + ') مشغول حالياً؛ جاري التحويل تلقائياً للنموذج البديل (' + modelQueue[qIdx + 1] + ') دون توقف...'), 'info');
+                    tryModelAtIndex(qIdx + 1).then(resolve).catch(reject);
+                  } else {
+                    reject(new Error(t(
+                      'Kie.ai Generation Failed (' + currentModel + '): ' + fMsg,
+                      'رد سيرفر Kie.ai (' + currentModel + '): ' + fMsg
+                    )));
+                  }
+                } else if (attempts >= maxAttempts) {
+                  clearInterval(pollTimer);
+                  reject(new Error(t('Generation timed out after 10 minutes.', 'تجاوز وقت الريندر 10 دقائق.')));
                 }
-                if (!videoUrl) {
-                  reject(new Error(t('Kie.ai finished task ' + taskId + ' but returned no video URL.', 'انتهت المهمة في Kie.ai ولكن لم يتم العثور على رابط ملف الفيديو.')));
-                } else {
-                  resolve(videoUrl);
+              }).catch(function(pollErr) {
+                if (attempts >= maxAttempts) {
+                  clearInterval(pollTimer);
+                  reject(pollErr);
                 }
-              } else if (st === 'fail' || st === 'failed' || st === 'error') {
-                clearInterval(pollTimer);
-                reject(new Error(t(
-                  'Kie.ai Generation Failed: ' + (d.failMsg || 'Task failed on provider server.'),
-                  'فشل توليد الفيديو في سيرفر Kie.ai: ' + (d.failMsg || 'تأكد من الرصيد أو إعدادات الموديل في Kie.ai.')
-                )));
-              } else if (attempts >= maxAttempts) {
-                clearInterval(pollTimer);
-                reject(new Error(t('Generation timed out after 10 minutes (Task ID: ' + taskId + ').', 'استغرق الريندر أكثر من 10 دقائق (رقم المهمة: ' + taskId + ').')));
-              }
-            }).catch(function(pollErr) {
-              if (attempts >= maxAttempts) {
-                clearInterval(pollTimer);
-                reject(pollErr);
-              }
-            });
-          }, 5000);
+              });
+            }, 5000);
+          });
         });
-      }).then(function(generatedVideoUrl) {
+      }
+
+      tryModelAtIndex(0).then(function(generatedVideoUrl) {
         // Step 3: Download the generated MP4 video blob and upload it to the user's YouTube channel via YouTube Data API v3!
         stepTitle.textContent = t('🚀 Step 3/3: Video Ready! Uploading MP4 to YouTube Channel "' + chName + '"...', '🚀 الخطوة 3/3: اكتمل صناعة الفيديو! جاري رفعه ونشره الآن على قناتك "' + chName + '"...');
         pctEl.textContent = '90%';
