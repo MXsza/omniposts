@@ -1630,8 +1630,8 @@
         <span data-en="— All Rights Reserved © 2026" data-ar="— جميع الحقوق محفوظة © 2026">— All Rights Reserved © 2026</span>
       </div>
       <div class="flex flex-wrap items-center gap-4">
-        <button type="button" onclick="openPolicyTab('terms')" class="hover:text-white transition" data-en="Terms of Use" data-ar="شروط الاستخدام">Terms of Use</button>
-        <button type="button" onclick="openPolicyTab('privacy')" class="hover:text-white transition" data-en="Privacy Policy" data-ar="سياسة الخصوصية">Privacy Policy</button>
+        <a href="https://omniposts.online/?policy=terms" onclick="event.preventDefault(); openPolicyTab('terms')" class="hover:text-white transition" data-en="Terms of Use" data-ar="شروط الاستخدام">Terms of Use</a>
+        <a href="https://omniposts.online/?policy=privacy" onclick="event.preventDefault(); openPolicyTab('privacy')" class="hover:text-white transition" data-en="Privacy Policy" data-ar="سياسة الخصوصية">Privacy Policy</a>
         <button type="button" onclick="openPolicyTab('refund')" class="hover:text-white transition" data-en="Refund Policy" data-ar="سياسة الاسترداد">Refund Policy</button>
         <button type="button" onclick="openPolicyTab('copyright')" class="hover:text-white transition" data-en="Copyright & Media" data-ar="حقوق النشر والموسيقى">Copyright & Media</button>
         <button type="button" onclick="openPolicyTab('ai-policy')" class="hover:text-white transition" data-en="AI Disclosure Policy" data-ar="سياسة الذكاء الاصطناعي">AI Disclosure Policy</button>
@@ -4173,6 +4173,13 @@
       } catch (e) {}
       setLanguage(savedLang);
 
+      if (window.location.search && window.location.search.indexOf('policy=') !== -1) {
+        const qParams = new URLSearchParams(window.location.search);
+        const pol = qParams.get('policy');
+        if (pol === 'privacy' || pol === 'terms') {
+          setTimeout(function() { openPolicyTab(pol); }, 50);
+        }
+      }
       const hasOAuthReturn = Boolean(window.location.hash && window.location.hash.indexOf('access_token=') !== -1);
       const rawHash = hasOAuthReturn ? window.location.hash.substring(1) : '';
 
