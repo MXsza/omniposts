@@ -4274,94 +4274,16 @@
       showToast(t('🗑️ Disconnected and removed YouTube channel "' + oldName + '" from Slot #' + slot + '.', '🗑️ تم حذف وفصل قناة اليوتيوب "' + oldName + '" من القناة رقم ' + slot + ' بنجاح.'), 'info');
     }
 
-    // In-Browser Story Video Synthesizer Fallback (Creates a real playable WebM/MP4 Video Blob with animated visuals & story text in 4s when cloud key is not set or busy)
-    function synthesizeStoryVideoBlobInBrowser(storyTitle, storySummary, activeNiche, isVertical, onProgress) {
-      return new Promise(function(resolve) {
-        try {
-          if (!document.createElement || typeof MediaRecorder === 'undefined') {
-            resolve(new Blob(['OMNIPOSTS_VIDEO'], { type: 'video/mp4' }));
-            return;
-          }
-          const canvas = document.createElement('canvas');
-          canvas.width = isVertical ? 720 : 1280;
-          canvas.height = isVertical ? 1280 : 720;
-          const ctx = canvas.getContext('2d');
-          if (!ctx || typeof canvas.captureStream !== 'function') {
-            resolve(new Blob(['OMNIPOSTS_VIDEO'], { type: 'video/mp4' }));
-            return;
-          }
-          const stream = canvas.captureStream(30);
-          let mimeType = 'video/webm;codecs=vp9';
-          if (typeof MediaRecorder.isTypeSupported === 'function') {
-            if (MediaRecorder.isTypeSupported('video/mp4')) mimeType = 'video/mp4';
-            else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8')) mimeType = 'video/webm;codecs=vp8';
-            else if (MediaRecorder.isTypeSupported('video/webm')) mimeType = 'video/webm';
-          }
-          const chunks = [];
-          const recorder = new MediaRecorder(stream, { mimeType: mimeType });
-          recorder.ondataavailable = function(e) {
-            if (e.data && e.data.size > 0) chunks.push(e.data);
-          };
-          recorder.onstop = function() {
-            resolve(new Blob(chunks, { type: mimeType }));
-          };
-          recorder.start(200);
-
-          let frame = 0;
-          const totalFrames = 90; // 3 seconds at 30fps
-          const drawTimer = setInterval(function() {
-            frame++;
-            const pct = Math.min(85, 35 + Math.round((frame / totalFrames) * 50));
-            if (typeof onProgress === 'function') onProgress(pct);
-
-            // Animated cinematic gradient background
-            const hue1 = (frame * 3) % 360;
-            const hue2 = (hue1 + 70) % 360;
-            const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            grad.addColorStop(0, 'hsl(' + hue1 + ', 75%, 18%)');
-            grad.addColorStop(0.5, '#090d16');
-            grad.addColorStop(1, 'hsl(' + hue2 + ', 80%, 22%)');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Glowing animated orbs
-            for (let i = 0; i < 6; i++) {
-              const angle = (frame * 0.05) + (i * 1.04);
-              const ox = (canvas.width / 2) + Math.cos(angle) * (canvas.width * 0.28);
-              const oy = (canvas.height / 2) + Math.sin(angle * 1.3) * (canvas.height * 0.22);
-              const rad = ctx.createRadialGradient(ox, oy, 5, ox, oy, 140);
-              rad.addColorStop(0, 'hsla(' + ((hue1 + i * 45) % 360) + ', 95%, 60%, 0.45)');
-              rad.addColorStop(1, 'rgba(0,0,0,0)');
-              ctx.fillStyle = rad;
-              ctx.beginPath();
-              ctx.arc(ox, oy, 140, 0, Math.PI * 2);
-              ctx.fill();
-            }
-
-            // Story Title & Niche Badge
-            ctx.fillStyle = '#38bdf8';
-            ctx.font = 'bold 28px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('Omniposts.online • ' + activeNiche, canvas.width / 2, canvas.height * 0.36);
-
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 34px sans-serif';
-            const cleanTitle = String(storyTitle || activeNiche).substring(0, 46);
-            ctx.fillText(cleanTitle, canvas.width / 2, canvas.height * 0.48);
-
-            ctx.fillStyle = '#a7f3d0';
-            ctx.font = '24px sans-serif';
-            const cleanSub = String(storySummary || '').substring(0, 58);
-            ctx.fillText(cleanSub, canvas.width / 2, canvas.height * 0.58);
-
-            if (frame >= totalFrames) {
-              clearInterval(drawTimer);
-              try { recorder.stop(); } catch (e) { resolve(new Blob(chunks, { type: mimeType })); }
-            }
-          }, 35);
-        } catch (err) {
-          resolve(new Blob(['OMNIPOSTS_VIDEO'], { type: 'video/mp4' }));
-        }
+    function ensureMasterKeyLoaded() {
+      const u = appState.currentUser || {};
+      const existingKey = (platformMasterEngine.apiKey && platformMasterEngine.apiKey.length >= 20)
+        ? platformMasterEngine.apiKey.trim()
+        : ((u.aiApiKey && u.aiApiKey.length >= 20) ? u.aiApiKey.trim() : '');
+      if (existingKey) return Promise.resolve(existingKey);
+      return loadPlatformMasterEngineFromSupabase().then(function() {
+        return (platformMasterEngine.apiKey && platformMasterEngine.apiKey.length >= 20)
+          ? platformMasterEngine.apiKey.trim()
+          : '';
       });
     }
 
@@ -4382,7 +4304,7 @@
         return;
       }
       if (!isOwner && curCredits < requiredCredits) {
-        showToast(t('⚠️ Insufficient Credits! This video requires ' + requiredCredits + ' Credits, while your balance is ' + curCredits + ' Credits. Choose a shorter duration/lower resolution or top up your credits!', '⚠️ رصيد الكريدت غير كافٍ! هذا الفيديو يحتاج ' + requiredCredits + ' كريدت، بينما رصيدك الحالي ' + curCredits + ' كريدت. اختر مدة/دقة أقل أو اشحن رصيدك!'), 'warn');
+        showToast(t('⚠️ Insufficient Credits! This video requires ' + requiredCredits + ' Credits, while your balance is ' + curCredits + ' Credits.', '⚠️ رصيد الكريدت غير كافٍ! هذا الفيديو يحتاج ' + requiredCredits + ' كريدت، بينما رصيدك الحالي ' + curCredits + ' كريدت.'), 'warn');
         return;
       }
       if (!ch || !ch.connected) {
@@ -4396,9 +4318,6 @@
       const durLabel = formatDurationLabel(durSec);
       const isVertical = String(ch.orientation || '').indexOf('9:16') !== -1;
       const aspectRatioStr = isVertical ? '9:16' : '16:9';
-      const activeMasterKey = (platformMasterEngine.apiKey && platformMasterEngine.apiKey.length >= 20)
-        ? platformMasterEngine.apiKey.trim()
-        : ((u.aiApiKey && u.aiApiKey.length >= 20) ? u.aiApiKey.trim() : '');
       const modelQueue = resolveKieModelQueue(selectedModel);
       if (!Array.isArray(ch.storyHistory)) ch.storyHistory = [];
 
@@ -4425,6 +4344,7 @@
         'جاري فحص ذاكرة قصص القناة (' + ch.storyHistory.length + ' حلقة سابقة) لتأليف حلقة جديدة كلياً بشخصيات وأحداث غير مكررة...'
       );
 
+      let activeMasterKey = '';
       let seoTitle = '';
       let seoDesc = '';
       let engineeredPrompt = '';
@@ -4446,28 +4366,9 @@
       }
 
       function tryModelAtIndex(qIdx) {
-        if (!activeMasterKey) {
-          // Synthesize directly in browser so demo recording & instant publishing work even before Master API Key is added!
-          deductUserCreditsOnce();
-          stepTitle.textContent = t(
-            '🎬 Step 2/4: Rendering Story Video in Omniposts Cloud Studio...',
-            '🎬 الخطوة 2/4: جاري صناعة وريندر فيديو القصة في استوديو المنصة السحابي...'
-          );
-          return synthesizeStoryVideoBlobInBrowser(seoTitle, storySummaryText, activeNiche, isVertical, function(p) {
-            pctEl.textContent = p + '%';
-            barEl.style.width = p + '%';
-            detailEl.textContent = t(
-              'Rendering HD video frames & audio | Story: ' + storySummaryText,
-              'جاري ريندر مشاهد الفيديو والصوت | القصة: ' + storySummaryText
-            );
-          }).then(function(blob) {
-            return { isDirectBlob: true, blob: blob };
-          });
-        }
-
         const currentModel = modelQueue[qIdx];
         stepTitle.textContent = t(
-          '⏳ Step 2/4: Dispatching Story to Omniposts AI Render Cloud (' + currentModel + ')...',
+          '⏳ Step 2/4: Dispatching Story to AI Render Cloud (' + currentModel + ')...',
           '⏳ الخطوة 2/4: جاري إرسال القصة والبرومبت إلى سيرفر الريندر السحابي (' + currentModel + ')...'
         );
         pctEl.textContent = '22%';
@@ -4490,26 +4391,25 @@
           return r.json().catch(function() { return { code: r.status, msg: 'HTTP ' + r.status }; });
         }).then(function(resJson) {
           if (!resJson || resJson.code !== 200 || !resJson.data || !resJson.data.taskId) {
-            const errMsg = (resJson && (resJson.msg || resJson.message)) || 'Rejected by render node';
+            const errMsg = (resJson && (resJson.msg || resJson.message)) || 'Rejected by cloud render engine';
             const errCode = (resJson && resJson.code) || 400;
-            if (qIdx + 1 < modelQueue.length && errCode !== 401 && errCode !== 402) {
+            if (errCode === 401 || errCode === 402 || String(errMsg).toLowerCase().indexOf('credit') !== -1 || String(errMsg).toLowerCase().indexOf('balance') !== -1 || String(errMsg).toLowerCase().indexOf('insufficient') !== -1) {
+              throw new Error(t(
+                'Cloud Engine Balance Alert (' + errCode + '): ' + errMsg + ' — No credits were deducted from your wallet.',
+                'تنبيه رصيد محرك الريندر السحابي (كود ' + errCode + '): ' + errMsg + ' — (لم يتم خصم أي كريدت من محفظتك).'
+              ));
+            }
+            if (qIdx + 1 < modelQueue.length) {
               return tryModelAtIndex(qIdx + 1);
             }
-            // Fallback to built-in synthesizer if upstream node is unavailable so publishing never blocks
-            deductUserCreditsOnce();
-            return synthesizeStoryVideoBlobInBrowser(seoTitle, storySummaryText, activeNiche, isVertical, function(p) {
-              pctEl.textContent = p + '%';
-              barEl.style.width = p + '%';
-            }).then(function(blob) {
-              return { isDirectBlob: true, blob: blob };
-            });
+            throw new Error(t('Cloud Render Error (' + errCode + '): ' + errMsg, 'خطأ من سيرفر الريندر (' + errCode + '): ' + errMsg));
           }
 
           deductUserCreditsOnce();
           const taskId = resJson.data.taskId;
           stepTitle.textContent = t(
-            '🎬 Step 3/4: Rendering Story Video (' + currentModel + ' — Task: ' + taskId + ')...',
-            '🎬 الخطوة 3/4: جاري صناعة وريندر فيديو القصة (' + currentModel + ' — مهمة رقم: ' + taskId + ')...'
+            '🎬 Step 3/4: Rendering AI Video (' + currentModel + ' — Task: ' + taskId + ')...',
+            '🎬 الخطوة 3/4: جاري صناعة وريندر الفيديو بالذكاء الاصطناعي (' + currentModel + ' — مهمة رقم: ' + taskId + ')...'
           );
           pctEl.textContent = '35%';
           barEl.style.width = '35%';
@@ -4557,12 +4457,13 @@
                   if (!videoUrl) {
                     reject(new Error(t('Task completed but no video URL was returned.', 'اكتملت المهمة ولكن لم يرجع رابط الفيديو.')));
                   } else {
-                    resolve({ isDirectBlob: false, url: videoUrl });
+                    resolve(videoUrl);
                   }
                 } else if (st === 'fail' || st === 'failed' || st === 'error') {
                   clearInterval(pollTimer);
                   const fMsg = String(d.failMsg || 'Task failed on upstream model.');
-                  if (qIdx + 1 < modelQueue.length) {
+                  if (qIdx + 1 < modelQueue.length && (fMsg.toLowerCase().indexOf('timeout') !== -1 || fMsg.toLowerCase().indexOf('timed out') !== -1 || fMsg.toLowerCase().indexOf('connectexception') !== -1)) {
+                    showToast(t('🔄 Switching to backup render node (' + modelQueue[qIdx + 1] + ')...', '🔄 جاري التحويل تلقائياً للنموذج البديل (' + modelQueue[qIdx + 1] + ')...'), 'info');
                     tryModelAtIndex(qIdx + 1).then(resolve).catch(reject);
                   } else {
                     reject(new Error(t('Render Failed: ' + fMsg, 'توقف الريندر: ' + fMsg)));
@@ -4582,7 +4483,16 @@
         });
       }
 
-      createUniqueStoryAndPromptViaKie(activeMasterKey, activeNiche, ch.language, aspectRatioStr, durSec, ch.storyHistory).then(function(storyPack) {
+      ensureMasterKeyLoaded().then(function(loadedKey) {
+        activeMasterKey = loadedKey;
+        if (!activeMasterKey) {
+          throw new Error(t(
+            'Central Platform Master Key is not saved yet! Open the Owner Admin Panel (👑) and paste your Master API Key in the green box.',
+            'لم يتم حفظ المفتاح المركزي للمنصة بعد! افتح (👑 لوحة تحكم الأدمن) والصق مفتاح التوليد الرئيسي في البطاقة الخضراء واضغط حفظ.'
+          ));
+        }
+        return createUniqueStoryAndPromptViaKie(activeMasterKey, activeNiche, ch.language, aspectRatioStr, durSec, ch.storyHistory);
+      }).then(function(storyPack) {
         seoTitle = storyPack.seoTitle;
         seoDesc = storyPack.seoDesc;
         engineeredPrompt = storyPack.engineeredPrompt;
@@ -4603,23 +4513,19 @@
         }
 
         return tryModelAtIndex(0);
-      }).then(function(renderOut) {
-        stepTitle.textContent = t('🚀 Step 4/4: Video Ready! Uploading to YouTube Channel "' + chName + '"...', '🚀 الخطوة 4/4: اكتمل صناعة الفيديو! جاري رفعه ونشره الآن على قناتك "' + chName + '"...');
+      }).then(function(generatedVideoUrl) {
+        stepTitle.textContent = t('🚀 Step 4/4: Video Ready! Uploading MP4 to YouTube Channel "' + chName + '"...', '🚀 الخطوة 4/4: اكتمل صناعة الفيديو! جاري رفعه ونشره الآن على قناتك "' + chName + '"...');
         pctEl.textContent = '90%';
         barEl.style.width = '90%';
         detailEl.textContent = t(
-          'Uploading generated video to YouTube Data API v3 (youtube.upload scope)...',
-          'جاري رفع الفيديو مباشرة إلى قناتك في يوتيوب عبر YouTube Data API v3...'
+          'Downloading generated MP4 from Omniposts Cloud and uploading to YouTube Data API v3...',
+          'جاري سحب ملف الفيديو MP4 من السيرفر السحابي للمنصة ورفعه مباشرة إلى يوتيوب عبر YouTube Data API v3...'
         );
 
-        const blobPromise = (renderOut && renderOut.isDirectBlob && renderOut.blob)
-          ? Promise.resolve(renderOut.blob)
-          : window.fetch(renderOut.url).then(function(vRes) {
-              if (!vRes.ok) throw new Error(t('Could not fetch generated video file from CDN.', 'تعذر تحميل ملف الفيديو المولد من السيرفر السحابي.'));
-              return vRes.blob();
-            });
-
-        return blobPromise.then(function(videoBlob) {
+        return window.fetch(generatedVideoUrl).then(function(vRes) {
+          if (!vRes.ok) throw new Error(t('Could not fetch generated MP4 file from CDN.', 'تعذر تحميل ملف الفيديو المولد من السيرفر السحابي.'));
+          return vRes.blob();
+        }).then(function(videoBlob) {
           return uploadVideoBlobToYouTube(
             videoBlob,
             seoTitle,
