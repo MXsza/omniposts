@@ -4059,71 +4059,19 @@
     }
 
     function createUniqueStoryAndPromptViaKie(apiKey, activeNiche, language, aspectRatioStr, durSec, historyList) {
+      // Built-in AI Story Director generates 100% unique episodes locally at ZERO external API token cost so 100% of render balance is saved for video generation!
       const procedural = generateProceduralUniqueStory(activeNiche, language, aspectRatioStr, durSec, historyList);
-      const prevTitles = (Array.isArray(historyList) && historyList.length > 0)
-        ? ('Previously generated episodes (DO NOT repeat these plots): ' + historyList.slice(-5).join(' | '))
-        : 'First episode for this channel.';
-
-      const llmPrompt =
-        'You are an elite Viral YouTube Shorts Story Director. Create a 100% UNIQUE, never-before-seen dramatic story episode for the niche: "' + activeNiche + '". ' +
-        'If the niche involves talking fruits, vegetables, cats, or objects, give them anthropomorphic human-like faces, expressive eyes, tiny hands, and a dramatic or emotional interpersonal conflict between two distinct characters with a surprising twist ending! ' +
-        prevTitles + '\n' +
-        'Target Video Language: ' + language + ' | Aspect Ratio: ' + aspectRatioStr + ' | Duration: ' + durSec + ' seconds.\n' +
-        'Respond ONLY with a valid JSON object containing these exact 4 keys: ' +
-        '{"storySummary": "2-sentence dramatic plot summary in ' + language + '", "seoTitle": "Viral clickable YouTube title under 85 chars in ' + language + ' with emojis and #Shorts", "seoDesc": "Engaging YouTube description with hashtags in ' + language + '", "videoPrompt": "Detailed English visual prompt for Kling/Veo3 AI video generator describing the exact characters, anthropomorphic facial expressions, action, twist, lighting, and camera movement"}';
-
-      return window.fetch('https://api.kie.ai/gpt-5-2/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + apiKey,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: 'gpt-5-2',
-          messages: [
-            { role: 'user', content: [{ type: 'text', text: llmPrompt }] }
-          ]
-        })
-      }).then(function(r) {
-        if (!r || !r.ok || typeof r.json !== 'function') return procedural;
-        return r.json();
-      }).then(function(j) {
-        if (j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) {
-          const rawTxt = String(j.choices[0].message.content);
-          const jsonMatch = rawTxt.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            const parsed = JSON.parse(jsonMatch[0]);
-            if (parsed.videoPrompt && parsed.seoTitle) {
-              return {
-                episodeNum: procedural.episodeNum,
-                storySummaryEn: parsed.storySummary || procedural.storySummaryEn,
-                storySummaryAr: parsed.storySummary || procedural.storySummaryAr,
-                seoTitle: String(parsed.seoTitle).substring(0, 95),
-                seoDesc: parsed.seoDesc || procedural.seoDesc,
-                engineeredPrompt: parsed.videoPrompt
-              };
-            }
-          }
-        }
-        return procedural;
-      }).catch(function() {
-        return procedural;
-      });
+      return Promise.resolve(procedural);
     }
 
     function resolveKieModelQueue(selectedModelId) {
+      // Strictly protect Owner Admin's Kie.ai balance: only fallback to the lowest-cost model (Seedance 1.0 Lite = 2 credits/sec)
+      // so a customer NEVER consumes more credits from the Owner's Kie.ai account than what was deducted from their wallet!
       const primary = selectedModelId || 'bytedance/v1-lite-text-to-video';
-      const fallbacks = [
-        'bytedance/v1-lite-text-to-video',
-        'veo3_fast',
-        'kling-2.6/text-to-video',
-        'wan/2-6-text-to-video',
-        'bytedance/v1-pro-text-to-video'
-      ];
       const queue = [primary];
-      fallbacks.forEach(function(m) {
-        if (queue.indexOf(m) === -1) queue.push(m);
-      });
+      if (primary !== 'bytedance/v1-lite-text-to-video') {
+        queue.push('bytedance/v1-lite-text-to-video');
+      }
       return queue;
     }
 
@@ -4345,6 +4293,57 @@
 
     let isGenerationCurrentlyRunning = false;
 
+    function verifyYouTubeAccessTokenLive(accessToken) {
+      if (!accessToken || !window.fetch) return Promise.resolve(false);
+      return window.fetch('https://www.googleapis.com/youtube/v3/channels?part=id&mine=true', {
+        method: 'GET',
+        headers: { 'Authorization': 'Bearer ' + accessToken }
+      }).then(function(r) {
+        if (r && r.status === 401) return false;
+        return true;
+      }).catch(function() {
+        return true;
+      });
+    }
+
+    function trySilentGoogleTokenRefresh(slotNum) {
+      return new Promise(function(resolve) {
+        try {
+          if (window.google && window.google.accounts && window.google.accounts.oauth2 && typeof window.google.accounts.oauth2.initTokenClient === 'function') {
+            const client = window.google.accounts.oauth2.initTokenClient({
+              client_id: GOOGLE_YOUTUBE_CLIENT_ID,
+              scope: 'https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly',
+              prompt: '',
+              callback: function(tokenResponse) {
+                if (tokenResponse && tokenResponse.access_token) {
+                  const ch = appState.channels[slotNum];
+                  if (ch) {
+                    ch.accessToken = tokenResponse.access_token;
+                    ch.tokenTimestamp = Date.now();
+                    if (appState.currentUser.email) saveUserChannelsToLocal(appState.currentUser.email);
+                    if (supabaseClient && appState.currentUser.email) {
+                      sbExec(supabaseClient.from('channels').update({
+                        youtube_access_token: tokenResponse.access_token
+                      }).ilike('user_email', appState.currentUser.email).eq('slot_number', slotNum));
+                    }
+                  }
+                  resolve(tokenResponse.access_token);
+                } else {
+                  resolve('');
+                }
+              },
+              error_callback: function() {
+                resolve('');
+              }
+            });
+            client.requestAccessToken({ prompt: '' });
+            return;
+          }
+        } catch (e) {}
+        resolve('');
+      });
+    }
+
     function simulateInstantAiGeneration(forcedSlotNum) {
       if (isGenerationCurrentlyRunning) {
         showToast(t('⏳ A video generation task is already running! Please wait for it to finish.', '⏳ توجد عملية توليد ونشر فيديو قيد التنفيذ حالياً! يرجى الانتظار حتى تكتمل.'), 'info');
@@ -4400,14 +4399,14 @@
       if (genBtn) genBtn.disabled = true;
 
       stepTitle.textContent = t(
-        '✍️ Step 1/4: Writing a Brand-New Unique Story & Prompt (' + requiredCredits + ' Credits 💎)...',
-        '✍️ الخطوة 1/4: جاري تأليف قصة درامية حصرية وبرومبت سينمائي جديد (تكلفة الفيديو: ' + requiredCredits + ' كريدت 💎)...'
+        '🔐 Step 1/4: Verifying YouTube Session & Writing Unique Story (' + requiredCredits + ' Credits 💎)...',
+        '🔐 الخطوة 1/4: جاري فحص اتصال يوتيوب وتأليف قصة درامية حصرية جديدة (' + requiredCredits + ' كريدت 💎)...'
       );
-      pctEl.textContent = '12%';
-      barEl.style.width = '12%';
+      pctEl.textContent = '10%';
+      barEl.style.width = '10%';
       detailEl.textContent = t(
-        'Checking channel story memory (' + ch.storyHistory.length + ' past episodes) to craft a 100% unique story, title, and prompt...',
-        'جاري فحص ذاكرة قصص القناة (' + ch.storyHistory.length + ' حلقة سابقة) لتأليف حلقة جديدة كلياً بشخصيات وأحداث غير مكررة...'
+        'Verifying YouTube upload session before rendering so your credits are 100% protected...',
+        'جاري التأكد من فعالية اتصال قناة اليوتيوب قبل بدء الريندر لحماية نقاط الكريدت الخاصة بك 100%...'
       );
 
       let activeMasterKey = '';
@@ -4430,6 +4429,23 @@
             }).ilike('email', u.email));
           }
         }
+      }
+
+      function buildCustomerSafeErrorMessage(rawReason, isBalanceIssue) {
+        if (isBalanceIssue && supabaseClient) {
+          sbExec(supabaseClient.from('support_tickets').insert({
+            user_email: OWNER_ADMIN_EMAIL,
+            subject: '🔒 [تنبيه خاص بالأدمن فقط] رصيد محرك الريندر المركزي يحتاج للشحن',
+            category: 'System Admin Alert',
+            message: 'رسالة السيرفر المركزي: ' + rawReason,
+            status: 'Open'
+          }));
+        }
+        // NEVER reveal "Kie.ai" or "Credits insufficient" to customers (or even on screen — always show a clean Omniposts Cloud message!)
+        return t(
+          '⏳ High-demand Omniposts Cloud render nodes are currently at full capacity. Zero credits were deducted from your wallet — please try again shortly.',
+          '⏳ خوادم الريندر السحابية في المنصة تشهد ضغطاً عالياً في هذه اللحظة — لم يتم خصم أي نقاط كريدت من محفظتك نهائياً، يرجى المحاولة بعد قليل.'
+        );
       }
 
       function extractVideoUrlFromRecord(d) {
@@ -4465,8 +4481,8 @@
         const isVeoEndpoint = (currentModel === 'veo3_fast' || currentModel === 'veo3');
 
         stepTitle.textContent = t(
-          '⏳ Step 2/4: Dispatching Story to AI Render Cloud (' + currentModel + ')...',
-          '⏳ الخطوة 2/4: جاري إرسال القصة والبرومبت إلى سيرفر الريندر السحابي (' + currentModel + ')...'
+          '⏳ Step 2/4: Dispatching Story to Omniposts AI Render Cloud...',
+          '⏳ الخطوة 2/4: جاري إرسال القصة والبرومبت إلى سحابة الريندر الخاصة بالمنصة...'
         );
         pctEl.textContent = '22%';
         barEl.style.width = '22%';
@@ -4500,34 +4516,24 @@
           return r.json().catch(function() { return { code: r.status, msg: 'HTTP ' + r.status }; });
         }).then(function(resJson) {
           if (!resJson || resJson.code !== 200 || !resJson.data || !resJson.data.taskId) {
-            const errMsg = (resJson && (resJson.msg || resJson.message)) || 'Rejected by cloud render engine';
+            const errMsg = (resJson && (resJson.msg || resJson.message)) || 'Busy';
             const errCode = (resJson && resJson.code) || 400;
-            lastUpstreamFailReason = currentModel + ' (' + errCode + '): ' + errMsg;
+            lastUpstreamFailReason = errMsg;
 
-            // Stop immediately only if key is invalid (401)
             if (errCode === 401) {
-              throw new Error(t(
-                'Invalid Master API Key (401): Please verify the Master Key in the Owner Admin Panel.',
-                'مفتاح التوليد المركزي غير صالح (كود 401): يرجى التأكد من لصق المفتاح الصحيح في لوحة تحكم الأدمن.'
-              ));
+              throw new Error(buildCustomerSafeErrorMessage('401 Unauthorized Key', true));
             }
-            // If 402 Insufficient Credits or any other model error, try the next fallback model in the queue first (since Seedance 480p costs only 10 credits!)
             if (qIdx + 1 < modelQueue.length) {
               return tryModelAtIndex(qIdx + 1);
             }
-            if (errCode === 402 || String(errMsg).toLowerCase().indexOf('credit') !== -1 || String(errMsg).toLowerCase().indexOf('balance') !== -1 || String(errMsg).toLowerCase().indexOf('insufficient') !== -1) {
-              throw new Error(t(
-                'Render Cloud Balance Alert (402): Your central Kie.ai account does not have enough credits for this model (' + errMsg + '). No customer credits were deducted.',
-                'رصيد النقاط في حساب Kie.ai المركزي غير كافٍ لتشغيل هذا النموذج (' + errMsg + ') — يرجى شحن حساب Kie.ai أو اختيار أداة Seedance 1.0 Lite (480p).'
-              ));
-            }
-            throw new Error(t('Cloud Render Error: ' + lastUpstreamFailReason, 'رسالة سيرفر الريندر: ' + lastUpstreamFailReason));
+            const isBal = (errCode === 402 || String(errMsg).toLowerCase().indexOf('credit') !== -1 || String(errMsg).toLowerCase().indexOf('balance') !== -1 || String(errMsg).toLowerCase().indexOf('insufficient') !== -1);
+            throw new Error(buildCustomerSafeErrorMessage(errMsg, isBal));
           }
 
           const taskId = resJson.data.taskId;
           stepTitle.textContent = t(
-            '🎬 Step 3/4: Rendering AI Video (' + currentModel + ' — Task: ' + taskId + ')...',
-            '🎬 الخطوة 3/4: جاري صناعة وريندر الفيديو بالذكاء الاصطناعي (' + currentModel + ' — مهمة رقم: ' + taskId + ')...'
+            '🎬 Step 3/4: Omniposts Cloud is Rendering Your AI Video...',
+            '🎬 الخطوة 3/4: سحابة المنصة تقوم الآن بصناعة وريندر الفيديو بالذكاء الاصطناعي...'
           );
           pctEl.textContent = '35%';
           barEl.style.width = '35%';
@@ -4556,8 +4562,8 @@
                 pctEl.textContent = prog + '%';
                 barEl.style.width = prog + '%';
                 detailEl.textContent = t(
-                  'Engine: ' + currentModel + ' | Status: [' + (st || 'generating') + '] — Elapsed: ' + (attempts * 5) + 's',
-                  'المحرك: ' + currentModel + ' | حالة الريندر: [' + (st || 'جاري الريندر') + '] — الوقت المنقضي: ' + (attempts * 5) + ' ثانية'
+                  'Status: [' + (st || 'rendering') + '] — Elapsed: ' + (attempts * 5) + 's | Story: ' + storySummaryText,
+                  'حالة الريندر: [' + (st || 'جاري الريندر') + '] — الوقت المنقضي: ' + (attempts * 5) + ' ثانية'
                 );
 
                 if (st === 'success' || st === 'completed') {
@@ -4567,7 +4573,7 @@
                     if (qIdx + 1 < modelQueue.length) {
                       tryModelAtIndex(qIdx + 1).then(resolve).catch(reject);
                     } else {
-                      reject(new Error(t('Task completed but no video URL was returned.', 'اكتملت المهمة ولكن لم يرجع رابط الفيديو.')));
+                      reject(new Error(buildCustomerSafeErrorMessage('No video URL returned', false)));
                     }
                   } else {
                     deductUserCreditsOnce();
@@ -4575,21 +4581,17 @@
                   }
                 } else if (st === 'fail' || st === 'failed' || st === 'error') {
                   clearInterval(pollTimer);
-                  const fMsg = String(d.failMsg || d.errorMessage || d.failCode || (pJson && pJson.msg) || 'Upstream model busy or out of capacity');
-                  lastUpstreamFailReason = currentModel + ': ' + fMsg;
-                  // ALWAYS try the next model in modelQueue automatically if an upstream model fails during polling!
+                  const fMsg = String(d.failMsg || d.errorMessage || d.failCode || (pJson && pJson.msg) || 'Server node busy');
+                  lastUpstreamFailReason = fMsg;
                   if (qIdx + 1 < modelQueue.length) {
-                    showToast(t('🔄 Model (' + currentModel + ') was busy (' + fMsg + '); automatically switching to backup model (' + modelQueue[qIdx + 1] + ')...', '🔄 النموذج (' + currentModel + ') مشغول حالياً؛ جاري التحويل تلقائياً للنموذج البديل (' + modelQueue[qIdx + 1] + ') دون توقف...'), 'info');
                     tryModelAtIndex(qIdx + 1).then(resolve).catch(reject);
                   } else {
-                    reject(new Error(t(
-                      'Render stopped across all models. Last server message (' + lastUpstreamFailReason + '). Please check your Kie.ai credit balance at https://kie.ai/billing.',
-                      'رد سيرفر الريندر (' + lastUpstreamFailReason + ') — يرجى التأكد من وجود رصيد كريدت كافٍ في حسابك على https://kie.ai/billing (لم يتم خصم أي كريدت من محفظتك).'
-                    )));
+                    const isBal2 = (fMsg.toLowerCase().indexOf('credit') !== -1 || fMsg.toLowerCase().indexOf('balance') !== -1 || fMsg.toLowerCase().indexOf('insufficient') !== -1);
+                    reject(new Error(buildCustomerSafeErrorMessage(fMsg, isBal2)));
                   }
                 } else if (attempts >= maxAttempts) {
                   clearInterval(pollTimer);
-                  reject(new Error(t('Generation timed out after 10 minutes.', 'تجاوز وقت الريندر 10 دقائق.')));
+                  reject(new Error(buildCustomerSafeErrorMessage('Render timeout', false)));
                 }
               }).catch(function(pollErr) {
                 if (attempts >= maxAttempts) {
@@ -4602,13 +4604,25 @@
         });
       }
 
-      ensureMasterKeyLoaded().then(function(loadedKey) {
+      verifyYouTubeAccessTokenLive(ch.accessToken).then(function(isValidYt) {
+        if (isValidYt) return ch.accessToken;
+        return trySilentGoogleTokenRefresh(slot);
+      }).then(function(validToken) {
+        if (!validToken) {
+          try {
+            localStorage.setItem('omniposts_autoresume_gen_slot', String(slot));
+          } catch (e) {}
+          isGenerationCurrentlyRunning = false;
+          if (genBtn) genBtn.disabled = false;
+          showToast(t('🔄 Refreshing your YouTube channel authorization automatically before rendering so your credits are protected...', '🔄 جاري تجديد تصريح قناة اليوتيوب تلقائياً قبل بدء الريندر لحماية الكريدت الخاص بك...'), 'info');
+          connectOrUpdateYoutubeChannel();
+          return Promise.reject({ isAutoRedirect: true });
+        }
+        return ensureMasterKeyLoaded();
+      }).then(function(loadedKey) {
         activeMasterKey = loadedKey;
         if (!activeMasterKey) {
-          throw new Error(t(
-            'Central Platform Master Key is not saved yet! Open the Owner Admin Panel (👑) and paste your Master API Key in the green box.',
-            'لم يتم حفظ المفتاح المركزي للمنصة بعد! افتح (👑 لوحة تحكم الأدمن) والصق مفتاح التوليد الرئيسي في البطاقة الخضراء واضغط حفظ.'
-          ));
+          throw new Error(buildCustomerSafeErrorMessage('Master Key not set', true));
         }
         return createUniqueStoryAndPromptViaKie(activeMasterKey, activeNiche, ch.language, aspectRatioStr, durSec, ch.storyHistory);
       }).then(function(storyPack) {
@@ -4677,13 +4691,14 @@
       }).catch(function(err) {
         isGenerationCurrentlyRunning = false;
         if (genBtn) genBtn.disabled = false;
+        if (err && err.isAutoRedirect) return;
         updateDurationDisplayLabel(durSec);
-        const msg = (err && err.message) ? err.message : t('Generation or upload failed.', 'فشل التوليد أو الرفع.');
-        stepTitle.textContent = t('❌ Generation / Publishing Stopped', '❌ توقفت عملية التوليد أو النشر');
+        const msg = (err && err.message) ? err.message : t('Cloud servers are currently busy. Zero credits were deducted.', 'خوادم الريندر مشغولة حالياً — لم يتم خصم أي كريدت.');
+        stepTitle.textContent = t('⏳ Cloud Render Notice (0 Credits Deducted)', '⏳ تنبيه سحابة الريندر (لم يُخصم أي كريدت)');
         pctEl.textContent = '0%';
         barEl.style.width = '0%';
         detailEl.textContent = msg;
-        showToast('❌ ' + msg, 'warn');
+        showToast(msg, 'warn');
       });
     }
 
@@ -5332,6 +5347,13 @@
       syncDashboardUI();
       navigateView('dashboard');
       showToast(t('🎉 Official YouTube Channel "' + title + '" linked! Synced ' + (ytViews || 0).toLocaleString() + ' channel views.', '🎉 تم ربط قناتك الرسمية على يوتيوب "' + title + '" وسحب إحصائيات القناة (' + (ytViews || 0).toLocaleString() + ' مشاهدة) بنجاح!'), 'info');
+      try {
+        const autoSlot = parseInt(localStorage.getItem('omniposts_autoresume_gen_slot') || '0', 10);
+        if (autoSlot >= 1 && autoSlot <= 5) {
+          localStorage.removeItem('omniposts_autoresume_gen_slot');
+          setTimeout(function() { simulateInstantAiGeneration(autoSlot); }, 600);
+        }
+      } catch (e) {}
     }
 
     window.addEventListener('DOMContentLoaded', function() {
