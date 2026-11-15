@@ -963,7 +963,14 @@
                   <span>⏰</span>
                   <span data-en="6. Automated Daily Publish Time Slots (Dynamically adjusts to 1–5 daily videos):" data-ar="6. مواعيد النشر اليومية الأوتوماتيكية (تتغير تلقائياً حسب عدد الفيديوهات المختار):">6. Automated Daily Publish Time Slots (Dynamically adjusts to 1–5 daily videos):</span>
                 </h4>
-                <span id="slots-count-badge" class="text-xs px-2.5 py-0.5 rounded-full bg-blue-600/30 text-blue-300 font-semibold">3 Active Daily Slots</span>
+                <div class="flex flex-wrap items-center gap-2">
+                  <button type="button" onclick="setFirstSlotToNextMinuteForTest()" class="px-3 py-1 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 text-[11px] font-bold transition" data-en="⚡ Set Slot #1 to +1 Min (Test Auto-Publish)" data-ar="⚡ ضبط الموعد #1 بعد دقيقة واحدة (لتجربة النشر التلقائي الآن)">⚡ ضبط الموعد #1 بعد دقيقة واحدة (لتجربة النشر التلقائي الآن)</button>
+                  <span id="slots-count-badge" class="text-xs px-2.5 py-0.5 rounded-full bg-blue-600/30 text-blue-300 font-semibold">3 Active Daily Slots</span>
+                </div>
+              </div>
+              <div id="live-scheduler-daemon-bar" class="mb-3 px-3.5 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex flex-wrap items-center justify-between gap-2 text-xs text-emerald-300 font-semibold">
+                <span id="live-scheduler-status-text" data-en="🟢 Auto-Publish Scheduler Active — Checking your scheduled times every 10 seconds..." data-ar="🟢 محرك النشر التلقائي بالمواعيد نشط الآن — يفحص مواعيد قنواتك كل 10 ثوانٍ ويولد وينشر تلقائياً...">🟢 محرك النشر التلقائي بالمواعيد نشط الآن — يفحص مواعيد قنواتك كل 10 ثوانٍ ويولد وينشر تلقائياً...</span>
+                <span id="live-scheduler-clock-now" class="font-mono text-white bg-black/50 px-2.5 py-0.5 rounded-lg border border-white/10" dir="ltr">--:--:--</span>
               </div>
               <p class="text-xs text-zinc-400 mb-4" data-en="At each scheduled time below, Omniposts.online automatically dispatches your channel settings to your AI tool API to generate the prompt, video, title, and description, and uploads it straight to your YouTube channel:" data-ar="في كل موعد من المواعيد التالية، ترسل المنصة الإعدادات أوتوماتيكياً إلى أداة الذكاء الاصطناعي لتوليد البرومبت والفيديو والعنوان والوصف ورفعه فوراً على القناة:">
                 At each scheduled time below, Omniposts.online automatically dispatches your channel settings to your AI tool API to generate the prompt, video, title, and description, and uploads it straight to your YouTube channel:
@@ -3039,8 +3046,12 @@
         const crMeta = decodeUserCreditsMeta(savedProv, isSubscribed);
         appState.currentUser.credits = isOwner ? 999999 : crMeta.credits;
         appState.currentUser.claimedRewardTier = crMeta.rewardTier;
+        const decodedLoginKey = decodeCombinedMasterKeyField(savedKey);
+        if (isOwner && decodedLoginKey.kieKey) {
+          platformMasterEngine.apiKey = decodedLoginKey.kieKey;
+        }
         appState.currentUser.aiProvider = savedProv;
-        appState.currentUser.aiApiKey = savedKey;
+        appState.currentUser.aiApiKey = decodedLoginKey.kieKey || savedKey;
         appState.currentUser.aiApiKeyVerified = true;
         appState.isLoggedIn = true;
 
@@ -3730,9 +3741,8 @@
           hourOptions += '<option value="' + h + '"' + sel + '>' + dispH + '</option>';
         }
 
-        const minuteSteps = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
-        if (minuteSteps.indexOf(parsed.m) === -1) minuteSteps.push(parsed.m);
-        minuteSteps.sort(function(a, b) { return a - b; });
+        const minuteSteps = [];
+        for (let mStep = 0; mStep < 60; mStep++) { minuteSteps.push(mStep); }
         let minOptions = '';
         for (let mIdx = 0; mIdx < minuteSteps.length; mIdx++) {
           const mVal = minuteSteps[mIdx];
@@ -3780,6 +3790,7 @@
           appState.channels[appState.selectedChannelSlot].timeSlots[i] = new24;
           previewBadge.textContent = formatLocalizedClock(new24);
           updateLiveAiPreviewText();
+          saveCurrentChannelConfig(false);
         }
 
         hSelect.addEventListener('change', onClockChange);
@@ -4102,7 +4113,13 @@
 
     function resolveKieModelQueue(selectedModelId) {
       const primary = selectedModelId || 'bytedance/v1-lite-text-to-video';
-      const fallbacks = ['bytedance/v1-lite-text-to-video', 'kling-2.6/text-to-video', 'wan/2-6-text-to-video'];
+      const fallbacks = [
+        'bytedance/v1-lite-text-to-video',
+        'veo3_fast',
+        'kling-2.6/text-to-video',
+        'wan/2-6-text-to-video',
+        'bytedance/v1-pro-text-to-video'
+      ];
       const queue = [primary];
       fallbacks.forEach(function(m) {
         if (queue.indexOf(m) === -1) queue.push(m);
@@ -4110,55 +4127,92 @@
       return queue;
     }
 
+    function sanitizeKiePrompt(rawPrompt) {
+      return String(rawPrompt || 'Cinematic 3D Pixar style animated story scene with expressive characters and dramatic lighting')
+        .replace(/[#*`~<>\[\]{}|\\]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .substring(0, 480);
+    }
+
     function buildKieModelPayload(modelId, promptText, aspectRatioStr, durSec, resolutionStr) {
+      const cleanPrompt = sanitizeKiePrompt(promptText);
       const chosenRes = resolutionStr || '480p';
-      const clipDur = (durSec >= 10) ? '10' : '5';
+      const safeAspect = (aspectRatioStr === '16:9') ? '16:9' : '9:16';
+      const randomSeed = Math.floor(10000000 + Math.random() * 89999999);
+
       if (modelId === 'bytedance/v1-lite-text-to-video' || modelId === 'bytedance/v1-pro-text-to-video' || modelId === 'bytedance/seedance-2.5') {
+        // Per docs.kie.ai/market/bytedance/v1-lite-text-to-video: duration "5" + 480p/720p is the most reliable & compatible across all accounts
+        const safeRes = (chosenRes === '4K' || chosenRes === '1080p') ? '720p' : chosenRes;
         return {
           model: modelId,
           input: {
-            prompt: promptText,
-            aspect_ratio: aspectRatioStr,
-            resolution: (chosenRes === '4K' ? '1080p' : chosenRes),
-            duration: clipDur,
+            prompt: cleanPrompt,
+            aspect_ratio: safeAspect,
+            resolution: safeRes,
+            duration: '5',
             camera_fixed: false,
-            enable_safety_checker: true,
-            nsfw_checker: false
+            seed: randomSeed,
+            enable_safety_checker: true
           }
         };
       }
       if (modelId === 'wan/2-6-text-to-video') {
+        // Per docs.kie.ai/market/wan/2-6-text-to-video: Wan 2.6 takes prompt, duration, resolution, multi_shots, nsfw_checker
         return {
           model: 'wan/2-6-text-to-video',
           input: {
-            prompt: promptText,
-            duration: clipDur,
-            resolution: (chosenRes === '480p' ? '720p' : (chosenRes === '4K' ? '1080p' : chosenRes)),
+            prompt: cleanPrompt,
+            duration: '5',
+            resolution: '720p',
             multi_shots: false,
             nsfw_checker: false
           }
         };
       }
       if (modelId.indexOf('kling') !== -1) {
+        // Per docs.kie.ai/market/kling/text-to-video: sound: false prevents double credit charge & audio failure
         return {
-          model: modelId,
+          model: 'kling-2.6/text-to-video',
           input: {
-            prompt: promptText,
-            sound: true,
-            aspect_ratio: aspectRatioStr,
-            duration: clipDur
+            prompt: cleanPrompt,
+            sound: false,
+            aspect_ratio: safeAspect,
+            duration: '5'
           }
         };
       }
       return {
-        model: modelId,
+        model: 'bytedance/v1-lite-text-to-video',
         input: {
-          prompt: promptText,
-          aspect_ratio: aspectRatioStr,
-          resolution: chosenRes,
-          duration: clipDur
+          prompt: cleanPrompt,
+          aspect_ratio: safeAspect,
+          resolution: '480p',
+          duration: '5',
+          camera_fixed: false,
+          seed: randomSeed,
+          enable_safety_checker: true
         }
       };
+    }
+
+    function fetchVideoBlobWithCorsFallback(videoUrl) {
+      return window.fetch(videoUrl).then(function(res) {
+        if (!res.ok) throw new Error('Direct CDN fetch HTTP ' + res.status);
+        return res.blob();
+      }).catch(function() {
+        const proxy1 = 'https://corsproxy.io/?' + encodeURIComponent(videoUrl);
+        return window.fetch(proxy1).then(function(r1) {
+          if (!r1.ok) throw new Error('Proxy 1 HTTP ' + r1.status);
+          return r1.blob();
+        });
+      }).catch(function() {
+        const proxy2 = 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(videoUrl);
+        return window.fetch(proxy2).then(function(r2) {
+          if (!r2.ok) throw new Error(t('Could not download generated MP4 file from CDN.', 'تعذر سحب ملف الفيديو المولد من السيرفر السحابي.'));
+          return r2.blob();
+        });
+      });
     }
 
     function uploadVideoBlobToYouTube(videoBlob, seoTitle, seoDesc, tagsList, accessToken) {
@@ -4190,7 +4244,7 @@
       }).then(function(initRes) {
         if (!initRes.ok) {
           return initRes.text().then(function(errTxt) {
-            throw new Error(t('YouTube Upload Init Error (' + initRes.status + '): ' + errTxt.substring(0, 140), 'رفض يوتيوب بدء الرفع (كود ' + initRes.status + '): تأكد من تفعيل YouTube Data API v3 وإعطاء صلاحية إدارة فيديوهات يوتيوب عند ربط القناة.'));
+            throw new Error(t('YouTube Upload Init Error (' + initRes.status + '): ' + errTxt.substring(0, 140), 'رفض يوتيوب بدء الرفع (كود ' + initRes.status + '): يرجى الضغط على "تحديث / تغيير القناة" لتجديد صلاحية يوتيوب.'));
           });
         }
         const uploadUrl = initRes.headers.get('Location') || initRes.headers.get('location');
@@ -4238,7 +4292,6 @@
       ch.ytViews = 0;
       ch.ytVideos = 0;
 
-      // Recalculate total user videos & views across remaining connected channels
       let sumVids = 0;
       let sumViews = 0;
       for (let i = 1; i <= 5; i++) {
@@ -4276,21 +4329,33 @@
 
     function ensureMasterKeyLoaded() {
       const u = appState.currentUser || {};
-      const existingKey = (platformMasterEngine.apiKey && platformMasterEngine.apiKey.length >= 20)
+      const rawMem = (platformMasterEngine.apiKey && platformMasterEngine.apiKey.length >= 20)
         ? platformMasterEngine.apiKey.trim()
         : ((u.aiApiKey && u.aiApiKey.length >= 20) ? u.aiApiKey.trim() : '');
-      if (existingKey) return Promise.resolve(existingKey);
+      const cleanMem = decodeCombinedMasterKeyField(rawMem).kieKey;
+      if (cleanMem && cleanMem.length >= 20) {
+        platformMasterEngine.apiKey = cleanMem;
+        return Promise.resolve(cleanMem);
+      }
       return loadPlatformMasterEngineFromSupabase().then(function() {
-        return (platformMasterEngine.apiKey && platformMasterEngine.apiKey.length >= 20)
-          ? platformMasterEngine.apiKey.trim()
-          : '';
+        const afterLoad = decodeCombinedMasterKeyField(platformMasterEngine.apiKey || '').kieKey;
+        return (afterLoad && afterLoad.length >= 20) ? afterLoad : '';
       });
     }
 
-    function simulateInstantAiGeneration() {
+    let isGenerationCurrentlyRunning = false;
+
+    function simulateInstantAiGeneration(forcedSlotNum) {
+      if (isGenerationCurrentlyRunning) {
+        showToast(t('⏳ A video generation task is already running! Please wait for it to finish.', '⏳ توجد عملية توليد ونشر فيديو قيد التنفيذ حالياً! يرجى الانتظار حتى تكتمل.'), 'info');
+        return;
+      }
       const u = appState.currentUser;
       const isOwner = Boolean(u.email && u.email.toLowerCase() === OWNER_ADMIN_EMAIL.toLowerCase());
-      const slot = appState.selectedChannelSlot;
+      const slot = forcedSlotNum || appState.selectedChannelSlot;
+      if (forcedSlotNum && forcedSlotNum !== appState.selectedChannelSlot) {
+        selectChannelSlot(forcedSlotNum);
+      }
       const ch = appState.channels[slot];
       const durSec = Math.max(5, Math.min(3600, parseInt(ch ? ch.durationSec : 5, 10) || 5));
       const selectedModel = (ch && ch.videoModel) || (document.getElementById('channel-model-select') && document.getElementById('channel-model-select').value) || 'bytedance/v1-lite-text-to-video';
@@ -4312,7 +4377,7 @@
         return;
       }
 
-      saveCurrentChannelConfig(false);
+      if (!forcedSlotNum) saveCurrentChannelConfig(false);
       const chName = isEn() ? ch.nameEn : ch.nameAr;
       const activeNiche = (ch.customNiche && ch.customNiche.trim()) ? ch.customNiche.trim() : ch.niche;
       const durLabel = formatDurationLabel(durSec);
@@ -4330,6 +4395,7 @@
 
       if (!progCard || !stepTitle || !pctEl || !barEl || !detailEl) return;
 
+      isGenerationCurrentlyRunning = true;
       progCard.classList.remove('hidden');
       if (genBtn) genBtn.disabled = true;
 
@@ -4350,6 +4416,7 @@
       let engineeredPrompt = '';
       let storySummaryText = '';
       let creditsDeducted = false;
+      let lastUpstreamFailReason = '';
 
       function deductUserCreditsOnce() {
         if (!creditsDeducted && !isOwner) {
@@ -4365,8 +4432,38 @@
         }
       }
 
+      function extractVideoUrlFromRecord(d) {
+        if (!d) return '';
+        let videoUrl = '';
+        if (d.resultJson) {
+          try {
+            const parsedRes = typeof d.resultJson === 'string' ? JSON.parse(d.resultJson) : d.resultJson;
+            if (parsedRes) {
+              if (Array.isArray(parsedRes.resultUrls) && parsedRes.resultUrls[0]) videoUrl = parsedRes.resultUrls[0];
+              else if (parsedRes.videoUrl) videoUrl = parsedRes.videoUrl;
+              else if (parsedRes.video_url) videoUrl = parsedRes.video_url;
+              else if (parsedRes.url) videoUrl = parsedRes.url;
+              else if (Array.isArray(parsedRes.works) && parsedRes.works[0] && parsedRes.works[0].resource && parsedRes.works[0].resource.resource) {
+                videoUrl = parsedRes.works[0].resource.resource;
+              }
+            }
+          } catch (e) {}
+        }
+        if (!videoUrl && d.response && Array.isArray(d.response.resultUrls) && d.response.resultUrls[0]) {
+          videoUrl = d.response.resultUrls[0];
+        }
+        if (!videoUrl && Array.isArray(d.resultUrls) && d.resultUrls[0]) videoUrl = d.resultUrls[0];
+        if (!videoUrl && d.resultUrl) videoUrl = d.resultUrl;
+        if (!videoUrl && d.videoInfo && d.videoInfo.videoUrl) videoUrl = d.videoInfo.videoUrl;
+        if (!videoUrl && d.videoUrl) videoUrl = d.videoUrl;
+        if (!videoUrl && d.video_url) videoUrl = d.video_url;
+        return videoUrl;
+      }
+
       function tryModelAtIndex(qIdx) {
         const currentModel = modelQueue[qIdx];
+        const isVeoEndpoint = (currentModel === 'veo3_fast' || currentModel === 'veo3');
+
         stepTitle.textContent = t(
           '⏳ Step 2/4: Dispatching Story to AI Render Cloud (' + currentModel + ')...',
           '⏳ الخطوة 2/4: جاري إرسال القصة والبرومبت إلى سيرفر الريندر السحابي (' + currentModel + ')...'
@@ -4374,13 +4471,25 @@
         pctEl.textContent = '22%';
         barEl.style.width = '22%';
         detailEl.textContent = t(
-          'Story: ' + storySummaryText + ' | Resolution: ' + selectedRes + ' | Duration: ' + durLabel + ' (' + requiredCredits + ' Credits 💎)',
-          'القصة المولدة: ' + storySummaryText + ' | الدقة: ' + selectedRes + ' | المدة: ' + durLabel + ' (' + requiredCredits + ' كريدت 💎)'
+          'Story: ' + storySummaryText + ' | Resolution: ' + selectedRes + ' | Duration: ' + durLabel,
+          'القصة المولدة: ' + storySummaryText + ' | الدقة: ' + selectedRes + ' | المدة: ' + durLabel
         );
 
-        const payload = buildKieModelPayload(currentModel, engineeredPrompt, aspectRatioStr, durSec, selectedRes);
+        const createEndpoint = isVeoEndpoint
+          ? 'https://api.kie.ai/api/v1/veo/generate'
+          : 'https://api.kie.ai/api/v1/jobs/createTask';
 
-        return window.fetch('https://api.kie.ai/api/v1/jobs/createTask', {
+        const payload = isVeoEndpoint
+          ? {
+              prompt: sanitizeKiePrompt(engineeredPrompt),
+              model: currentModel === 'veo3' ? 'veo3' : 'veo3_fast',
+              aspect_ratio: aspectRatioStr,
+              generationType: 'TEXT_2_VIDEO',
+              enableTranslation: true
+            }
+          : buildKieModelPayload(currentModel, engineeredPrompt, aspectRatioStr, durSec, selectedRes);
+
+        return window.fetch(createEndpoint, {
           method: 'POST',
           headers: {
             'Authorization': 'Bearer ' + activeMasterKey,
@@ -4393,19 +4502,28 @@
           if (!resJson || resJson.code !== 200 || !resJson.data || !resJson.data.taskId) {
             const errMsg = (resJson && (resJson.msg || resJson.message)) || 'Rejected by cloud render engine';
             const errCode = (resJson && resJson.code) || 400;
-            if (errCode === 401 || errCode === 402 || String(errMsg).toLowerCase().indexOf('credit') !== -1 || String(errMsg).toLowerCase().indexOf('balance') !== -1 || String(errMsg).toLowerCase().indexOf('insufficient') !== -1) {
+            lastUpstreamFailReason = currentModel + ' (' + errCode + '): ' + errMsg;
+
+            // Stop immediately only if key is invalid (401)
+            if (errCode === 401) {
               throw new Error(t(
-                'Cloud Engine Balance Alert (' + errCode + '): ' + errMsg + ' — No credits were deducted from your wallet.',
-                'تنبيه رصيد محرك الريندر السحابي (كود ' + errCode + '): ' + errMsg + ' — (لم يتم خصم أي كريدت من محفظتك).'
+                'Invalid Master API Key (401): Please verify the Master Key in the Owner Admin Panel.',
+                'مفتاح التوليد المركزي غير صالح (كود 401): يرجى التأكد من لصق المفتاح الصحيح في لوحة تحكم الأدمن.'
               ));
             }
+            // If 402 Insufficient Credits or any other model error, try the next fallback model in the queue first (since Seedance 480p costs only 10 credits!)
             if (qIdx + 1 < modelQueue.length) {
               return tryModelAtIndex(qIdx + 1);
             }
-            throw new Error(t('Cloud Render Error (' + errCode + '): ' + errMsg, 'خطأ من سيرفر الريندر (' + errCode + '): ' + errMsg));
+            if (errCode === 402 || String(errMsg).toLowerCase().indexOf('credit') !== -1 || String(errMsg).toLowerCase().indexOf('balance') !== -1 || String(errMsg).toLowerCase().indexOf('insufficient') !== -1) {
+              throw new Error(t(
+                'Render Cloud Balance Alert (402): Your central Kie.ai account does not have enough credits for this model (' + errMsg + '). No customer credits were deducted.',
+                'رصيد النقاط في حساب Kie.ai المركزي غير كافٍ لتشغيل هذا النموذج (' + errMsg + ') — يرجى شحن حساب Kie.ai أو اختيار أداة Seedance 1.0 Lite (480p).'
+              ));
+            }
+            throw new Error(t('Cloud Render Error: ' + lastUpstreamFailReason, 'رسالة سيرفر الريندر: ' + lastUpstreamFailReason));
           }
 
-          deductUserCreditsOnce();
           const taskId = resJson.data.taskId;
           stepTitle.textContent = t(
             '🎬 Step 3/4: Rendering AI Video (' + currentModel + ' — Task: ' + taskId + ')...',
@@ -4414,59 +4532,60 @@
           pctEl.textContent = '35%';
           barEl.style.width = '35%';
           detailEl.textContent = t(
-            'Story: ' + storySummaryText + ' | Deducted ' + requiredCredits + ' Credits. Checking status every 5s...',
-            'القصة: ' + storySummaryText + ' | تم خصم ' + requiredCredits + ' كريدت. جاري فحص حالة الريندر كل 5 ثوانٍ...'
+            'Story: ' + storySummaryText + ' | Checking render progress every 5s...',
+            'القصة: ' + storySummaryText + ' | جاري متابعة تقدم الريندر كل 5 ثوانٍ...'
           );
+
+          const pollEndpoint = isVeoEndpoint
+            ? ('https://api.kie.ai/api/v1/veo/record-info?taskId=' + encodeURIComponent(taskId))
+            : ('https://api.kie.ai/api/v1/jobs/recordInfo?taskId=' + encodeURIComponent(taskId));
 
           return new Promise(function(resolve, reject) {
             let attempts = 0;
             const maxAttempts = 120;
             const pollTimer = setInterval(function() {
               attempts++;
-              window.fetch('https://api.kie.ai/api/v1/jobs/recordInfo?taskId=' + encodeURIComponent(taskId), {
+              window.fetch(pollEndpoint, {
                 method: 'GET',
                 headers: { 'Authorization': 'Bearer ' + activeMasterKey }
               }).then(function(pr) { return pr.json(); }).then(function(pJson) {
                 const d = (pJson && pJson.data) ? pJson.data : {};
-                const st = String(d.state || d.status || '').toLowerCase();
+                const st = String(d.state || d.status || (d.successFlag === 1 ? 'success' : (d.successFlag === 2 || d.successFlag === 3 ? 'fail' : '')) || '').toLowerCase();
                 const prog = parseInt(d.progress, 10) || Math.min(88, 35 + attempts * 2);
 
                 pctEl.textContent = prog + '%';
                 barEl.style.width = prog + '%';
                 detailEl.textContent = t(
-                  'Status: [' + (st || 'generating') + '] — Elapsed: ' + (attempts * 5) + 's | Story: ' + storySummaryText,
-                  'حالة الريندر: [' + (st || 'جاري الريندر') + '] — الوقت المنقضي: ' + (attempts * 5) + ' ثانية | ' + storySummaryText
+                  'Engine: ' + currentModel + ' | Status: [' + (st || 'generating') + '] — Elapsed: ' + (attempts * 5) + 's',
+                  'المحرك: ' + currentModel + ' | حالة الريندر: [' + (st || 'جاري الريندر') + '] — الوقت المنقضي: ' + (attempts * 5) + ' ثانية'
                 );
 
                 if (st === 'success' || st === 'completed') {
                   clearInterval(pollTimer);
-                  let videoUrl = '';
-                  if (d.resultJson) {
-                    try {
-                      const parsedRes = typeof d.resultJson === 'string' ? JSON.parse(d.resultJson) : d.resultJson;
-                      if (parsedRes && Array.isArray(parsedRes.resultUrls) && parsedRes.resultUrls[0]) {
-                        videoUrl = parsedRes.resultUrls[0];
-                      } else if (parsedRes && parsedRes.videoUrl) {
-                        videoUrl = parsedRes.videoUrl;
-                      }
-                    } catch (e) {}
-                  }
-                  if (!videoUrl && d.videoInfo && d.videoInfo.videoUrl) videoUrl = d.videoInfo.videoUrl;
-                  if (!videoUrl && d.videoUrl) videoUrl = d.videoUrl;
-
+                  const videoUrl = extractVideoUrlFromRecord(d);
                   if (!videoUrl) {
-                    reject(new Error(t('Task completed but no video URL was returned.', 'اكتملت المهمة ولكن لم يرجع رابط الفيديو.')));
+                    if (qIdx + 1 < modelQueue.length) {
+                      tryModelAtIndex(qIdx + 1).then(resolve).catch(reject);
+                    } else {
+                      reject(new Error(t('Task completed but no video URL was returned.', 'اكتملت المهمة ولكن لم يرجع رابط الفيديو.')));
+                    }
                   } else {
+                    deductUserCreditsOnce();
                     resolve(videoUrl);
                   }
                 } else if (st === 'fail' || st === 'failed' || st === 'error') {
                   clearInterval(pollTimer);
-                  const fMsg = String(d.failMsg || 'Task failed on upstream model.');
-                  if (qIdx + 1 < modelQueue.length && (fMsg.toLowerCase().indexOf('timeout') !== -1 || fMsg.toLowerCase().indexOf('timed out') !== -1 || fMsg.toLowerCase().indexOf('connectexception') !== -1)) {
-                    showToast(t('🔄 Switching to backup render node (' + modelQueue[qIdx + 1] + ')...', '🔄 جاري التحويل تلقائياً للنموذج البديل (' + modelQueue[qIdx + 1] + ')...'), 'info');
+                  const fMsg = String(d.failMsg || d.errorMessage || d.failCode || (pJson && pJson.msg) || 'Upstream model busy or out of capacity');
+                  lastUpstreamFailReason = currentModel + ': ' + fMsg;
+                  // ALWAYS try the next model in modelQueue automatically if an upstream model fails during polling!
+                  if (qIdx + 1 < modelQueue.length) {
+                    showToast(t('🔄 Model (' + currentModel + ') was busy (' + fMsg + '); automatically switching to backup model (' + modelQueue[qIdx + 1] + ')...', '🔄 النموذج (' + currentModel + ') مشغول حالياً؛ جاري التحويل تلقائياً للنموذج البديل (' + modelQueue[qIdx + 1] + ') دون توقف...'), 'info');
                     tryModelAtIndex(qIdx + 1).then(resolve).catch(reject);
                   } else {
-                    reject(new Error(t('Render Failed: ' + fMsg, 'توقف الريندر: ' + fMsg)));
+                    reject(new Error(t(
+                      'Render stopped across all models. Last server message (' + lastUpstreamFailReason + '). Please check your Kie.ai credit balance at https://kie.ai/billing.',
+                      'رد سيرفر الريندر (' + lastUpstreamFailReason + ') — يرجى التأكد من وجود رصيد كريدت كافٍ في حسابك على https://kie.ai/billing (لم يتم خصم أي كريدت من محفظتك).'
+                    )));
                   }
                 } else if (attempts >= maxAttempts) {
                   clearInterval(pollTimer);
@@ -4522,10 +4641,7 @@
           'جاري سحب ملف الفيديو MP4 من السيرفر السحابي للمنصة ورفعه مباشرة إلى يوتيوب عبر YouTube Data API v3...'
         );
 
-        return window.fetch(generatedVideoUrl).then(function(vRes) {
-          if (!vRes.ok) throw new Error(t('Could not fetch generated MP4 file from CDN.', 'تعذر تحميل ملف الفيديو المولد من السيرفر السحابي.'));
-          return vRes.blob();
-        }).then(function(videoBlob) {
+        return fetchVideoBlobWithCorsFallback(generatedVideoUrl).then(function(videoBlob) {
           return uploadVideoBlobToYouTube(
             videoBlob,
             seoTitle,
@@ -4535,6 +4651,7 @@
           );
         });
       }).then(function(ytUploadRes) {
+        isGenerationCurrentlyRunning = false;
         const ytVidId = (ytUploadRes && ytUploadRes.id) ? ytUploadRes.id : '';
         stepTitle.textContent = t('✅ Published Successfully on YouTube Channel "' + chName + '"!', '✅ تم توليد ورفع ونشر الفيديو بنجاح على قناتك في يوتيوب "' + chName + '"!');
         pctEl.textContent = '100%';
@@ -4558,6 +4675,7 @@
         updateDurationDisplayLabel(durSec);
         showToast(t('🎉 Video generated & published live to YouTube channel: "' + chName + '"!', '🎉 تم توليد الفيديو ورفعه ونشره فعلياً على قناتك في يوتيوب: "' + chName + '"!'), 'info');
       }).catch(function(err) {
+        isGenerationCurrentlyRunning = false;
         if (genBtn) genBtn.disabled = false;
         updateDurationDisplayLabel(durSec);
         const msg = (err && err.message) ? err.message : t('Generation or upload failed.', 'فشل التوليد أو الرفع.');
@@ -4567,6 +4685,112 @@
         detailEl.textContent = msg;
         showToast('❌ ' + msg, 'warn');
       });
+    }
+
+    // =========================================================================
+    // AUTOMATED DAILY TIME-SLOT SCHEDULER DAEMON (CHECKS EVERY 10 SECONDS)
+    // =========================================================================
+    let schedulerDaemonTimer = null;
+
+    function getTodayDateKey() {
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      return yyyy + '-' + mm + '-' + dd;
+    }
+
+    function setFirstSlotToNextMinuteForTest() {
+      const slot = appState.selectedChannelSlot;
+      const ch = appState.channels[slot];
+      if (!ch) return;
+      const target = new Date(Date.now() + 60000);
+      const hh = String(target.getHours()).padStart(2, '0');
+      const mm = String(target.getMinutes()).padStart(2, '0');
+      const nextTime24 = hh + ':' + mm;
+      if (!Array.isArray(ch.timeSlots) || ch.timeSlots.length === 0) {
+        ch.timeSlots = [nextTime24];
+      } else {
+        ch.timeSlots[0] = nextTime24;
+      }
+      // Clear any previous execution log for this slot today so it triggers fresh
+      try {
+        const logKey = 'omniposts_sched_' + getTodayDateKey();
+        const executed = JSON.parse(localStorage.getItem(logKey) || '{}');
+        delete executed['slot_' + slot + '_' + nextTime24];
+        localStorage.setItem(logKey, JSON.stringify(executed));
+      } catch (e) {}
+
+      renderTimeSlots(ch.dailyCount, ch.timeSlots);
+      saveCurrentChannelConfig(false);
+      showToast(t('⏰ Set Slot #1 to ' + formatLocalizedClock(nextTime24) + '! Keep this page open — auto-generation & YouTube publishing will start automatically in ~60 seconds!', '⏰ تم ضبط الموعد #1 على الساعة ' + formatLocalizedClock(nextTime24) + '! اترك الصفحة مفتوحة وسيبدأ التوليد والنشر التلقائي على يوتيوب خلال 60 ثانية بالظبط!'), 'info');
+    }
+
+    function runAutomatedScheduleTick() {
+      const now = new Date();
+      const hhNow = String(now.getHours()).padStart(2, '0');
+      const mmNow = String(now.getMinutes()).padStart(2, '0');
+      const ssNow = String(now.getSeconds()).padStart(2, '0');
+      const current24 = hhNow + ':' + mmNow;
+      const nowMinutesTotal = now.getHours() * 60 + now.getMinutes();
+
+      const clockEl = document.getElementById('live-scheduler-clock-now');
+      if (clockEl) {
+        clockEl.textContent = formatLocalizedClock(current24) + ' (' + hhNow + ':' + mmNow + ':' + ssNow + ')';
+      }
+
+      if (!appState.isLoggedIn || isGenerationCurrentlyRunning) return;
+
+      const logKey = 'omniposts_sched_' + getTodayDateKey();
+      let executedMap = {};
+      try {
+        executedMap = JSON.parse(localStorage.getItem(logKey) || '{}');
+      } catch (e) {
+        executedMap = {};
+      }
+
+      for (let slotNum = 1; slotNum <= 5; slotNum++) {
+        const ch = appState.channels[slotNum];
+        if (!ch || !ch.connected || !Array.isArray(ch.timeSlots)) continue;
+
+        for (let sIdx = 0; sIdx < ch.timeSlots.length; sIdx++) {
+          const sched24 = String(ch.timeSlots[sIdx] || '').trim();
+          if (!sched24) continue;
+          const parts = sched24.split(':');
+          const sH = parseInt(parts[0], 10);
+          const sM = parseInt(parts[1], 10);
+          if (isNaN(sH) || isNaN(sM)) continue;
+
+          const schedMinutesTotal = sH * 60 + sM;
+          const diffMinutes = nowMinutesTotal - schedMinutesTotal;
+          const execId = 'slot_' + slotNum + '_' + sched24;
+
+          // Trigger if current time matches exact scheduled minute (or within 10 minutes past if tab just woke up) and not yet executed today!
+          if (diffMinutes >= 0 && diffMinutes <= 10 && !executedMap[execId]) {
+            executedMap[execId] = Date.now();
+            try {
+              localStorage.setItem(logKey, JSON.stringify(executedMap));
+            } catch (e) {}
+
+            const statusTxt = document.getElementById('live-scheduler-status-text');
+            if (statusTxt) {
+              statusTxt.textContent = t(
+                '🚀 Scheduled Time Reached (' + formatLocalizedClock(sched24) + ')! Auto-Generating & Publishing for Channel #' + slotNum + '...',
+                '🚀 حان موعد النشر المجدول (' + formatLocalizedClock(sched24) + ')! جاري توليد الفيديو ورفعه على القناة رقم ' + slotNum + ' تلقائياً...'
+              );
+            }
+            showToast(t('⏰ Scheduled publish time (' + formatLocalizedClock(sched24) + ') reached for Channel #' + slotNum + '! Starting automated AI video generation & YouTube upload...', '⏰ حان موعد النشر المجدول (' + formatLocalizedClock(sched24) + ') للقناة رقم ' + slotNum + '! بدء توليد القصة والفيديو والرفع التلقائي على يوتيوب الآن...'), 'info');
+            simulateInstantAiGeneration(slotNum);
+            return;
+          }
+        }
+      }
+    }
+
+    function startAutomatedScheduleDaemon() {
+      if (schedulerDaemonTimer) clearInterval(schedulerDaemonTimer);
+      runAutomatedScheduleTick();
+      schedulerDaemonTimer = setInterval(runAutomatedScheduleTick, 5000);
     }
 
     function handleChangeEmail(e) {
@@ -5119,6 +5343,7 @@
       loadPlatformMasterEngineFromSupabase();
       updateCustomPlanSlider();
       checkWhopReturnUrlCallback();
+      startAutomatedScheduleDaemon();
 
       if (window.location.search && window.location.search.indexOf('policy=') !== -1) {
         const qParams = new URLSearchParams(window.location.search);
