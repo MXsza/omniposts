@@ -6,7 +6,6 @@
   <title>Omniposts.online — Autonomous AI Video Generation & Multi-Channel Publishing Platform</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.1"></script>
-  <script src="https://gumroad.com/js/gumroad.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1169,14 +1168,15 @@
           The moment your payment succeeds, all 5 channel slots, AI API integrations, and cloud scheduling unlock automatically without waiting for manual approval.
         </p>
 
-        <!-- Dual Payment Gateway Region Selector -->
+        <!-- Dual Gateway Selector: Whop Global USD Gateway (Active) + Egypt Local Gateway (Ready for Future Activation) -->
         <div class="mt-7 inline-flex flex-wrap items-center justify-center gap-2 p-1.5 rounded-full apple-glass border border-white/15">
-          <button type="button" id="gw-btn-intl" onclick="setPaymentGatewayRegion('INTL')" class="px-5 py-2 rounded-full text-xs sm:text-sm font-bold bg-blue-600 text-white transition" data-en="🌍 International Gateway (Pay in USD $)" data-ar="🌍 بوابة باقي دول العالم (بالدولار USD $)">
-            🌍 International Gateway (Pay in USD $)
+          <button type="button" id="gw-btn-intl" onclick="setPaymentGatewayRegion('INTL')" class="px-5 py-2 rounded-full text-xs sm:text-sm font-bold bg-blue-600 text-white transition" data-en="🌍 Global Payment Gateway (Whop — Pay in USD $)" data-ar="🌍 بوابة الدفع العالمية (Whop — الدفع بالدولار USD $)">
+            🌍 بوابة الدفع العالمية (Whop — الدفع بالدولار USD $)
           </button>
-          <button type="button" id="gw-btn-egypt" onclick="setPaymentGatewayRegion('EGY')" class="px-5 py-2 rounded-full text-xs sm:text-sm font-bold text-zinc-300 hover:text-white transition" data-en="🇪🇬 Egypt Local Gateway (Pay in EGP)" data-ar="🇪🇬 بوابة دفع مصر (بالجنيه المصري EGP)">
-            🇪🇬 Egypt Local Gateway (Pay in EGP)
+          <button type="button" id="gw-btn-egypt" onclick="setPaymentGatewayRegion('EGY')" class="px-5 py-2 rounded-full text-xs sm:text-sm font-bold text-zinc-300 hover:text-white transition" data-en="🇪🇬 Egypt Local Gateway (Vodafone Cash / InstaPay / Meeza)" data-ar="🇪🇬 بوابة الدفع المصرية (فودافون كاش / إنستاباي / ميزة)">
+            🇪🇬 بوابة الدفع المصرية (فودافون كاش / إنستاباي / ميزة)
           </button>
+          <select id="whop-currency-select" class="hidden"><option value="USD" selected>USD</option></select>
         </div>
       </div>
 
@@ -1192,7 +1192,7 @@
             </div>
             <div class="mt-4 flex items-baseline gap-2">
               <span id="price-6m-main" class="text-4xl sm:text-5xl font-extrabold text-white">$9.99</span>
-              <span id="price-6m-sub" class="text-xs text-zinc-400">USD (490 EGP)</span>
+              <span id="price-6m-sub" class="text-xs text-zinc-400">USD / 1,000 Credits</span>
             </div>
             <div class="mt-4 p-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-xs sm:text-sm font-extrabold text-emerald-300" data-en="💎 1,000 Credits (900 + 100 Bonus) — Generates 100 Videos" data-ar="💎 تعطيك 1,000 كريدت (900 + 100 هدية) — تولد 100 فيديو">
               💎 تعطيك 1,000 كريدت (900 + 100 هدية) — تولد 100 فيديو
@@ -1204,7 +1204,7 @@
               <li class="flex items-center gap-2"><span class="text-emerald-400">✔</span> <span data-en="Unused credits never expire & roll over forever" data-ar="الكريدت لا ينتهي أبداً ويترحل معك دائماً">Unused credits never expire & roll over forever</span></li>
             </ul>
           </div>
-          <button type="button" onclick="openCheckoutModal('Starter Plan - 1000 Credits', 9.99, 30, 1000)" class="mt-7 w-full apple-btn-secondary py-3.5 text-xs sm:text-sm font-bold" data-en="Subscribe — 1,000 Credits / 100 Videos ($9.99)" data-ar="اشترك الآن — 1,000 كريدت / 100 فيديو (490 ج.م)">
+          <button type="button" onclick="openCheckoutModal('Starter Plan - 1000 Credits', 9.99, 30, 1000)" class="mt-7 w-full apple-btn-secondary py-3.5 text-xs sm:text-sm font-bold" data-en="Subscribe — 1,000 Credits / 100 Videos ($9.99 USD)" data-ar="اشترك الآن — 1,000 كريدت / 100 فيديو ($9.99 USD)">
             Subscribe — 1,000 Credits / 100 Videos ($9.99)
           </button>
         </div>
@@ -1221,7 +1221,7 @@
             </div>
             <div class="mt-4 flex items-baseline gap-2">
               <span id="price-12m-main" class="text-4xl sm:text-5xl font-extrabold text-white">$19.99</span>
-              <span id="price-12m-old" class="text-xs text-zinc-400">USD (980 EGP)</span>
+              <span id="price-12m-old" class="text-xs text-zinc-400">USD / 2,500 Credits</span>
             </div>
             <p id="price-12m-sub" class="hidden"></p>
             <div class="mt-4 p-3 rounded-2xl bg-blue-500/20 border border-blue-500/40 text-xs sm:text-sm font-extrabold text-blue-200" data-en="💎 2,500 Credits (2,000 + 500 Bonus) — Generates 250 Videos" data-ar="💎 تعطيك 2,500 كريدت (2000 + 500 هدية) — تولد 250 فيديو">
@@ -1234,7 +1234,7 @@
               <li class="flex items-center gap-2"><span class="text-blue-400">✔</span> <span data-en="Durations from 5 sec up to 60 min (1 Hour) with Audio" data-ar="جميع المدد من 5 ثوانٍ حتى 60 دقيقة بالصوت الكامل">Durations from 5 sec up to 60 min (1 Hour) with Audio</span></li>
             </ul>
           </div>
-          <button type="button" onclick="openCheckoutModal('Pro Plan - 2500 Credits', 19.99, 30, 2500)" class="mt-7 w-full apple-btn-primary py-3.5 text-xs sm:text-sm font-bold" data-en="Subscribe — 2,500 Credits / 250 Videos ($19.99)" data-ar="اشترك الآن — 2,500 كريدت / 250 فيديو (980 ج.م)">
+          <button type="button" onclick="openCheckoutModal('Pro Plan - 2500 Credits', 19.99, 30, 2500)" class="mt-7 w-full apple-btn-primary py-3.5 text-xs sm:text-sm font-bold" data-en="Subscribe — 2,500 Credits / 250 Videos ($19.99 USD)" data-ar="اشترك الآن — 2,500 كريدت / 250 فيديو ($19.99 USD)">
             Subscribe — 2,500 Credits / 250 Videos ($19.99)
           </button>
         </div>
@@ -1248,7 +1248,7 @@
             </div>
             <div class="mt-4 flex items-baseline gap-2">
               <span id="price-18m-main" class="text-4xl sm:text-5xl font-extrabold apple-gold-text">$39.99</span>
-              <span id="price-18m-old" class="text-xs text-zinc-400">USD (1,960 EGP)</span>
+              <span id="price-18m-old" class="text-xs text-zinc-400">USD / 5,000 Credits</span>
             </div>
             <p id="price-18m-sub" class="hidden"></p>
             <div class="mt-4 p-3 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-xs sm:text-sm font-extrabold text-amber-200" data-en="💎 5,000 Credits (4,000 + 1,000 Bonus) — Generates 500 Videos" data-ar="💎 تعطيك 5,000 كريدت (4000 + 1000 هدية) — تولد 500 فيديو">
@@ -1261,7 +1261,7 @@
               <li class="flex items-center gap-2"><span class="text-amber-400">✔</span> <span data-en="Unused credits never expire & roll over forever" data-ar="رصيدك ملكك للأبد ولا ينتهي بنهاية الشهر">Unused credits never expire & roll over forever</span></li>
             </ul>
           </div>
-          <button type="button" onclick="openCheckoutModal('VIP Agency Plan - 5000 Credits', 39.99, 30, 5000)" class="mt-7 w-full apple-btn-secondary border-amber-500/40 hover:bg-amber-500/20 text-amber-200 py-3.5 text-xs sm:text-sm font-bold" data-en="Subscribe — 5,000 Credits / 500 Videos ($39.99)" data-ar="اشترك الآن — 5,000 كريدت / 500 فيديو (1,960 ج.م)">
+          <button type="button" onclick="openCheckoutModal('VIP Agency Plan - 5000 Credits', 39.99, 30, 5000)" class="mt-7 w-full apple-btn-secondary border-amber-500/40 hover:bg-amber-500/20 text-amber-200 py-3.5 text-xs sm:text-sm font-bold" data-en="Subscribe — 5,000 Credits / 500 Videos ($39.99 USD)" data-ar="اشترك الآن — 5,000 كريدت / 500 فيديو ($39.99 USD)">
             Subscribe — 5,000 Credits / 500 Videos ($39.99)
           </button>
         </div>
@@ -1301,7 +1301,7 @@
             <div id="custom-slider-bonus-tag" class="text-xs font-bold text-amber-300">Generates 100 Videos 🎬</div>
             <div class="pt-2 border-t border-white/10 flex items-center justify-center gap-2">
               <span id="custom-slider-price-usd" class="text-2xl font-extrabold text-white">$9.99</span>
-              <span id="custom-slider-price-egp" class="text-xs text-zinc-300 font-semibold">(490 EGP)</span>
+              <span id="custom-slider-price-egp" class="text-xs text-emerald-300 font-semibold">USD</span>
             </div>
             <button type="button" onclick="openCustomSliderCheckout()" class="w-full apple-btn-primary py-3 text-xs sm:text-sm font-bold" data-en="⚡ Top-Up & Add Credits Now" data-ar="⚡ شحن وتزويد الرصيد الآن">
               ⚡ Top-Up & Add Credits Now
@@ -1347,13 +1347,14 @@
               </div>
             </div>
 
-            <!-- International USD Payment Gateway Box (Embedded In-Page Checkout) -->
+            <!-- Whop Dynamic API Checkout Box -->
             <div id="intl-gateway-methods" class="space-y-3">
-              <div class="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-xs text-purple-200" data-en="🌍 Secure In-Site USD Checkout: Complete your payment directly below inside Omniposts.online without leaving the site. Your account unlocks automatically upon payment:" data-ar="🌍 الدفع المباشر داخل الموقع بالدولار (USD): أتمم عملية الدفع بالأسفل داخل موقع Omniposts.online مباشرة دون الخروج من الصفحة، وسيتم فتح حسابك أوتوماتيكياً فور الدفع:">
-                🌍 Secure In-Site USD Checkout: Complete your payment directly below inside Omniposts.online without leaving the site. Your account unlocks automatically upon payment:
+              <div class="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex flex-wrap items-center justify-between gap-2 text-xs text-emerald-200">
+                <span id="whop-session-status-text" data-en="🔒 Whop Dynamic API Checkout: Generating your custom-priced checkout session..." data-ar="🔒 بوابة دفع Whop الديناميكية (API): جاري توليد جلسة الدفع بالسعر والعملة المختارة...">🔒 بوابة دفع Whop الديناميكية (API): جاري توليد جلسة الدفع بالسعر والعملة المختارة...</span>
+                <a id="whop-external-checkout-link" href="https://whop.com/checkout" target="_blank" rel="noopener noreferrer" class="px-3 py-1 rounded-full bg-emerald-500 text-black font-extrabold text-[11px] hover:bg-emerald-400 transition" data-en="↗ Open Checkout in New Tab" data-ar="↗ فتح صفحة الدفع في نافذة مستقلة">↗ فتح صفحة الدفع في نافذة مستقلة</a>
               </div>
               <div class="rounded-2xl overflow-hidden border border-white/15 bg-zinc-950 shadow-2xl">
-                <iframe id="gumroad-inline-iframe" src="https://omniposts.gumroad.com/l/pmuiu?embed=true&wanted=true" class="w-full border-0" style="height: 540px; min-height: 480px;" allow="payment *"></iframe>
+                <iframe id="gumroad-inline-iframe" src="about:blank" class="w-full border-0" style="height: 540px; min-height: 480px;" allow="payment *"></iframe>
               </div>
             </div>
 
@@ -1618,6 +1619,48 @@
               💾 Save Central Master Key
             </button>
           </div>
+        </div>
+      </div>
+
+      <!-- OWNER ADMIN WHOP DYNAMIC API + FALLBACK CHECKOUT LINK & EGYPT GATEWAY READY -->
+      <div class="apple-bento p-6 border-2 border-blue-500/50 bg-gradient-to-r from-blue-950/40 via-zinc-900 to-purple-950/30 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/10">
+          <div>
+            <span class="text-xs font-extrabold text-blue-400 uppercase" data-en="💳 Owner Admin Only: Whop USD Payment Gateway (API + CORS-Safe Fallback) & Egypt Gateway Ready" data-ar="💳 خاص بمالك المنصة فقط: بوابة دفع Whop بالدولار (API + حماية كاملة من الأخطاء) + جاهزية البوابة المصرية">💳 Owner Admin Only: Whop USD Payment Gateway (API + CORS-Safe Fallback) & Egypt Gateway Ready</span>
+            <h3 class="text-lg sm:text-xl font-bold text-white mt-0.5" data-en="Whop Dynamic USD Checkout API + Direct Checkout Link Protection" data-ar="إعدادات بوابة Whop بالدولار (USD $) + الحماية المزدوجة ضد أي حظر متصفح">Whop Dynamic USD Checkout API + Direct Checkout Link Protection</h3>
+            <p class="text-xs text-zinc-300 mt-1" data-en="All prices are unified in USD ($9.99 / $19.99 / $39.99) to guarantee 0% currency errors on Whop. Paste your Whop API Key & Product ID below (and optionally your direct Whop checkout link as a 100% CORS-safe fallback). The Egypt local gateway tab is also preserved and ready for future activation!" data-ar="تم توحيد العملة بالدولار الأمريكي (USD $) في جميع الخطط وشريط الشحن لمنع أي أخطاء عملات في Whop، مع الإبقاء على تبويب بوابة الدفع المصرية جاهزاً للتفعيل مستقبلاً!">
+              All prices are unified in USD ($9.99 / $19.99 / $39.99) to guarantee 0% currency errors on Whop. Paste your Whop API Key & Product ID below (and optionally your direct Whop checkout link as a 100% CORS-safe fallback). The Egypt local gateway tab is also preserved and ready for future activation!
+            </p>
+          </div>
+          <span id="admin-whop-status-badge" class="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/40 text-xs font-bold">Whop USD Gateway Ready ⚡</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+          <div class="md:col-span-4">
+            <label for="admin-whop-api-key" class="block text-xs text-zinc-300 mb-1.5 font-semibold" data-en="1. Whop API Key (Developer -> API Keys):" data-ar="1. مفتاح Whop API Key (من Developer -> API Keys):">1. Whop API Key (Developer -> API Keys):</label>
+            <input type="password" id="admin-whop-api-key" placeholder="apik_xxxxxxxxxxxxxxxxxxxxxxxx" class="apple-input w-full px-4 py-2.5 text-xs sm:text-sm font-mono" dir="ltr" />
+          </div>
+          <div class="md:col-span-3">
+            <label for="admin-whop-product-id" class="block text-xs text-zinc-300 mb-1.5 font-semibold" data-en="2. Whop Product ID (Auto-detected if blank):" data-ar="2. رقم المنتج Product ID (يُسحب تلقائياً):">2. Whop Product ID (Auto-detected if blank):</label>
+            <input type="text" id="admin-whop-product-id" placeholder="prod_xxxxxxxxxxxxxx" class="apple-input w-full px-4 py-2.5 text-xs sm:text-sm font-mono" dir="ltr" />
+          </div>
+          <div class="md:col-span-3">
+            <label for="admin-whop-fallback-url" class="block text-xs text-zinc-300 mb-1.5 font-semibold" data-en="3. Direct Whop Store/Checkout Link (CORS Fallback):" data-ar="3. رابط متجر/دفع Whop المباشر (حماية إضافية اختيارات):">3. Direct Whop Store/Checkout Link (CORS Fallback):</label>
+            <input type="text" id="admin-whop-fallback-url" placeholder="https://whop.com/checkout/..." class="apple-input w-full px-4 py-2.5 text-xs sm:text-sm font-mono" dir="ltr" />
+          </div>
+          <div class="md:col-span-2">
+            <button type="button" onclick="saveAdminWhopApiSettings()" class="w-full apple-btn-primary py-2.5 px-3 text-xs sm:text-sm font-bold" data-en="💾 Save Whop" data-ar="💾 حفظ ربط Whop">
+              💾 حفظ ربط Whop
+            </button>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-black/50 border border-white/10 text-xs text-zinc-300 flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <span class="font-bold text-emerald-400" data-en="🔗 Webhook / Return URL to paste in Whop Developer -> Webhooks:" data-ar="🔗 رابط الـ Webhook والعودة التلقائية لوضعه في Whop (قسم Developer -> Webhooks):">🔗 رابط الـ Webhook والعودة التلقائية لوضعه في Whop (قسم Developer -> Webhooks):</span>
+            <code class="ms-2 px-2.5 py-1 rounded bg-white/10 text-blue-300 font-mono select-all" dir="ltr">https://omniposts.online/?whop_webhook=1</code>
+          </div>
+          <span class="text-[11px] text-zinc-400" data-en="Events: payment.succeeded & membership.activated | 🇪🇬 Egypt Gateway tab is preserved in Pricing view for future setup" data-ar="الأحداث: payment.succeeded و membership.activated | 🇪🇬 تبويب البوابة المصرية محفوظ وجاهز للربط لاحقاً">Events: payment.succeeded & membership.activated | 🇪🇬 Egypt Gateway tab is preserved in Pricing view for future setup</span>
         </div>
       </div>
 
@@ -2171,6 +2214,226 @@
       return { credits: credits, rewardTier: rewardTier };
     }
 
+    // =========================================================================
+    // WHOP DYNAMIC USD API ENGINE + CORS FALLBACK + EGYPT GATEWAY PRESERVATION
+    // =========================================================================
+    const WHOP_CURRENCY_RATES = {
+      USD: { symbol: '$', code: 'usd', rate: 1.0, labelEn: 'USD ($)', labelAr: 'دولار أمريكي ($)' }
+    };
+
+    let platformWhopConfig = {
+      apiKey: '',
+      productId: '',
+      companyId: '',
+      fallbackUrl: '',
+      activeCheckoutId: '',
+      activePurchaseUrl: '',
+      selectedCurrency: 'USD'
+    };
+
+    function formatCurrencyAmount(usdAmount) {
+      return '$' + Number(usdAmount).toFixed(2) + ' USD';
+    }
+
+    function handleWhopCurrencyChange() {
+      platformWhopConfig.selectedCurrency = 'USD';
+      updateCustomPlanSlider();
+      updateCheckoutSummary();
+    }
+
+    function encodeCombinedMasterKeyField(kieKey, whopKey, whopProdId, whopBizId, whopFallback) {
+      const k = String(kieKey || '').trim();
+      const w = String(whopKey || '').trim();
+      const p = String(whopProdId || '').trim();
+      const b = String(whopBizId || '').trim();
+      const f = String(whopFallback || '').trim();
+      if (!w && !p && !b && !f) return k;
+      return k + '||WHOP:' + w + '|PROD:' + p + '|BIZ:' + b + '|FB:' + f;
+    }
+
+    function decodeCombinedMasterKeyField(rawField) {
+      const str = String(rawField || '');
+      const idx = str.indexOf('||WHOP:');
+      if (idx === -1) {
+        return { kieKey: str.trim(), whopKey: '', productId: '', companyId: '', fallbackUrl: '' };
+      }
+      const kiePart = str.substring(0, idx).trim();
+      const rest = str.substring(idx + 7);
+      const wMatch = rest.match(/^([^|]*)/);
+      const pMatch = rest.match(/\|PROD:([^|]*)/);
+      const bMatch = rest.match(/\|BIZ:([^|]*)/);
+      const fMatch = rest.match(/\|FB:([^|]*)/);
+      return {
+        kieKey: kiePart,
+        whopKey: wMatch ? wMatch[1].trim() : '',
+        productId: pMatch ? pMatch[1].trim() : '',
+        companyId: bMatch ? bMatch[1].trim() : '',
+        fallbackUrl: fMatch ? fMatch[1].trim() : ''
+      };
+    }
+
+    function saveAdminWhopApiSettings() {
+      const keyEl = document.getElementById('admin-whop-api-key');
+      const prodEl = document.getElementById('admin-whop-product-id');
+      const fbEl = document.getElementById('admin-whop-fallback-url');
+      const wKey = keyEl ? keyEl.value.trim() : '';
+      const wProd = prodEl ? prodEl.value.trim() : '';
+      const wFb = fbEl ? fbEl.value.trim() : '';
+
+      if (!wKey && !wFb) {
+        showToast(t('⚠️ Please paste your Whop API Key (or Direct Whop Checkout URL).', '⚠️ يرجى لصق مفتاح Whop API Key (أو رابط دفع Whop المباشر).'), 'warn');
+        return;
+      }
+
+      if (wKey) platformWhopConfig.apiKey = wKey;
+      if (wProd) platformWhopConfig.productId = wProd;
+      if (wFb) platformWhopConfig.fallbackUrl = wFb;
+
+      const discoverPromise = (wKey && !wProd && window.fetch)
+        ? window.fetch('https://api.whop.com/api/v2/products', {
+            method: 'GET',
+            headers: { 'Authorization': 'Bearer ' + wKey }
+          }).then(function(r) { return r.json(); }).then(function(j) {
+            if (j && Array.isArray(j.data) && j.data.length > 0) {
+              const firstProd = j.data[0];
+              if (firstProd.id) platformWhopConfig.productId = firstProd.id;
+              if (firstProd.company_id) platformWhopConfig.companyId = firstProd.company_id;
+              if (prodEl && platformWhopConfig.productId) prodEl.value = platformWhopConfig.productId;
+            }
+          }).catch(function() {})
+        : Promise.resolve();
+
+      discoverPromise.then(function() {
+        try {
+          localStorage.setItem('omniposts_whop_config', JSON.stringify(platformWhopConfig));
+        } catch (e) {}
+
+        if (supabaseClient) {
+          const combined = encodeCombinedMasterKeyField(
+            platformMasterEngine.apiKey,
+            platformWhopConfig.apiKey,
+            platformWhopConfig.productId,
+            platformWhopConfig.companyId,
+            platformWhopConfig.fallbackUrl
+          );
+          sbExec(supabaseClient.from('profiles').update({
+            ai_api_key: combined
+          }).ilike('email', OWNER_ADMIN_EMAIL));
+        }
+
+        const badge = document.getElementById('admin-whop-status-badge');
+        if (badge) {
+          badge.textContent = t('Whop USD Gateway Connected ✓', 'بوابة Whop بالدولار متصلة ومفعلة ✓');
+        }
+        showToast(t('✅ Whop USD Gateway settings saved & linked!', '✅ تم حفظ إعدادات بوابة دفع Whop بالدولار بنجاح!'), 'info');
+      });
+    }
+
+    function createWhopDynamicCheckoutSession(planName, usdPrice, creditsAmount) {
+      const cleanUsd = parseFloat(Number(usdPrice).toFixed(2));
+      const statusTxt = document.getElementById('whop-session-status-text');
+      const extLink = document.getElementById('whop-external-checkout-link');
+      const iframe = document.getElementById('gumroad-inline-iframe');
+      const uEmail = (appState.currentUser && appState.currentUser.email) ? appState.currentUser.email : '';
+      const returnUrl = 'https://omniposts.online/?whop_paid=1&credits=' + encodeURIComponent(String(creditsAmount)) + '&plan=' + encodeURIComponent(planName);
+
+      if (statusTxt) {
+        statusTxt.textContent = t(
+          '⏳ Generating Whop USD Checkout for $' + cleanUsd.toFixed(2) + ' USD (' + creditsAmount + ' Credits)...',
+          '⏳ جاري توليد فاتورة دفع Whop بمبلغ $' + cleanUsd.toFixed(2) + ' USD (' + creditsAmount + ' كريدت)...'
+        );
+      }
+
+      function applyFallbackWhopUrl() {
+        if (platformWhopConfig.fallbackUrl) {
+          const fb = platformWhopConfig.fallbackUrl;
+          const fbWithParams = fb + (fb.indexOf('?') === -1 ? '?' : '&') + 'd=true' + (uEmail ? '&email=' + encodeURIComponent(uEmail) : '');
+          if (iframe) iframe.src = fbWithParams;
+          if (extLink) extLink.href = fb;
+          if (statusTxt) {
+            statusTxt.textContent = t(
+              '✅ Whop USD Checkout Ready: $' + cleanUsd.toFixed(2) + ' USD (' + creditsAmount + ' Credits 💎)',
+              '✅ صفحة دفع Whop جاهزة الآن: $' + cleanUsd.toFixed(2) + ' USD (' + creditsAmount + ' كريدت 💎)'
+            );
+          }
+          return fb;
+        }
+        if (statusTxt) {
+          statusTxt.textContent = t(
+            '🔒 Whop USD Checkout ($' + cleanUsd.toFixed(2) + ' USD — ' + creditsAmount + ' Credits)',
+            '🔒 بوابة دفع Whop ($' + cleanUsd.toFixed(2) + ' USD — ' + creditsAmount + ' كريدت)'
+          );
+        }
+        return null;
+      }
+
+      if (!platformWhopConfig.apiKey || !window.fetch) {
+        return Promise.resolve(applyFallbackWhopUrl());
+      }
+
+      const reqBody = {
+        plan: {
+          plan_type: 'one_time',
+          release_method: 'buy_now',
+          initial_price: cleanUsd,
+          currency: 'usd'
+        },
+        metadata: {
+          user_email: uEmail,
+          credits: String(creditsAmount),
+          plan_name: planName,
+          currency: 'USD'
+        },
+        redirect_url: returnUrl
+      };
+      if (platformWhopConfig.productId) reqBody.plan.product_id = platformWhopConfig.productId;
+      if (platformWhopConfig.companyId) reqBody.plan.company_id = platformWhopConfig.companyId;
+
+      return window.fetch('https://api.whop.com/api/v2/checkout_configurations', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + platformWhopConfig.apiKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(reqBody)
+      }).then(function(r) {
+        return r.json().catch(function() { return null; });
+      }).then(function(resJson) {
+        const purchaseUrl = (resJson && (resJson.purchase_url || (resJson.data && resJson.data.purchase_url))) || '';
+        const sessionId = (resJson && (resJson.id || (resJson.data && resJson.data.id))) || '';
+        if (purchaseUrl) {
+          platformWhopConfig.activeCheckoutId = sessionId;
+          platformWhopConfig.activePurchaseUrl = purchaseUrl;
+          const finalUrl = purchaseUrl + (purchaseUrl.indexOf('?') === -1 ? '?' : '&') + 'd=true' + (uEmail ? '&email=' + encodeURIComponent(uEmail) : '');
+          if (iframe) iframe.src = finalUrl;
+          if (extLink) extLink.href = purchaseUrl;
+          if (statusTxt) {
+            statusTxt.textContent = t(
+              '✅ Whop USD Session Ready: $' + cleanUsd.toFixed(2) + ' USD (' + creditsAmount + ' Credits 💎)',
+              '✅ فاتورة Whop جاهزة الآن: $' + cleanUsd.toFixed(2) + ' USD (' + creditsAmount + ' كريدت 💎)'
+            );
+          }
+          return purchaseUrl;
+        }
+        return applyFallbackWhopUrl();
+      }).catch(function() {
+        return applyFallbackWhopUrl();
+      });
+    }
+
+    function checkWhopReturnUrlCallback() {
+      try {
+        const params = new URLSearchParams(window.location.search || '');
+        if (params.get('whop_paid') === '1' && appState.isLoggedIn && appState.currentUser.email) {
+          const addCr = parseInt(params.get('credits') || '1000', 10) || 1000;
+          const pName = params.get('plan') || ('Whop Package (' + addCr + ' Credits)');
+          appState.selectedCheckoutPlan = { nameEn: pName, nameAr: pName, usdPrice: 9.99, days: 30, credits: addCr };
+          window.history.replaceState({}, document.title, window.location.pathname);
+          activateVerifiedSubscriptionFromGumroad();
+        }
+      } catch (e) {}
+    }
+
     function saveAdminMasterEngineSettings() {
       const keyEl = document.getElementById('admin-master-kie-key');
       const keyVal = keyEl ? keyEl.value.trim() : '';
@@ -2191,7 +2454,7 @@
 
       if (supabaseClient) {
         sbExec(supabaseClient.from('profiles').update({
-          ai_api_key: keyVal,
+          ai_api_key: encodeCombinedMasterKeyField(keyVal, platformWhopConfig.apiKey, platformWhopConfig.productId, platformWhopConfig.companyId),
           ai_provider: 'MASTER_ACTIVE|CR:999999|RWD:0'
         }).ilike('email', OWNER_ADMIN_EMAIL));
       }
@@ -2215,15 +2478,41 @@
       return sbExec(
         supabaseClient.from('profiles').select('ai_api_key').ilike('email', OWNER_ADMIN_EMAIL).maybeSingle()
       ).then(function(res) {
-        if (res && res.data && res.data.ai_api_key && res.data.ai_api_key.length >= 20) {
-          platformMasterEngine.apiKey = res.data.ai_api_key;
-          try {
-            localStorage.setItem('omniposts_master_engine', JSON.stringify(platformMasterEngine));
-          } catch (e) {}
-          const keyEl = document.getElementById('admin-master-kie-key');
-          if (keyEl) keyEl.value = platformMasterEngine.apiKey;
-          const badge = document.getElementById('admin-master-key-badge');
-          if (badge) badge.textContent = t('Central Master Key Connected ✓', 'المفتاح المركزي متصل ومفعل ✓');
+        try {
+          const localW = localStorage.getItem('omniposts_whop_config');
+          if (localW) {
+            const parsedW = JSON.parse(localW);
+            if (parsedW && parsedW.apiKey) platformWhopConfig.apiKey = parsedW.apiKey;
+            if (parsedW && parsedW.productId) platformWhopConfig.productId = parsedW.productId;
+            if (parsedW && parsedW.companyId) platformWhopConfig.companyId = parsedW.companyId;
+          }
+        } catch (e) {}
+        if (res && res.data && res.data.ai_api_key) {
+          const decoded = decodeCombinedMasterKeyField(res.data.ai_api_key);
+          if (decoded.kieKey && decoded.kieKey.length >= 20) {
+            platformMasterEngine.apiKey = decoded.kieKey;
+            try {
+              localStorage.setItem('omniposts_master_engine', JSON.stringify(platformMasterEngine));
+            } catch (e) {}
+            const keyEl = document.getElementById('admin-master-kie-key');
+            if (keyEl) keyEl.value = platformMasterEngine.apiKey;
+            const badge = document.getElementById('admin-master-key-badge');
+            if (badge) badge.textContent = t('Central Master Key Connected ✓', 'المفتاح المركزي متصل ومفعل ✓');
+          }
+          if (decoded.whopKey) {
+            platformWhopConfig.apiKey = decoded.whopKey;
+            if (decoded.productId) platformWhopConfig.productId = decoded.productId;
+            if (decoded.companyId) platformWhopConfig.companyId = decoded.companyId;
+            try {
+              localStorage.setItem('omniposts_whop_config', JSON.stringify(platformWhopConfig));
+            } catch (e) {}
+            const wKeyEl = document.getElementById('admin-whop-api-key');
+            const wProdEl = document.getElementById('admin-whop-product-id');
+            const wBadge = document.getElementById('admin-whop-status-badge');
+            if (wKeyEl) wKeyEl.value = platformWhopConfig.apiKey;
+            if (wProdEl && platformWhopConfig.productId) wProdEl.value = platformWhopConfig.productId;
+            if (wBadge) wBadge.textContent = t('Whop API Connected ✓', 'بوابة Whop API متصلة ومفعلة ✓');
+          }
         }
       });
     }
@@ -2286,7 +2575,7 @@
         tagEl.textContent = t('Generates ' + videosCount + ' Videos 🎬 (Never Expires ♾️)', 'تولد ' + videosCount + ' فيديو 🎬 (لا ينتهي أبداً ♾️)');
       }
       if (usdEl) usdEl.textContent = '$' + usdPrice.toFixed(2);
-      if (egpEl) egpEl.textContent = '(' + egpPrice.toLocaleString() + (isEn() ? ' EGP)' : ' ج.م)');
+      if (egpEl) egpEl.textContent = appState.gatewayRegion === 'EGY' ? ('(' + egpPrice.toLocaleString() + (isEn() ? ' EGP)' : ' ج.م)')) : 'USD';
     }
 
     function openCustomSliderCheckout() {
@@ -4423,7 +4712,7 @@
     }
 
     function openCheckoutModal(planName, usdPrice, days, creditsAmount) {
-      const cr = parseInt(creditsAmount, 10) || 330;
+      const cr = parseInt(creditsAmount, 10) || 1000;
       appState.selectedCheckoutPlan = {
         nameEn: planName,
         nameAr: planName,
@@ -4435,14 +4724,7 @@
       panel.classList.remove('hidden');
       updateCheckoutSummary();
       panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      const iframe = document.getElementById('gumroad-inline-iframe');
-      if (iframe) {
-        const baseGumUrl = (usdPrice <= 10)
-          ? 'https://omniposts.gumroad.com/l/qmlde'
-          : (usdPrice >= 25 ? 'https://omniposts.gumroad.com/l/ipano' : 'https://omniposts.gumroad.com/l/pmuiu');
-        const userEmailParam = appState.currentUser.email ? '&email=' + encodeURIComponent(appState.currentUser.email) : '';
-        iframe.src = baseGumUrl + '?embed=true&wanted=true' + userEmailParam;
-      }
+      createWhopDynamicCheckoutSession(planName, usdPrice, cr);
     }
 
     function closeCheckoutModal() {
@@ -4453,16 +4735,15 @@
       const p = appState.selectedCheckoutPlan;
       if (!p) return;
       const planLabel = isEn() ? p.nameEn : p.nameAr;
-      const cr = parseInt(p.credits, 10) || 330;
+      const cr = parseInt(p.credits, 10) || 1000;
       document.getElementById('checkout-plan-title').textContent = t('Subscribing to: ' + planLabel, 'الاشتراك في: ' + planLabel);
       document.getElementById('summary-plan-name').textContent = planLabel;
-      document.getElementById('summary-plan-days').textContent = t(cr + ' Credits (Never Expire ♾️)', cr + ' نقطة كريدت (لا تنتهي أبداً ♾️)');
-
+      document.getElementById('summary-plan-days').textContent = t(cr.toLocaleString() + ' Credits (Never Expire ♾️)', cr.toLocaleString() + ' نقطة كريدت (لا تنتهي أبداً ♾️)');
       if (appState.gatewayRegion === 'EGY') {
-        document.getElementById('summary-gateway-name').textContent = t('🇪🇬 Egypt Gateway (EGP)', '🇪🇬 بوابة مصر (بالجنيه المصري EGP)');
-        document.getElementById('summary-total-amount').textContent = Math.round(p.usdPrice * appState.egpRate).toLocaleString() + (isEn() ? ' EGP ($' + p.usdPrice + ')' : ' ج.م ($' + p.usdPrice + ')');
+        document.getElementById('summary-gateway-name').textContent = t('🇪🇬 Egypt Local Gateway (Vodafone Cash / InstaPay)', '🇪🇬 بوابة الدفع المصرية (فودافون كاش / إنستاباي)');
+        document.getElementById('summary-total-amount').textContent = '$' + Number(p.usdPrice).toFixed(2) + ' USD (' + Math.round(p.usdPrice * appState.egpRate).toLocaleString() + (isEn() ? ' EGP)' : ' ج.م)');
       } else {
-        document.getElementById('summary-gateway-name').textContent = t('🌍 International Gateway (USD)', '🌍 البوابة الدولية (بالدولار USD)');
+        document.getElementById('summary-gateway-name').textContent = t('🌍 Whop Global Gateway (USD $)', '🌍 بوابة دفع Whop العالمية (USD $)');
         document.getElementById('summary-total-amount').textContent = '$' + Number(p.usdPrice).toFixed(2) + ' USD';
       }
     }
@@ -4931,6 +5212,7 @@
       setLanguage(savedLang);
       loadPlatformMasterEngineFromSupabase();
       updateCustomPlanSlider();
+      checkWhopReturnUrlCallback();
 
       if (window.location.search && window.location.search.indexOf('policy=') !== -1) {
         const qParams = new URLSearchParams(window.location.search);
