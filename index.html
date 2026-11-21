@@ -3,7 +3,42 @@
 <head>
  <meta charset="UTF-8" />
  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
- <title>Omniposts.online — Autonomous AI Video Generation & Multi-Channel Publishing Platform</title>
+ <title>Omniposts — AI Video Generator &amp; YouTube Autopilot (Omniposts.online)</title>
+ <meta name="description" content="Omniposts (Omniposts.online) is an autonomous AI video generation and multi-channel YouTube publishing platform. Create viral AI Shorts and auto-publish to up to 7 YouTube channels 24/7." />
+ <meta name="keywords" content="Omniposts, Omniposts.online, AI Video Generator, YouTube Automation, AI Shorts Autopilot, صناعة فيديوهات بالذكاء الاصطناعي, أتمتة يوتيوب" />
+ <meta name="robots" content="index, follow, max-image-preview:large" />
+ <link rel="canonical" href="https://omniposts.online/" />
+ <!-- Site Logo / Favicon for Google Search Results & Browsers -->
+ <link rel="icon" type="image/png" sizes="120x120" href="https://omniposts.online/omniposts_logo_120x120.png" />
+ <link rel="shortcut icon" type="image/png" href="https://omniposts.online/omniposts_logo_120x120.png" />
+ <link rel="apple-touch-icon" sizes="120x120" href="https://omniposts.online/omniposts_logo_120x120.png" />
+ <!-- Open Graph / Social Sharing -->
+ <meta property="og:type" content="website" />
+ <meta property="og:site_name" content="Omniposts" />
+ <meta property="og:title" content="Omniposts — Autonomous AI Video Generation &amp; YouTube Autopilot" />
+ <meta property="og:description" content="Connect up to 7 YouTube channels, generate viral AI videos with 16 top AI models, and auto-publish daily 24/7." />
+ <meta property="og:url" content="https://omniposts.online/" />
+ <meta property="og:image" content="https://omniposts.online/omniposts_logo_120x120.png" />
+ <!-- Google Structured Data (Site Name & Logo in Search Results) -->
+ <script type="application/ld+json">
+ {
+   "@context": "https://schema.org",
+   "@type": "Organization",
+   "name": "Omniposts",
+   "alternateName": "Omniposts.online",
+   "url": "https://omniposts.online/",
+   "logo": "https://omniposts.online/omniposts_logo_120x120.png"
+ }
+ </script>
+ <script type="application/ld+json">
+ {
+   "@context": "https://schema.org",
+   "@type": "WebSite",
+   "name": "Omniposts",
+   "alternateName": "Omniposts.online",
+   "url": "https://omniposts.online/"
+ }
+ </script>
  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.1"></script>
  <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -4172,7 +4207,7 @@
     : 'https://omniposts.online';
    const redirectUri = encodeURIComponent(currentOrigin);
    const scope = encodeURIComponent('https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly');
-   const oauthUrl = 'https://accounts.google.com/o/oauth2/v2/auth?client_id=' + GOOGLE_YOUTUBE_CLIENT_ID + '&redirect_uri=' + redirectUri + '&response_type=token&scope=' + scope + '&include_granted_scopes=true&prompt=consent&state=slot_' + slot;
+   const oauthUrl = 'https://accounts.google.com/o/oauth2/v2/auth?client_id=' + GOOGLE_YOUTUBE_CLIENT_ID + '&redirect_uri=' + redirectUri + '&response_type=code&access_type=offline&scope=' + scope + '&include_granted_scopes=true&prompt=consent&state=slot_' + slot;
    showToast(t('🔄 Redirecting you to Google / YouTube official authorization screen to link Channel #' + slot + '...', '🔄 جاري توجيهك الآن إلى صفحة جوجل / يوتيوب الرسمية لربط القناة رقم ' + slot + '...'), 'info');
    window.location.href = oauthUrl;
   }
@@ -4224,7 +4259,13 @@
      duration_sec: ch.durationSec || 60,
      orientation: ch.orientation,
      video_language: ch.language,
-     time_slots: ch.timeSlots
+     time_slots: ch.timeSlots,
+     auto_schedule_enabled: ch.autoScheduleEnabled !== false,
+     visual_style: ch.visualStyle || '3D Pixar & Disney Animation',
+     video_model: ch.videoModel || 'bytedance/v1-lite-text-to-video',
+     resolution: ch.resolution || '480p',
+     publish_mode: ch.publishMode || 'AUTO_PUBLISH_AND_DOWNLOAD',
+     timezone_offset_minutes: new Date().getTimezoneOffset()
     }, { onConflict: 'user_email,slot_number' }));
    }
    if (notify) {
@@ -5955,8 +5996,10 @@
      setTimeout(function() { openPolicyTab(pol); }, 50);
     }
    }
-   const hasOAuthReturn = Boolean(window.location.hash && window.location.hash.indexOf('access_token=') !== -1);
-   const rawHash = hasOAuthReturn ? window.location.hash.substring(1) : '';
+   const urlSearchParams = new URLSearchParams(window.location.search || '');
+   const oauthCodeParam = urlSearchParams.get('code');
+   const hasOAuthReturn = Boolean((window.location.hash && window.location.hash.indexOf('access_token=') !== -1) || oauthCodeParam);
+   const rawHash = (window.location.hash && window.location.hash.indexOf('access_token=') !== -1) ? window.location.hash.substring(1) : '';
    try {
     const savedSession = localStorage.getItem('omniposts_v3_session');
     if (savedSession) {
@@ -5977,9 +6020,23 @@
    } catch (err) {}
    if (hasOAuthReturn) {
     const params = new URLSearchParams(rawHash);
-    const accessToken = params.get('access_token');
+    const rawAccessToken = params.get('access_token');
     const slot = parseInt(localStorage.getItem('omniposts_pending_yt_slot') || '1', 10);
     const pendingCustomName = localStorage.getItem('omniposts_pending_yt_custom_name') || '';
+    const exchangePromise = oauthCodeParam
+     ? fetch(SUPABASE_URL + '/functions/v1/cloud-autopilot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+        body: JSON.stringify({
+         action: 'exchange_oauth_code',
+         code: oauthCodeParam,
+         redirect_uri: (window.location.origin && window.location.origin.indexOf('http') === 0) ? window.location.origin : 'https://omniposts.online',
+         user_email: (appState.currentUser && appState.currentUser.email) || '',
+         slot_number: slot
+        })
+       }).then(function(r) { return r.json(); }).then(function(j) { return (j && j.access_token) ? j.access_token : ''; }).catch(function() { return ''; })
+     : Promise.resolve(rawAccessToken || '');
+    exchangePromise.then(function(accessToken) {
     if (accessToken) {
      loadUserChannelsFromSupabase(appState.currentUser.email).then(function() {
       fetch('https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&mine=true', {
@@ -6003,6 +6060,7 @@
       });
      });
     }
+    });
    } else if (appState.isLoggedIn && appState.currentUser.email) {
     loadUserChannelsFromSupabase(appState.currentUser.email);
    }
