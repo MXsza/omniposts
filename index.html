@@ -1321,6 +1321,31 @@
        </div>
       </div>
      </div>
+     <!-- Saved Channels & Schedules Summary Table (Shown after clicking Save Schedule) -->
+     <div id="saved-schedules-summary-card" class="mt-4 p-4 rounded-2xl bg-slate-900/90 border border-emerald-500/30 space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-white/10">
+       <div class="flex items-center gap-2">
+        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+        <h5 class="text-xs sm:text-sm font-bold text-white" data-en="Saved Channels & Daily Publish Schedule Table" data-ar="جدول القنوات والمواعيد المجدولة المحفوظة">جدول القنوات والمواعيد المجدولة المحفوظة</h5>
+       </div>
+       <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-semibold" data-en="24/7 Cloud Synced" data-ar="متزامن مع السحابة 24/7">متزامن مع السحابة 24/7</span>
+      </div>
+      <div class="overflow-x-auto">
+       <table class="w-full text-start text-xs">
+        <thead>
+         <tr class="border-b border-white/10 text-slate-400 text-[11px]">
+          <th class="py-2 px-2" data-en="Channel" data-ar="اسم القناة">اسم القناة</th>
+          <th class="py-2 px-2" data-en="Content Niche" data-ar="المحتوى المختار">المحتوى المختار</th>
+          <th class="py-2 px-2 text-center" data-en="Daily Videos" data-ar="عدد الفيديوهات">عدد الفيديوهات</th>
+          <th class="py-2 px-2" data-en="Scheduled Times" data-ar="مواعيد النشر">مواعيد النشر</th>
+          <th class="py-2 px-2 text-end" data-en="Status" data-ar="الحالة">الحالة</th>
+         </tr>
+        </thead>
+        <tbody id="saved-schedules-summary-tbody" class="divide-y divide-white/10">
+        </tbody>
+       </table>
+      </div>
+     </div>
      <!-- Daily & Yesterday Publish History Log -->
      <div id="daily-publish-history-card" class="mt-4 p-4 rounded-2xl bg-slate-950/70 border border-white/10 space-y-3">
       <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-white/10">
@@ -3927,6 +3952,7 @@
    }
    updateAutoScheduleToggleUI(ch);
    renderTimeSlots(ch.dailyCount, ch.timeSlots);
+   renderSavedSchedulesTable();
    renderPublishHistoryLog();
    updateLiveAiPreviewText();
   }
@@ -4268,13 +4294,51 @@
      timezone_offset_minutes: new Date().getTimezoneOffset()
     }, { onConflict: 'user_email,slot_number' }));
    }
+   renderSavedSchedulesTable();
    if (notify) {
+    const tblCard = document.getElementById('saved-schedules-summary-card');
+    if (tblCard) tblCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     if (!ch.connected) {
-     showToast(t('⚠️ Preferences saved for Channel #' + slot + ', but this channel is NOT linked to YouTube yet! Click "Connect / Update YouTube Channel" above to link your channel via Google.', '⚠️ تم حفظ الإعدادات المبدئية للقناة رقم ' + slot + '، ولكن هذه القناة غير مربوطة بيوتيوب بعد! اضغط على "تحديث / ربط حساب يوتيوب" بالأعلى لربط قناتك عبر جوجل.'), 'warn');
+     showToast(t('Preferences saved for Channel #' + slot + ', but this channel is NOT linked to YouTube yet! Link it from the Channels page.', 'تم حفظ الجدول للقناة رقم ' + slot + '، ولكن القناة غير مربوطة بيوتيوب بعد! اربطها من صفحة القنوات.'), 'warn');
     } else {
-     showToast(t('💾 Saved schedule for Channel #' + slot + ' (' + ch.dailyCount + ' videos/day) to Supabase!', '💾 تم حفظ جدول القناة رقم ' + slot + ' (' + ch.dailyCount + ' فيديوهات يومياً) في قاعدة بيانات Supabase!'), 'info');
+     showToast(t('Saved schedule for Channel #' + slot + ' (' + ch.dailyCount + ' videos/day) to Cloud Autopilot!', 'تم حفظ جدول القناة رقم ' + slot + ' (' + ch.dailyCount + ' فيديوهات يومياً) وتفعيله في السحابة بنجاح!'), 'info');
     }
    }
+  }
+  function renderSavedSchedulesTable() {
+   const tbody = document.getElementById('saved-schedules-summary-tbody');
+   if (!tbody) return;
+   const rows = [];
+   for (let i = 1; i <= 7; i++) {
+    const ch = appState.channels[i];
+    if (!ch) continue;
+    if (!ch.connected && i !== appState.selectedChannelSlot) continue;
+    const chName = isEn() ? (ch.nameEn || ('Channel #' + i)) : (ch.nameAr || ('القناة #' + i));
+    const nicheLabel = (ch.customNiche && ch.customNiche.trim()) ? ch.customNiche.trim() : (ch.niche || '—');
+    const timesFormatted = Array.isArray(ch.timeSlots) && ch.timeSlots.length > 0
+     ? ch.timeSlots.map(formatLocalizedClock).join(isEn() ? ', ' : ' ، ')
+     : '—';
+    let statusBadge = '';
+    if (!ch.connected) {
+     statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">' + t('Not Linked', 'غير مربوطة') + '</span>';
+    } else if (ch.autoScheduleEnabled === false) {
+     statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-700 text-slate-300 border border-white/10">' + t('Paused', 'متوقفة مؤقتاً') + '</span>';
+    } else {
+     statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">' + t('Active 24/7 ✓', 'نشطة 24/7 ✓') + '</span>';
+    }
+    rows.push(
+     '<tr class="hover:bg-white/5 transition">' +
+      '<td class="py-2.5 px-2 font-bold text-white">' + chName + '</td>' +
+      '<td class="py-2.5 px-2 text-slate-300 max-w-[180px] truncate">' + nicheLabel + '</td>' +
+      '<td class="py-2.5 px-2 text-center font-extrabold text-sky-300">' + toLocalizedDigits(ch.dailyCount || 1) + ' ' + t('/day', 'فيديو/يوم') + '</td>' +
+      '<td class="py-2.5 px-2 text-indigo-200 font-semibold">' + timesFormatted + '</td>' +
+      '<td class="py-2.5 px-2 text-end">' + statusBadge + '</td>' +
+     '</tr>'
+    );
+   }
+   tbody.innerHTML = rows.length > 0
+    ? rows.join('')
+    : '<tr><td colspan="5" class="py-4 text-center text-slate-400 text-[11px]">' + t('Configure a channel and click Save Schedule to view your schedule table.', 'اضبط إعدادات القناة واضغط حفظ الجدول ليظهر جدول مواعيدك هنا.') + '</td></tr>';
   }
   function updateLiveAiPreviewText() {
    const ch = appState.channels[appState.selectedChannelSlot];
@@ -4666,40 +4730,55 @@
    });
   }
   function trySilentGoogleTokenRefresh(slotNum) {
-   return new Promise(function(resolve) {
-    try {
-     if (window.google && window.google.accounts && window.google.accounts.oauth2 && typeof window.google.accounts.oauth2.initTokenClient === 'function') {
-      const client = window.google.accounts.oauth2.initTokenClient({
-       client_id: GOOGLE_YOUTUBE_CLIENT_ID,
-       scope: 'https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly',
-       prompt: '',
-       callback: function(tokenResponse) {
-        if (tokenResponse && tokenResponse.access_token) {
-         const ch = appState.channels[slotNum];
-         if (ch) {
-          ch.accessToken = tokenResponse.access_token;
-          ch.tokenTimestamp = Date.now();
-          if (appState.currentUser.email) saveUserChannelsToLocal(appState.currentUser.email);
-          if (supabaseClient && appState.currentUser.email) {
-           sbExec(supabaseClient.from('channels').update({
-            youtube_access_token: tokenResponse.access_token
-           }).ilike('user_email', appState.currentUser.email).eq('slot_number', slotNum));
-          }
-         }
-         resolve(tokenResponse.access_token);
-        } else {
-         resolve('');
+   const userEm = (appState.currentUser && appState.currentUser.email) ? appState.currentUser.email : '';
+   const cloudRefreshPromise = userEm
+    ? fetch(SUPABASE_URL + '/functions/v1/cloud-autopilot', {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+       body: JSON.stringify({ action: 'refresh_access_token', user_email: userEm, slot_number: slotNum })
+      }).then(function(r) { return r.json(); }).then(function(j) {
+       if (j && j.ok && j.access_token) {
+        const ch = appState.channels[slotNum];
+        if (ch) {
+         ch.accessToken = j.access_token;
+         ch.tokenTimestamp = Date.now();
+         saveUserChannelsToLocal(userEm);
         }
-       },
-       error_callback: function() {
-        resolve('');
+        return j.access_token;
        }
-      });
-      client.requestAccessToken({ prompt: '' });
-      return;
-     }
-    } catch (e) {}
-    resolve('');
+       return '';
+      }).catch(function() { return ''; })
+    : Promise.resolve('');
+   return cloudRefreshPromise.then(function(cloudTok) {
+    if (cloudTok) return cloudTok;
+    return new Promise(function(resolve) {
+     try {
+      if (window.google && window.google.accounts && window.google.accounts.oauth2 && typeof window.google.accounts.oauth2.initTokenClient === 'function') {
+       const client = window.google.accounts.oauth2.initTokenClient({
+        client_id: GOOGLE_YOUTUBE_CLIENT_ID,
+        scope: 'https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly',
+        prompt: '',
+        callback: function(tokenResponse) {
+         if (tokenResponse && tokenResponse.access_token) {
+          const ch = appState.channels[slotNum];
+          if (ch) {
+           ch.accessToken = tokenResponse.access_token;
+           ch.tokenTimestamp = Date.now();
+           if (appState.currentUser.email) saveUserChannelsToLocal(appState.currentUser.email);
+          }
+          resolve(tokenResponse.access_token);
+         } else {
+          resolve('');
+         }
+        },
+        error_callback: function() { resolve(''); }
+       });
+       client.requestAccessToken({ prompt: '' });
+       return;
+      }
+     } catch (e) {}
+     resolve('');
+    });
    });
   }
   function simulateInstantAiGeneration(forcedSlotNum) {
@@ -5176,7 +5255,8 @@
      createdAt: Date.now()
     });
     localStorage.setItem(getPublishHistoryStorageKey(), JSON.stringify(list.slice(0, 120)));
-    renderPublishHistoryLog();
+    renderSavedSchedulesTable();
+   renderPublishHistoryLog();
     const curCh = appState.channels[appState.selectedChannelSlot];
     if (curCh) renderTimeSlots(curCh.dailyCount, curCh.timeSlots);
    } catch (e) {}
@@ -5190,6 +5270,7 @@
      ? 'px-3 py-1 rounded-full text-[11px] font-bold bg-indigo-600 text-white transition'
      : 'px-3 py-1 rounded-full text-[11px] font-bold bg-white/5 hover:bg-white/10 text-slate-300 transition';
    });
+   renderSavedSchedulesTable();
    renderPublishHistoryLog();
   }
   function renderPublishHistoryLog() {
@@ -6036,6 +6117,7 @@
         })
        }).then(function(r) { return r.json(); }).then(function(j) { return (j && j.access_token) ? j.access_token : ''; }).catch(function() { return ''; })
      : Promise.resolve(rawAccessToken || '');
+    if (oauthCodeParam && window.history && window.history.replaceState) { try { window.history.replaceState({}, document.title, window.location.pathname); } catch (e) {} }
     exchangePromise.then(function(accessToken) {
     if (accessToken) {
      loadUserChannelsFromSupabase(appState.currentUser.email).then(function() {
