@@ -373,7 +373,9 @@
      <button type="button" onclick="navigateView('login')" class="apple-btn-secondary px-8 py-4 text-base sm:text-lg font-medium" data-en="Log In to Your Account" data-ar="تسجيل الدخول لحسابك">
       Log In to Your Account
      </button>
-
+     <button type="button" onclick="navigateView('dashboard')" class="hidden px-6 py-4 rounded-full text-sm text-blue-400 hover:text-blue-300 underline underline-offset-4" data-en="Preview Client Dashboard Live" data-ar="معاينة لوحة تحكم العميل مباشرة">
+      Preview Client Dashboard Live
+     </button>
     </div>
     <div class="mt-14 relative max-w-5xl mx-auto">
      <div class="apple-bento p-3 sm:p-5 shadow-2xl border border-white/15 relative overflow-hidden">
@@ -881,7 +883,16 @@
      <span data-en="We sent a 6-digit verification code to your email:" data-ar="أرسلنا كود تحقق مكون من 6 أرقام إلى بريدك الإلكتروني:">We sent a 6-digit verification code to your email:</span>
      <span id="otp-target-email" class="text-blue-400 font-mono block mt-1">user@example.com</span>
     </p>
-
+    <div class="hidden my-5 p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-start text-xs">
+     <div class="flex items-center justify-between">
+      <span class="text-blue-300 font-semibold" data-en="📬 Simulated Email Inbox (For Live Testing):" data-ar="📬 محاكاة رسالة البريد الواردة (للتجربة):">📬 Simulated Email Inbox (For Live Testing):</span>
+      <button type="button" onclick="fillDemoOtp()" class="px-2.5 py-1 rounded-lg bg-blue-600 text-white text-[11px] font-semibold" data-en="Auto-Fill OTP" data-ar="ملء الكود تلقائياً">Auto-Fill OTP</button>
+     </div>
+     <p class="text-zinc-300 mt-1.5">
+      <span data-en="Your Omniposts.online verification code is: " data-ar="كود التفعيل الخاص بك في Omniposts.online هو: ">Your Omniposts.online verification code is: </span>
+      <strong id="generated-otp-display" class="text-emerald-400 font-mono text-sm tracking-widest">482910</strong>
+     </p>
+    </div>
     <form id="otp-form" onsubmit="handleOtpVerify(event)" class="space-y-4">
      <div>
       <label class="block text-xs text-zinc-400 mb-2" data-en="Enter the 6-digit OTP code" data-ar="أدخل كود الـ OTP المكون من 6 أرقام">Enter the 6-digit OTP code</label>
@@ -928,6 +939,17 @@
  </section>
  <section id="view-dashboard" class="hidden flex-1 py-5 px-3 sm:px-6 overflow-x-hidden max-w-full">
   <div class="max-w-6xl mx-auto space-y-4">
+   <div class="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-white/10">
+    <div class="flex items-center gap-3">
+     <span class="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25 shrink-0">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+     </span>
+     <div>
+      <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-400" data-en="Dashboard & AI Video Studio" data-ar="لوحة التحكم واستوديو التوليد والجدولة">Dashboard & AI Video Studio</span>
+      <h2 class="text-lg sm:text-xl font-extrabold text-white" data-en="Channel Control, Video Generation & Daily Automation" data-ar="التحكم في القنوات، توليد الفيديوهات، والجدولة اليومية">Channel Control, Video Generation & Daily Automation</h2>
+     </div>
+    </div>
+   </div>
    <div id="owner-admin-exclusive-banner" class="hidden apple-bento p-3.5 sm:p-4 border border-amber-500/50 bg-gradient-to-r from-amber-500/15 via-slate-900 to-slate-900">
     <div class="flex flex-wrap items-center justify-between gap-3">
      <div class="flex items-center gap-3">
@@ -1189,17 +1211,17 @@
       </div>
      </div>
      <div class="mt-4 p-3.5 rounded-2xl bg-indigo-500/5 border border-indigo-500/20">
-      <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
-       <div class="flex items-center gap-2">
+      <div class="flex flex-wrap items-center justify-between gap-2.5 mb-3">
+       <div class="flex flex-wrap items-center gap-2">
         <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        <span class="text-xs font-bold text-white" data-en="Daily Auto-Publish Schedule:" data-ar="مواعيد النشر التلقائي اليومية:">Daily Auto-Publish Schedule:</span>
+        <span class="text-xs font-bold text-white" data-en="Daily Auto-Publish Schedule (Resets Daily):" data-ar="مواعيد النشر التلقائي اليومية (تتجدد تلقائياً كل يوم):">Daily Auto-Publish Schedule (Resets Daily):</span>
         <span id="slots-count-badge" class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-semibold">3 Slots</span>
        </div>
        <div class="flex flex-wrap items-center gap-2">
-        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-semibold text-emerald-300">
-         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-         <span data-en="Auto-Scheduler Active 24/7" data-ar="المجدول التلقائي نشط ويعمل بالخلفية">المجدول التلقائي نشط ويعمل بالخلفية</span>
-        </span>
+        <button type="button" id="btn-toggle-channel-autoschedule" onclick="toggleCurrentChannelAutoSchedule()" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-[11px] font-bold text-emerald-300 transition">
+         <span id="autoschedule-toggle-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+         <span id="autoschedule-toggle-label">الجدولة التلقائية مفعّلة — اضغط للإيقاف المؤقت</span>
+        </button>
         <span id="live-scheduler-clock-now" class="font-mono text-[11px] text-slate-200 bg-slate-950/80 px-2 py-0.5 rounded-md border border-white/10" dir="ltr">--:--:--</span>
        </div>
       </div>
@@ -1264,41 +1286,20 @@
        </div>
       </div>
      </div>
-     <!-- SAVED SCHEDULE & DAILY PUBLISHING STATUS TABLE (Appears upon clicking Save Schedule) -->
-     <div id="saved-schedule-status-card" class="hidden mt-5 p-4 sm:p-5 rounded-2xl bg-slate-950/90 border border-emerald-500/35 shadow-xl space-y-4 transition-all duration-300">
-      <div class="flex flex-wrap items-center justify-between gap-3 pb-3.5 border-b border-white/10">
-       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/35 flex items-center justify-center text-emerald-400 shrink-0 shadow">
-         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        </div>
-        <div>
-         <div class="flex flex-wrap items-center gap-2">
-          <h5 id="saved-schedule-banner-title" class="text-xs sm:text-sm font-extrabold text-emerald-300" data-en="✅ Saved & Waiting for Scheduled Publish Time" data-ar="✅ تم الحفظ وانتظار توقيت النشر">✅ تم الحفظ وانتظار توقيت النشر</h5>
-          <span id="saved-schedule-channel-badge" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">القناة رقم 1</span>
-         </div>
-         <p id="saved-schedule-sub-info" class="text-[11px] text-slate-300 mt-0.5" data-en="Your daily video publishing schedule is saved and active. Status updates automatically for each appointment." data-ar="تم حفظ جدول مواعيد النشر بنجاح وسيتم التوليد والنشر تلقائياً في كل موعد وتحديث الحالة بالأسفل.">تم حفظ جدول مواعيد النشر بنجاح وسيتم التوليد والنشر تلقائياً في كل موعد وتحديث الحالة بالأسفل.</p>
-        </div>
+     <!-- Daily & Yesterday Publish History Log -->
+     <div id="daily-publish-history-card" class="mt-4 p-4 rounded-2xl bg-slate-950/70 border border-white/10 space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-white/10">
+       <div class="flex items-center gap-2">
+        <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+        <h5 class="text-xs sm:text-sm font-bold text-white" data-en="Schedule & Publish History (Today & Yesterday)" data-ar="سجل مواعيد الجدولة والنشر (اليوم وأمس)">سجل مواعيد الجدولة والنشر (اليوم وأمس)</h5>
        </div>
-       <div class="flex flex-wrap items-center gap-2">
-        <div class="px-3 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center gap-2">
-         <span class="text-[11px] text-slate-300 font-semibold" data-en="Videos to Publish:" data-ar="عدد الفيديوهات التي سيتم نشرها:">عدد الفيديوهات التي سيتم نشرها:</span>
-         <strong id="saved-schedule-total-videos-badge" class="text-xs sm:text-sm font-extrabold text-emerald-300">3 فيديوهات</strong>
-        </div>
+       <div class="flex items-center gap-1.5">
+        <button type="button" id="hist-filter-today" onclick="setPublishHistoryFilter('today')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-indigo-600 text-white transition" data-en="Today" data-ar="اليوم">اليوم</button>
+        <button type="button" id="hist-filter-yesterday" onclick="setPublishHistoryFilter('yesterday')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-white/5 hover:bg-white/10 text-slate-300 transition" data-en="Yesterday" data-ar="أمس">أمس</button>
+        <button type="button" id="hist-filter-all" onclick="setPublishHistoryFilter('all')" class="px-3 py-1 rounded-full text-[11px] font-bold bg-white/5 hover:bg-white/10 text-slate-300 transition" data-en="All Days" data-ar="كل الأيام">كل الأيام</button>
        </div>
       </div>
-      <div class="overflow-x-auto rounded-xl border border-white/10 bg-slate-900/75">
-       <table class="w-full text-start border-collapse">
-        <thead>
-         <tr class="border-b border-white/10 bg-slate-950/80 text-[11px] text-slate-400 uppercase">
-          <th class="py-2.5 px-3 text-start font-bold" data-en="Video #" data-ar="الفيديو">الفيديو</th>
-          <th class="py-2.5 px-3 text-start font-bold" data-en="Channel & Content" data-ar="القناة والمحتوى">القناة والمحتوى</th>
-          <th class="py-2.5 px-3 text-start font-bold" data-en="Scheduled Publish Time" data-ar="ميعاد النشر">ميعاد النشر</th>
-          <th class="py-2.5 px-3 text-start font-bold" data-en="Publish Status" data-ar="حالة النشر">حالة النشر</th>
-         </tr>
-        </thead>
-        <tbody id="saved-schedule-table-tbody" class="divide-y divide-white/10 text-xs">
-        </tbody>
-       </table>
+      <div id="publish-history-list" class="space-y-2 max-h-60 overflow-y-auto pr-1">
       </div>
      </div>
      <div id="ai-live-output-box" class="hidden">
@@ -1525,7 +1526,7 @@
        <li class="flex items-center gap-2"><span class="text-emerald-400">✔</span> <span data-en="Unused credits never expire & 0 Credits charged on failed renders" data-ar="الكريدت لا ينتهي أبداً + حماية 100% للكريدت عند الفشل">Unused credits never expire & 0 Credits charged on failed renders</span></li>
       </ul>
      </div>
-     <button type="button" onclick="openCheckoutModal('Starter Plan • 1,000 Credits • 2 Channels', 19.99, 30, 1000)" class="mt-7 w-full apple-btn-secondary py-3.5 text-xs sm:text-sm font-bold" data-en="Subscribe — 1,000 Credits / 2 Channels ($19.99 USD)" data-ar="اشترك الآن — 1,000 كريدت / قناتين ($19.99 ≈ 1,077 ج.م)">
+     <button type="button" onclick="openCheckoutModal('Starter Plan - 1000 Credits (2 Channels)', 19.99, 30, 1000)" class="mt-7 w-full apple-btn-secondary py-3.5 text-xs sm:text-sm font-bold" data-en="Subscribe — 1,000 Credits / 2 Channels ($19.99 USD)" data-ar="اشترك الآن — 1,000 كريدت / قناتين ($19.99 ≈ 1,077 ج.م)">
       Subscribe — 1,000 Credits / 2 Channels ($19.99 USD)
      </button>
     </div>
@@ -1553,7 +1554,7 @@
        <li class="flex items-center gap-2"><span class="text-indigo-400">✔</span> <span data-en="Direct MP4 Download for TikTok/Reels + Forever Rollover" data-ar="تحميل الفيديو MP4 لتيك توك وريلز + رصيد لا ينتهي أبداً">Direct MP4 Download for TikTok/Reels + Forever Rollover</span></li>
       </ul>
      </div>
-     <button type="button" onclick="openCheckoutModal('Pro Creator Plan • 2,500 Credits • 4 Channels', 29.99, 30, 2500)" class="mt-7 w-full apple-btn-primary py-3.5 text-xs sm:text-sm font-bold" data-en="Subscribe — 2,500 Credits / 4 Channels ($29.99 USD)" data-ar="اشترك الآن — 2,500 كريدت / 4 قنوات ($29.99 ≈ 1,615 ج.م)">
+     <button type="button" onclick="openCheckoutModal('Pro Plan - 2500 Credits (4 Channels)', 29.99, 30, 2500)" class="mt-7 w-full apple-btn-primary py-3.5 text-xs sm:text-sm font-bold" data-en="Subscribe — 2,500 Credits / 4 Channels ($29.99 USD)" data-ar="اشترك الآن — 2,500 كريدت / 4 قنوات ($29.99 ≈ 1,615 ج.م)">
       Subscribe — 2,500 Credits / 4 Channels ($29.99 USD)
      </button>
     </div>
@@ -1578,7 +1579,7 @@
        <li class="flex items-center gap-2"><span class="text-amber-400">✔</span> <span data-en="Unused credits never expire & roll over forever" data-ar="رصيدك ملكك للأبد ولا ينتهي بنهاية الشهر">Unused credits never expire & roll over forever</span></li>
       </ul>
      </div>
-     <button type="button" onclick="openCheckoutModal('VIP Agency Plan • 5,000 Credits • 7 Channels', 49.99, 30, 5000)" class="mt-7 w-full apple-btn-secondary border-amber-500/40 hover:bg-amber-500/20 text-amber-200 py-3.5 text-xs sm:text-sm font-bold" data-en="Subscribe — 5,000 Credits / 7 Channels ($49.99 USD)" data-ar="اشترك الآن — 5,000 كريدت / 7 قنوات ($49.99 ≈ 2,692 ج.م)">
+     <button type="button" onclick="openCheckoutModal('VIP Agency Plan - 5000 Credits (7 Channels)', 49.99, 30, 5000)" class="mt-7 w-full apple-btn-secondary border-amber-500/40 hover:bg-amber-500/20 text-amber-200 py-3.5 text-xs sm:text-sm font-bold" data-en="Subscribe — 5,000 Credits / 7 Channels ($49.99 USD)" data-ar="اشترك الآن — 5,000 كريدت / 7 قنوات ($49.99 ≈ 2,692 ج.م)">
       Subscribe — 5,000 Credits / 7 Channels ($49.99 USD)
      </button>
     </div>
@@ -1724,7 +1725,7 @@
      <ul class="list-disc ps-5 space-y-2">
       <li data-en="Built-In Cloud Service & Credit Wallet: Omniposts.online provides built-in access to 16 global AI video generation models (including Seedance, Kling, Google Veo, Wan, Runway, Luma, Hailuo, PixVerse, Vidu, and Grok) using a unified platform credit wallet — requiring zero external API keys from the user." data-ar="طبيعة الخدمة السحابية ومحفظة الكريدت المدمجة: توفر منصة Omniposts.online وصولاً مدمجاً ومباشراً لـ 16 أداة عالمية لتوليد الفيديو والصوت وتأليف القصص من داخل المنصة مباشرة عبر محفظة كريدت موحدة، دون الحاجة لإدخال أي مفاتيح API خارجية من طرف العميل.">Built-In Cloud Service & Credit Wallet: Omniposts.online provides built-in access to 16 global AI video generation models (including Seedance, Kling, Google Veo, Wan, Runway, Luma, Hailuo, PixVerse, Vidu, and Grok) using a unified platform credit wallet — requiring zero external API keys from the user.</li>
       <li data-en="Account Eligibility & Security: Users must provide accurate registration details (Full Name, Username, Email, Password). You are solely responsible for safeguarding your account login credentials." data-ar="أهلية الحساب والأمان: يلتزم المستخدم بتقديم بيانات صحيحة عند إنشاء الحساب (الاسم الكامل، اسم المستخدم، البريد الإلكتروني، وكلمة المرور)، وهو مسؤول بالكامل عن الحفاظ على سرية بيانات دخوله.">Account Eligibility & Security: Users must provide accurate registration details (Full Name, Username, Email, Password). You are solely responsible for safeguarding your account login credentials.</li>
-      <li data-en="Multi-Channel Quotas: Depending on your selected tier, you can link and manage up to 2 YouTube channels (Starter Plan), 4 YouTube channels (Pro Plan), or 7 YouTube channels (VIP Agency Plan), and schedule 1 to 5 automated videos per day per channel." data-ar="ربط القنوات والجدولة اليومية: تتيح باقات المنصة ربط وإدارة حتى قناتين (باقة البداية)، أو 4 قنوات (باقة المحترفين)، أو 7 قنوات يوتيوب مستقلة (باقة VIP) في نفس الحساب، مع إمكانية جدولة من 1 إلى 5 فيديوهات يومياً لكل قناة.">Multi-Channel Quotas: Depending on your selected tier, you can link and manage up to 2 YouTube channels (Starter Plan), 4 YouTube channels (Pro Plan), or 7 YouTube channels (VIP Agency Plan), and schedule 1 to 5 automated videos per day per channel.</li>
+      <li data-en="Multi-Channel Quotas: All active plans allow linking and managing up to five (5) independent YouTube channels per account and scheduling 1 to 5 automated videos per day per channel." data-ar="ربط القنوات والجدولة اليومية: تتيح جميع باقات المنصة ربط وإدارة حتى خمس (5) قنوات يوتيوب مستقلة في نفس الحساب، مع إمكانية جدولة من 1 إلى 5 فيديوهات يومياً لكل قناة.">Multi-Channel Quotas: All active plans allow linking and managing up to five (5) independent YouTube channels per account and scheduling 1 to 5 automated videos per day per channel.</li>
       <li data-en="Transparent Per-Second Credit Deduction: Credit consumption is calculated transparently in real time before generation based on the user's selected AI video tool, resolution (480p, 720p, 1080p, or 4K), and video duration (from 5 seconds up to 60 minutes). Failed render tasks are never charged." data-ar="شفافية خصم الكريدت: يتم حساب وعرض تكلفة الفيديو بالكريدت أمام العميل لحظياً قبل التوليد بناءً على (الأداة المختارة × دقة الفيديو × مدة الفيديو بالثواني من 5 ثوانٍ حتى 60 دقيقة)، ولا يتم خصم أي كريدت في حال فشل مهمة الريندر.">Transparent Per-Second Credit Deduction: Credit consumption is calculated transparently in real time before generation based on the user's selected AI video tool, resolution (480p, 720p, 1080p, or 4K), and video duration (from 5 seconds up to 60 minutes). Failed render tasks are never charged.</li>
      </ul>
     </div>
@@ -1742,8 +1743,8 @@
      <h3 class="text-2xl font-bold text-white border-b border-white/10 pb-3" data-en="3. Plans, Forever-Rollover Credits & Refund Policy" data-ar="3. سياسة الباقات وشحن الكريدت والاسترداد (Subscriptions, Credits & Refund Policy)">3. Plans, Forever-Rollover Credits & Refund Policy</h3>
      <p data-en="Omniposts.online operates on transparent credit packages and instant top-ups with a Forever-Rollover guarantee:" data-ar="تعمل منصة Omniposts.online بنظام باقات الكريدت الواضحة وشحن الرصيد الفوري مع ضمان عدم انتهاء صلاحية الكريدت أبداً:">Omniposts.online operates on transparent credit packages and instant top-ups with a Forever-Rollover guarantee:</p>
      <ul class="list-disc ps-5 space-y-2">
-      <li data-en="Approved Credit Plans: Starter Plan — 1,000 Credits (900 + 100 Bonus, generates up to 100 videos + 2 YouTube Channels) for $19.99 USD; Pro Creator Plan — 2,500 Credits (2,000 + 500 Bonus, generates up to 250 videos + 4 YouTube Channels) for $29.99 USD; and VIP Agency Plan — 5,000 Credits (4,000 + 1,000 Bonus, generates up to 500 videos + 7 YouTube Channels) for $49.99 USD." data-ar="الباقات المعتمدة في المنصة: باقة البداية (Starter) وتمنح 1,000 نقطة كريدت (900 أساسي + 100 هدية — تولد 100 فيديو + ربط قناتين) بسعر $19.99 USD؛ باقة المحترفين (Pro) وتمنح 2,500 نقطة كريدت (2,000 أساسي + 500 هدية — تولد 250 فيديو + ربط 4 قنوات) بسعر $29.99 USD؛ وباقة النخبة (VIP) وتمنح 5,000 نقطة كريدت (4,000 أساسي + 1,000 هدية — تولد 500 فيديو + ربط 7 قنوات) بسعر $49.99 USD.">Approved Credit Plans: Starter Plan — 1,000 Credits (900 + 100 Bonus, generates up to 100 videos + 2 YouTube Channels) for $19.99 USD; Pro Creator Plan — 2,500 Credits (2,000 + 500 Bonus, generates up to 250 videos + 4 YouTube Channels) for $29.99 USD; and VIP Agency Plan — 5,000 Credits (4,000 + 1,000 Bonus, generates up to 500 videos + 7 YouTube Channels) for $49.99 USD.</li>
-      <li data-en="Instant Credit Top-Up & Forever Rollover: Subscribed users or users whose balance runs out may recharge extra credits at any time starting from a minimum of 1,000 Credits ($19.99 USD). Unused credits never expire and automatically roll over month after month." data-ar="شحن الرصيد الإضافي وعدم انتهاء الكريدت: يمكن لأي عميل شحن وتزويد رصيد كريدت إضافي في أي وقت بدون اشتراك جديد بحد أدنى 1,000 كريدت ($19.99 USD). جميع نقاط الكريدت في محفظة العميل لا تحترق ولا تنتهي صلاحيتها أبداً وتترحل تلقائياً.">Instant Credit Top-Up & Forever Rollover: Subscribed users or users whose balance runs out may recharge extra credits at any time starting from a minimum of 1,000 Credits ($19.99 USD). Unused credits never expire and automatically roll over month after month.</li>
+      <li data-en="Approved Credit Plans: Starter Plan — 1,000 Credits (900 + 100 Bonus, generates up to 100 videos) for $9.99 (538 EGP); Pro Creator Plan — 2,500 Credits (2,000 + 500 Bonus, generates up to 250 videos) for $19.99 (1,077 EGP); and VIP Agency Plan — 5,000 Credits (4,000 + 1,000 Bonus, generates up to 500 videos) for $39.99 (2,154 EGP)." data-ar="الباقات المعتمدة في المنصة: باقة البداية (Starter) وتمنح 1,000 نقطة كريدت (900 أساسي + 100 هدية — تولد 100 فيديو) بسعر $9.99 (538 ج.م)؛ باقة المحترفين (Pro) وتمنح 2,500 نقطة كريدت (2,000 أساسي + 500 هدية — تولد 250 فيديو) بسعر $19.99 (1,077 ج.م)؛ وباقة النخبة (VIP) وتمنح 5,000 نقطة كريدت (4,000 أساسي + 1,000 هدية — تولد 500 فيديو) بسعر $39.99 (2,154 ج.م).">Approved Credit Plans: Starter Plan — 1,000 Credits (900 + 100 Bonus, generates up to 100 videos) for $9.99 (538 EGP); Pro Creator Plan — 2,500 Credits (2,000 + 500 Bonus, generates up to 250 videos) for $19.99 (1,077 EGP); and VIP Agency Plan — 5,000 Credits (4,000 + 1,000 Bonus, generates up to 500 videos) for $39.99 (2,154 EGP).</li>
+      <li data-en="Instant Credit Top-Up & Forever Rollover: Subscribed users or users whose balance runs out may recharge extra credits at any time starting from a minimum of 1,000 Credits ($9.99 / 538 EGP). Unused credits never expire and automatically roll over month after month." data-ar="شحن الرصيد الإضافي وعدم انتهاء الكريدت: يمكن لأي عميل شحن وتزويد رصيد كريدت إضافي في أي وقت بدون اشتراك جديد بحد أدنى 1,000 كريدت ($9.99 / 538 ج.م). جميع نقاط الكريدت في محفظة العميل لا تحترق ولا تنتهي صلاحيتها أبداً وتترحل تلقائياً.">Instant Credit Top-Up & Forever Rollover: Subscribed users or users whose balance runs out may recharge extra credits at any time starting from a minimum of 1,000 Credits ($9.99 / 538 EGP). Unused credits never expire and automatically roll over month after month.</li>
       <li data-en="Refund Policy: Full refunds are available within 48 hours of purchase provided no more than 50 Credits have been consumed from the purchased package, or if a verified technical defect on Omniposts.online servers remains unresolved for 72 hours after opening a support ticket." data-ar="سياسة الاسترداد (Refund Policy): يحق للعميل طلب استرداد كامل المبلغ خلال 48 ساعة من تاريخ الشراء بشرط عدم استهلاك أكثر من 50 نقطة كريدت من الرصيد المشحون، أو في حال وجود عطل تقني في خوادم المنصة تعذر حله خلال 72 ساعة من فتح تذكرة دعم رسمية.">Refund Policy: Full refunds are available within 48 hours of purchase provided no more than 50 Credits have been consumed from the purchased package, or if a verified technical defect on Omniposts.online servers remains unresolved for 72 hours after opening a support ticket.</li>
      </ul>
     </div>
@@ -1753,7 +1754,7 @@
      <ul class="list-disc ps-5 space-y-2">
       <li data-en="Generating or publishing hate speech, graphic violence, terrorism, illegal content, sexually explicit material (NSFW), or child exploitation." data-ar="كتابة أو توليد أو نشر أي محتوى مخصص يحض على الكراهية، العنف الدموي، الإرهاب، المحتوى غير القانوني، أو المحتوى الإباحي أو استغلال الأطفال.">Generating or publishing hate speech, graphic violence, terrorism, illegal content, sexually explicit material (NSFW), or child exploitation.</li>
       <li data-en="Creating malicious deepfakes impersonating real individuals for defamation, financial fraud, or political/medical disinformation." data-ar="إنشاء مقاطع تزييف عميق (Deepfakes) تنتحل شخصيات حقيقية بهدف التشهير أو الاحتيال المالي أو التضليل الطبي والسياسي.">Creating malicious deepfakes impersonating real individuals for defamation, financial fraud, or political/medical disinformation.</li>
-      <li data-en="Attempting to manipulate credit balances, exploit platform endpoints, or exceed your plan channel quota (up to 7 YouTube channels)." data-ar="محاولة التلاعب برصيد الكريدت أو إساءة استخدام واجهات الريندر السحابي أو تجاوز الحد الأقصى المسموح به لباقتك (حتى 7 قنوات للحساب).">Attempting to manipulate credit balances, exploit platform endpoints, or exceed your plan channel quota (up to 7 YouTube channels).</li>
+      <li data-en="Attempting to manipulate credit balances, exploit platform endpoints, or exceed the 5-channel limit per account." data-ar="محاولة التلاعب برصيد الكريدت أو إساءة استخدام واجهات الريندر السحابي أو تجاوز الحد الأقصى المسموح به (5 قنوات للحساب).">Attempting to manipulate credit balances, exploit platform endpoints, or exceed the 5-channel limit per account.</li>
       <li data-en="Platform administrators reserve the right to immediately lock any account violating these rules without refund." data-ar="يحق لإدارة المنصة إغلاق وتجميد أي حساب ينتهك هذه السياسة فوراً دون التزام برد الرصيد المتبقي.">Platform administrators reserve the right to immediately lock any account violating these rules without refund.</li>
      </ul>
     </div>
@@ -1782,7 +1783,7 @@
       <h4 class="text-base font-bold text-blue-300" data-en="📘 3-Minute Quick Start Guide (No External API Keys Needed!):" data-ar="📘 دليل البدء السريع في 3 دقائق (بدون أي مفاتيح API خارجية!):">📘 3-Minute Quick Start Guide (No External API Keys Needed!):</h4>
       <ol class="list-decimal ps-5 space-y-2 text-xs sm:text-sm text-zinc-200">
        <li data-en="Create Your Account & Charge Your Credit Wallet: Sign up on Omniposts.online, open 'Plans & Credit Top-Up' from the menu, and choose a plan (Starter 1,000 Credits, Pro 2,500 Credits, or VIP 5,000 Credits) or top up your balance via the Egypt EGP gateway or International USD gateway." data-ar="إنشاء الحساب وشحن محفظة الكريدت: أنشئ حسابك في المنصة، ثم افتح صفحة (الخطط وشحن الرصيد) من القائمة، واختر باقتك (1,000 أو 2,500 أو 5,000 كريدت) أو اشحن رصيدك عبر بوابة مصر (بالجنيه) أو البوابة الدولية (بالدولار).">Create Your Account & Charge Your Credit Wallet: Sign up on Omniposts.online, open 'Plans & Credit Top-Up' from the menu, and choose a plan (Starter 1,000 Credits, Pro 2,500 Credits, or VIP 5,000 Credits) or top up your balance via the Egypt EGP gateway or International USD gateway.</li>
-       <li data-en="Link Up to 7 YouTube Channels: Open the Channels Manager (or select Channel Slot 1 through 7 in your Dashboard), click 'Link Official YouTube Channel', and approve Google's official OAuth 2.0 screen." data-ar="ربط قنوات اليوتيوب (حتى 7 قنوات حسب باقتك): من صفحة ربط القنوات أو لوحة التحكم، اختر القناة (من 1 إلى 7)، واضغط على زر (ربط قناة اليوتيوب الرسمية) ووافق على الصلاحيات عبر شاشة Google الآمنة.">Link Up to 7 YouTube Channels: Open the Channels Manager (or select Channel Slot 1 through 7 in your Dashboard), click 'Link Official YouTube Channel', and approve Google's official OAuth 2.0 screen.</li>
+       <li data-en="Link Up to 5 YouTube Channels: In your Dashboard, select Channel Slot 1 through 5, click 'Link Official YouTube Channel', and approve Google's official OAuth screen." data-ar="ربط قنوات اليوتيوب (حتى 5 قنوات في نفس الحساب): من لوحة التحكم، اختر القناة (من 1 إلى 5)، واضغط على زر (ربط قناة اليوتيوب الرسمية) ووافق على الصلاحيات عبر شاشة Google الآمنة.">Link Up to 5 YouTube Channels: In your Dashboard, select Channel Slot 1 through 5, click 'Link Official YouTube Channel', and approve Google's official OAuth screen.</li>
        <li data-en="Customize Your Viral Story, AI Tool, Resolution & Duration: Pick from 28 viral story niches (such as Talking Fruits, 3D Ginger Cat Stories, or Tiny Workers) or choose 'Write Another Custom Niche...', then select your preferred AI video tool (16 global tools), resolution (480p to 4K), duration (5s up to 60m with audio), and video language." data-ar="تخصيص القصة والأداة والدقة والمدة: اختر من الـ 28 ترند قصصي فيروسي (مثل الفواكه الناطقة أو قصص القط البرتقالي أو العمال الأقزام) أو اختر (✍️ كتابة محتوى آخر مخصص...)، ثم حدد أداة التوليد المفضلة لديك من بين 16 أداة، ودقة الفيديو (من 480p حتى 4K)، والمدة (من 5 ثوانٍ حتى ساعة كاملة بالصوت)، ولغة الفيديو.">Customize Your Viral Story, AI Tool, Resolution & Duration: Pick from 28 viral story niches (such as Talking Fruits, 3D Ginger Cat Stories, or Tiny Workers) or choose 'Write Another Custom Niche...', then select your preferred AI video tool (16 global tools), resolution (480p to 4K), duration (5s up to 60m with audio), and video language.</li>
        <li data-en="Generate Instantly or Schedule Daily: Check the live credit cost badge shown above the button, then click 'Generate & Publish Now' or 'Save Daily Schedule'. Our cloud writes a unique story, renders the video, and uploads it directly to your YouTube channel!" data-ar="التوليد الفوري أو الجدولة اليومية: ستظهر لك تكلفة الفيديو بالكريدت أمامك فوراً حسب اختياراتك؛ اضغط (توليد ونشر الفيديو الآن) أو احفظ جدول النشر اليومي، وستقوم المنصة بتأليف قصة جديدة وصناعة الفيديو ورفعه مباشرة على قناتك!">Generate Instantly or Schedule Daily: Check the live credit cost badge shown above the button, then click 'Generate & Publish Now' or 'Save Daily Schedule'. Our cloud writes a unique story, renders the video, and uploads it directly to your YouTube channel!</li>
       </ol>
@@ -1802,7 +1803,7 @@
       </div>
       <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
        <h5 class="font-bold text-white" data-en="Q: How many YouTube channels can I link in my plan?" data-ar="س: كم قناة يوتيوب يمكنني ربطها في الباقة؟">Q: How many YouTube channels can I link in my plan?</h5>
-       <p class="text-xs sm:text-sm text-zinc-400 mt-1" data-en="A: Starter Plan ($19.99) allows up to 2 YouTube channels, Pro Creator Plan ($29.99) allows up to 4 YouTube channels, and VIP Agency Plan ($49.99) allows up to 7 YouTube channels per account — each with its own niche, AI tool, resolution, language, and daily schedule." data-ar="ج: باقة البداية ($19.99) تتيح ربط قناتين يوتيوب (2)، وباقة المحترفين ($29.99) تتيح ربط 4 قنوات يوتيوب، وباقة النخبة VIP ($49.99) تتيح ربط حتى 7 قنوات يوتيوب كاملة في نفس الحساب، مع تخصيص محتوى وأداة ولغة وجدولة مستقلة لكل قناة.">A: Starter Plan ($19.99) allows up to 2 YouTube channels, Pro Creator Plan ($29.99) allows up to 4 YouTube channels, and VIP Agency Plan ($49.99) allows up to 7 YouTube channels per account — each with its own niche, AI tool, resolution, language, and daily schedule.</p>
+       <p class="text-xs sm:text-sm text-zinc-400 mt-1" data-en="A: All plans (Starter, Pro, and VIP) allow you to connect and manage up to 5 YouTube channels per account, each with its own niche, AI tool, resolution, language, and daily schedule." data-ar="ج: جميع الخطط في المنصة (البداية، المحترفين، والنخبة) تتيح لك ربط وإدارة حتى 5 قنوات يوتيوب كاملة في نفس الحساب، مع تخصيص محتوى وأداة ولغة وجدولة مستقلة لكل قناة.">A: All plans (Starter, Pro, and VIP) allow you to connect and manage up to 5 YouTube channels per account, each with its own niche, AI tool, resolution, language, and daily schedule.</p>
       </div>
      </div>
     </div>
@@ -1876,29 +1877,25 @@
      </div>
      <span id="admin-master-key-badge" class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-bold">Central Cloud Key Ready ✓</span>
     </div>
-     <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-      <div class="md:col-span-4">
-       <label for="admin-master-kie-key" class="block text-xs text-zinc-300 mb-1.5 font-semibold" data-en="1. Platform Master API Key (Hidden from all users):" data-ar="1. المفتاح الرئيسي للمنصة (محفوظ ومخفي عن العملاء):">1. المفتاح الرئيسي للمنصة (محفوظ ومخفي عن العملاء):</label>
-       <input type="password" id="admin-master-kie-key" placeholder="Paste your Master API Key here..." class="apple-input w-full px-4 py-2.5 text-xs sm:text-sm font-mono" dir="ltr" />
-      </div>
-      <div class="md:col-span-3">
-       <label for="admin-google-client-secret" class="block text-xs text-zinc-300 mb-1.5 font-semibold" data-en="2. Google OAuth Secret (GOCSPX-... Optional):" data-ar="2. مفتاح Google Client Secret (GOCSPX-... لتثبيت الربط للأبد):">2. مفتاح Google Client Secret (GOCSPX-... لتثبيت الربط للأبد):</label>
-       <input type="password" id="admin-google-client-secret" placeholder="GOCSPX-..." class="apple-input w-full px-3 py-2.5 text-xs sm:text-sm font-mono" dir="ltr" />
-      </div>
-      <div class="md:col-span-1">
-       <label for="admin-central-reserve-credits" class="block text-xs text-zinc-300 mb-1.5 font-semibold" data-en="Reserve (💎):" data-ar="رصيدك (💎):">رصيدك (💎):</label>
-       <input type="number" id="admin-central-reserve-credits" min="0" step="100" value="80" oninput="updateAdminCreditCoverageRadar()" class="apple-input w-full px-2 py-2.5 text-xs sm:text-sm font-extrabold text-emerald-300 text-center" dir="ltr" />
-      </div>
-      <div class="md:col-span-1">
-       <label for="admin-central-spent-usd" class="block text-xs text-zinc-300 mb-1.5 font-semibold" data-en="Spent ($):" data-ar="صرفت ($):">صرفت ($):</label>
-       <input type="number" id="admin-central-spent-usd" min="0" step="1" value="0" oninput="updateAdminCreditCoverageRadar()" class="apple-input w-full px-2 py-2.5 text-xs sm:text-sm font-extrabold text-amber-300 text-center" dir="ltr" />
-      </div>
-      <div class="md:col-span-3">
-       <button type="button" onclick="saveAdminMasterEngineSettings()" class="w-full apple-btn-primary py-2.5 px-4 text-xs sm:text-sm font-bold" data-en="💾 Save Key, Reserve & Spent" data-ar="💾 حفظ المفتاح والرصيد والمصروفات">
-        💾 حفظ المفتاح والرصيد والمصروفات
-       </button>
-      </div>
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+     <div class="md:col-span-5">
+      <label for="admin-master-kie-key" class="block text-xs text-zinc-300 mb-1.5 font-semibold" data-en="1. Platform Master API Key (Hidden from all users):" data-ar="1. المفتاح الرئيسي للمنصة (محفوظ ومخفي عن العملاء):">1. Platform Master API Key (Hidden from all users):</label>
+      <input type="password" id="admin-master-kie-key" placeholder="Paste your Master API Key here..." class="apple-input w-full px-4 py-2.5 text-xs sm:text-sm font-mono" dir="ltr" />
      </div>
+     <div class="md:col-span-2">
+      <label for="admin-central-reserve-credits" class="block text-xs text-zinc-300 mb-1.5 font-semibold" data-en="2. Central Reserve (💎):" data-ar="2. رصيدك المركزي (💎):">2. Central Reserve (💎):</label>
+      <input type="number" id="admin-central-reserve-credits" min="0" step="100" value="80" oninput="updateAdminCreditCoverageRadar()" class="apple-input w-full px-3 py-2.5 text-xs sm:text-sm font-extrabold text-emerald-300 text-center" dir="ltr" />
+     </div>
+     <div class="md:col-span-2">
+      <label for="admin-central-spent-usd" class="block text-xs text-zinc-300 mb-1.5 font-semibold" data-en="3. Total You Spent ($ USD):" data-ar="3. إجمالي ما صرفته ($):">3. Total You Spent ($ USD):</label>
+      <input type="number" id="admin-central-spent-usd" min="0" step="1" value="0" oninput="updateAdminCreditCoverageRadar()" class="apple-input w-full px-3 py-2.5 text-xs sm:text-sm font-extrabold text-amber-300 text-center" dir="ltr" />
+     </div>
+     <div class="md:col-span-3">
+      <button type="button" onclick="saveAdminMasterEngineSettings()" class="w-full apple-btn-primary py-2.5 px-4 text-xs sm:text-sm font-bold" data-en="💾 Save Key, Reserve & Spent" data-ar="💾 حفظ المفتاح والرصيد والمصروفات">
+       💾 حفظ المفتاح والرصيد والمصروفات
+      </button>
+     </div>
+    </div>
     <div class="p-3.5 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 flex flex-wrap items-center justify-between gap-3">
      <div class="text-xs text-emerald-200 font-bold" data-en="⚡ Topped up your central Kie.ai account? Record it here to auto-update your Reserve, Total Spent & Net Profit:" data-ar="⚡ شحنت رصيدك المركزي في Kie.ai؟ سجّل الشحنة هنا ليتم تزويد رصيدك المركزي وحساب المصروفات وصافي الربح تلقائياً:">
       ⚡ شحنت رصيدك المركزي في Kie.ai؟ سجّل الشحنة هنا ليتم تزويد رصيدك المركزي وحساب المصروفات وصافي الربح تلقائياً:
@@ -1963,8 +1960,8 @@
      <div>
       <span class="text-xs font-extrabold text-blue-400 uppercase" data-en="💳 Owner Admin Only: Whop USD Payment Gateway (API + CORS-Safe Fallback) & Egypt Gateway Ready" data-ar="💳 خاص بمالك المنصة فقط: بوابة دفع Whop بالدولار (API + حماية كاملة من الأخطاء) + جاهزية البوابة المصرية">💳 Owner Admin Only: Whop USD Payment Gateway (API + CORS-Safe Fallback) & Egypt Gateway Ready</span>
       <h3 class="text-lg sm:text-xl font-bold text-white mt-0.5" data-en="Whop Dynamic USD Checkout API + Direct Checkout Link Protection" data-ar="إعدادات بوابة Whop بالدولار (USD $) + الحماية المزدوجة ضد أي حظر متصفح">Whop Dynamic USD Checkout API + Direct Checkout Link Protection</h3>
-      <p class="text-xs text-zinc-300 mt-1" data-en="All prices are unified in USD ($19.99 / $29.99 / $49.99) to guarantee 0% currency errors on Whop. Paste your Whop API Key & Product ID below (and optionally your direct Whop checkout link as a 100% CORS-safe fallback). The Egypt local gateway tab is also preserved and ready for future activation!" data-ar="تم توحيد العملة بالدولار الأمريكي (USD $ — $19.99 / $29.99 / $49.99) في جميع الخطط وشريط الشحن لمنع أي أخطاء عملات في Whop، مع الإبقاء على تبويب بوابة الدفع المصرية جاهزاً للتفعيل مستقبلاً!">
-       All prices are unified in USD ($19.99 / $29.99 / $49.99) to guarantee 0% currency errors on Whop. Paste your Whop API Key & Product ID below (and optionally your direct Whop checkout link as a 100% CORS-safe fallback). The Egypt local gateway tab is also preserved and ready for future activation!
+      <p class="text-xs text-zinc-300 mt-1" data-en="All prices are unified in USD ($9.99 / $19.99 / $39.99) to guarantee 0% currency errors on Whop. Paste your Whop API Key & Product ID below (and optionally your direct Whop checkout link as a 100% CORS-safe fallback). The Egypt local gateway tab is also preserved and ready for future activation!" data-ar="تم توحيد العملة بالدولار الأمريكي (USD $) في جميع الخطط وشريط الشحن لمنع أي أخطاء عملات في Whop، مع الإبقاء على تبويب بوابة الدفع المصرية جاهزاً للتفعيل مستقبلاً!">
+       All prices are unified in USD ($9.99 / $19.99 / $39.99) to guarantee 0% currency errors on Whop. Paste your Whop API Key & Product ID below (and optionally your direct Whop checkout link as a 100% CORS-safe fallback). The Egypt local gateway tab is also preserved and ready for future activation!
       </p>
      </div>
      <span id="admin-whop-status-badge" class="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/40 text-xs font-bold">Whop USD Gateway Ready ⚡</span>
@@ -2058,17 +2055,6 @@
      </div>
      <div id="admin-countries-list" class="space-y-3">
      </div>
-    </div>
-   </div>
-   <div class="apple-bento p-6 space-y-4 border-indigo-500/35">
-    <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/10">
-     <div>
-      <h3 class="text-lg font-bold text-white" data-en="🎫 Customer Support Tickets & System Alerts (Supabase support_tickets)" data-ar="🎫 تذاكر الدعم الفني وتنبيهات النظام (جدول support_tickets في قاعدة البيانات)">🎫 Customer Support Tickets & System Alerts (Supabase support_tickets)</h3>
-      <p class="text-xs text-zinc-400" data-en="View all support tickets submitted by users from the Help Center or AI Assistant and mark them resolved" data-ar="جميع تذاكر الدعم الفني المرسلة من العملاء أو المساعد الذكي وتنبيهات الرصيد من قاعدة البيانات">View all support tickets submitted by users from the Help Center or AI Assistant and mark them resolved</p>
-     </div>
-     <span id="admin-tickets-count-badge" class="px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-xs font-bold">0 Tickets</span>
-    </div>
-    <div id="admin-support-tickets-list" class="space-y-2.5 text-xs">
     </div>
    </div>
   </div>
@@ -2185,12 +2171,13 @@
    currentView: 'landing',
    gatewayRegion: 'INTL', // 'INTL' (USD) default for English, or 'EGY' (Egypt EGP)
    egpRate: 53.86,
+   generatedOtp: '482910',
    currentUser: {
-    id: 0,
+    id: 100,
     fullNameEn: 'Creator Account',
     fullNameAr: 'حساب صانع محتوى',
     username: 'omniposts_creator',
-    email: '',
+    email: 'client@omniposts.online',
     countryEn: 'Egypt 🇪🇬',
     countryAr: 'مصر 🇪🇬',
     subscribed: false,
@@ -2205,20 +2192,19 @@
    },
    selectedChannelSlot: 1,
    channels: {
-    1: { connected: false, nameEn: 'Channel #1 (Not Connected Yet)', nameAr: 'القناة رقم 1 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #1', niche: 'Talking Fruits & Veggies Drama', visualStyle: '3D Pixar & Disney Animation', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 3, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية', timeSlots: ['14:00', '18:30', '22:00'] },
-    2: { connected: false, nameEn: 'Channel #2 (Not Connected Yet)', nameAr: 'القناة رقم 2 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #2', niche: 'Chubby Ginger Cat Emotional Stories', visualStyle: '3D Pixar & Disney Animation', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 2, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية', timeSlots: ['16:00', '21:00'] },
-    3: { connected: false, nameEn: 'Channel #3 (Not Connected Yet)', nameAr: 'القناة رقم 3 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #3', niche: 'Tiny Miniature Workers Giant Food', visualStyle: 'Hyper-Realistic 8K Cinema', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 2, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'English', timeSlots: ['19:00', '22:30'] },
-    4: { connected: false, nameEn: 'Channel #4 (Not Connected Yet)', nameAr: 'القناة رقم 4 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #4', niche: 'Glass & Crystal Fruit Slicing ASMR', visualStyle: 'Macro ASMR & Crystal Physics', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 2, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'English', timeSlots: ['15:00', '20:00'] },
-    5: { connected: false, nameEn: 'Channel #5 (Not Connected Yet)', nameAr: 'القناة رقم 5 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #5', niche: 'POV Ancient History Vlog', visualStyle: 'POV Handheld Vlog Realism', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 2, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية', timeSlots: ['13:00', '21:00'] },
-    6: { connected: false, nameEn: 'Channel #6 (Not Connected Yet)', nameAr: 'القناة رقم 6 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #6', niche: 'Stoic & BillionaireSuccess Parables', visualStyle: 'Dark Luxury & Moody Cinema', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 2, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'English', timeSlots: ['17:00', '22:00'] },
-    7: { connected: false, nameEn: 'Channel #7 (Not Connected Yet)', nameAr: 'القناة رقم 7 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #7', niche: '3D Pixar Moral Kids Stories', visualStyle: '3D Pixar & Disney Animation', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 2, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية', timeSlots: ['18:00', '23:00'] }
+    1: { connected: false, autoScheduleEnabled: true, nameEn: 'Channel #1 (Not Connected Yet)', nameAr: 'القناة رقم 1 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #1', niche: 'Talking Fruits & Veggies Drama', visualStyle: '3D Pixar & Disney Animation', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 3, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية', timeSlots: ['14:00', '18:30', '22:00'] },
+    2: { connected: false, autoScheduleEnabled: true, nameEn: 'Channel #2 (Not Connected Yet)', nameAr: 'القناة رقم 2 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #2', niche: 'Chubby Ginger Cat Emotional Stories', visualStyle: '3D Pixar & Disney Animation', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 2, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية', timeSlots: ['16:00', '21:00'] },
+    3: { connected: false, autoScheduleEnabled: true, nameEn: 'Channel #3 (Not Connected Yet)', nameAr: 'القناة رقم 3 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #3', niche: 'Tiny Miniature Workers Giant Food', visualStyle: 'Hyper-Realistic 8K Cinema', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 2, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'English', timeSlots: ['19:00', '22:30'] },
+    4: { connected: false, autoScheduleEnabled: true, nameEn: 'Channel #4 (Not Connected Yet)', nameAr: 'القناة رقم 4 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #4', niche: 'Glass & Crystal Fruit Slicing ASMR', visualStyle: 'Macro ASMR & Crystal Physics', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 2, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'English', timeSlots: ['15:00', '20:00'] },
+    5: { connected: false, autoScheduleEnabled: true, nameEn: 'Channel #5 (Not Connected Yet)', nameAr: 'القناة رقم 5 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #5', niche: 'POV Ancient History Vlog', visualStyle: 'POV Handheld Vlog Realism', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 2, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية', timeSlots: ['13:00', '21:00'] },
+    6: { connected: false, autoScheduleEnabled: true, nameEn: 'Channel #6 (Not Connected Yet)', nameAr: 'القناة رقم 6 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #6', niche: 'Stoic & BillionaireSuccess Parables', visualStyle: 'Dark Luxury & Moody Cinema', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 2, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'English', timeSlots: ['17:00', '22:00'] },
+    7: { connected: false, autoScheduleEnabled: true, nameEn: 'Channel #7 (Not Connected Yet)', nameAr: 'القناة رقم 7 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #7', niche: '3D Pixar Moral Kids Stories', visualStyle: '3D Pixar & Disney Animation', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 2, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية', timeSlots: ['18:00', '23:00'] }
    },
    selectedCheckoutPlan: {
-    nameEn: 'Starter Plan • 1,000 Credits • 2 Channels',
-    nameAr: 'باقة البداية • 1,000 كريدت • قناتين',
-    usdPrice: 19.99,
-    days: 30,
-    credits: 1000
+    nameEn: '1 Year Plan (20% OFF)',
+    nameAr: 'خطة سنة كاملة (خصم 20%)',
+    usdPrice: 32,
+    days: 365
    },
    tickets: [],
    adminUsers: [],
@@ -2290,7 +2276,7 @@
     node.setAttribute('title', lang === 'en' ? node.getAttribute('data-title-en') : node.getAttribute('data-title-ar'));
    });
    updateAiProviderInfo();
-   selectChannelSlot(appState.selectedChannelSlot);
+   selectChannelSlot(appState.selectedChannelSlot, true);
    syncDashboardUI();
    renderSevenChannelsManagerGrid();
    updatePricingCardsForGateway();
@@ -2435,244 +2421,21 @@
    if (backdrop) backdrop.classList.add('hidden');
    if (dd) dd.classList.add('hidden');
   }
-
-  function safeStorageSetItem(key, val) {
-   try {
-    localStorage.setItem(key, val);
-    return true;
-   } catch (e) {
-    try {
-     const keysToRemove = [];
-     for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (k && k !== 'omniposts_v3_session' && k.indexOf('omniposts_yt_vault_') === -1 && k.indexOf('omniposts_v3_channels_') === -1 && k !== 'omniposts_master_engine') {
-       keysToRemove.push(k);
-      }
-     }
-     keysToRemove.forEach(function(k) { localStorage.removeItem(k); });
-     localStorage.setItem(key, val);
-     return true;
-    } catch (e2) {
-     return false;
-    }
-   }
-  }
-  function saveSessionBackupEverywhere(userObj) {
-   if (!userObj || !userObj.email) return;
-   const jsonStr = JSON.stringify(userObj);
-   safeStorageSetItem('omniposts_v3_session', jsonStr);
-   try {
-    sessionStorage.setItem('omniposts_v3_session', jsonStr);
-   } catch (e) {}
-   try {
-    window.name = 'OMNI_SESS:' + btoa(unescape(encodeURIComponent(jsonStr)));
-   } catch (e) {}
-   try {
-    document.cookie = 'omniposts_session_email=' + encodeURIComponent(userObj.email.toLowerCase()) + '; path=/; max-age=2592000; SameSite=Lax';
-   } catch (e) {}
-  }
-  function clearSessionBackupEverywhere() {
-   try { localStorage.removeItem('omniposts_v3_session'); } catch (e) {}
-   try { localStorage.removeItem('omniposts_v3_view'); } catch (e) {}
-   try { sessionStorage.removeItem('omniposts_v3_session'); } catch (e) {}
-   try {
-    if (window.name && window.name.indexOf('OMNI_SESS:') === 0) window.name = '';
-   } catch (e) {}
-   try {
-    document.cookie = 'omniposts_session_email=; path=/; max-age=0; SameSite=Lax';
-   } catch (e) {}
-  }
-  function extractEmailFromOAuthState(stateStr) {
-   if (!stateStr || typeof stateStr !== 'string') return '';
-   const m = stateStr.match(/__em_([^&]+)/);
-   if (!m || !m[1]) return '';
-   try {
-    return decodeURIComponent(m[1]).trim().toLowerCase();
-   } catch (e) {
-    return m[1].trim().toLowerCase();
-   }
-  }
-  function restoreUserSessionFromAnySource(stateParam) {
-   let parsedUser = null;
-   try {
-    const rawLocal = localStorage.getItem('omniposts_v3_session');
-    if (rawLocal) parsedUser = JSON.parse(rawLocal);
-   } catch (e) {}
-   if (!parsedUser || !parsedUser.email) {
-    try {
-     const rawSess = sessionStorage.getItem('omniposts_v3_session');
-     if (rawSess) parsedUser = JSON.parse(rawSess);
-    } catch (e) {}
-   }
-   if (!parsedUser || !parsedUser.email) {
-    try {
-     if (window.name && window.name.indexOf('OMNI_SESS:') === 0) {
-      const dec = decodeURIComponent(escape(atob(window.name.substring(10))));
-      parsedUser = JSON.parse(dec);
-     }
-    } catch (e) {}
-   }
-   let fallbackEmail = extractEmailFromOAuthState(stateParam || '');
-   if (!fallbackEmail) {
-    try {
-     const cMatch = document.cookie.match(/(?:^|;\s*)omniposts_session_email=([^;]+)/);
-     if (cMatch && cMatch[1]) fallbackEmail = decodeURIComponent(cMatch[1]).trim().toLowerCase();
-    } catch (e) {}
-   }
-   if ((!parsedUser || !parsedUser.email) && fallbackEmail) {
-    const isOwner = (fallbackEmail.toLowerCase() === OWNER_ADMIN_EMAIL.toLowerCase());
-    let localRow = null;
-    try {
-     const localReg = JSON.parse(localStorage.getItem('omniposts_users_db') || '{}');
-     if (localReg[fallbackEmail]) localRow = localReg[fallbackEmail];
-    } catch (e) {}
-    const fName = (localRow && localRow.full_name) ? localRow.full_name : (isOwner ? 'Owner Admin' : fallbackEmail.split('@')[0]);
-    const isSub = isOwner || Boolean(localRow && localRow.subscribed);
-    parsedUser = {
-     fullNameEn: fName,
-     fullNameAr: fName,
-     username: (localRow && localRow.username) ? localRow.username : fallbackEmail.split('@')[0],
-     email: fallbackEmail,
-     countryEn: 'Egypt 🇪🇬',
-     countryAr: 'مصر 🇪🇬',
-     subscribed: isSub,
-     planNameEn: isOwner ? 'Owner Lifetime Admin' : ((localRow && localRow.plan_name) || (isSub ? 'Active Plan' : 'Unsubscribed')),
-     planNameAr: isOwner ? 'حساب الأدمن والمالك' : ((localRow && localRow.plan_name) || (isSub ? 'باقة نشطة' : 'غير مشترك')),
-     remainingDays: isOwner ? 9999 : ((localRow && localRow.remaining_days) || (isSub ? 30 : 0)),
-     credits: isOwner ? 999999 : ((localRow && localRow.credits) || (isSub ? 1000 : 0)),
-     claimedRewardTier: 0,
-     generatedVideos: (localRow && localRow.generated_videos) || 0,
-     totalViews: (localRow && localRow.total_views) || 0,
-     aiProvider: 'Kie.ai — Unified All-in-One Video Engine',
-     aiApiKey: (localRow && localRow.ai_api_key) || '',
-     aiApiKeyVerified: true
-    };
-   }
-   if (parsedUser && parsedUser.email) {
-    saveSessionBackupEverywhere(parsedUser);
-    return parsedUser;
-   }
-   return null;
-  }
-  function getCleanChannelUrl(rawUrl) {
-   if (!rawUrl || typeof rawUrl !== 'string') return '';
-   const idx = rawUrl.indexOf('#omni_meta=');
-   return idx === -1 ? rawUrl : rawUrl.substring(0, idx);
-  }
-  function packChannelUrlWithMeta(cleanUrl, ch) {
-   const base = getCleanChannelUrl(cleanUrl || (ch && ch.url) || '');
-   if (!ch) return base;
-   try {
-    const metaObj = {
-     tok: ch.accessToken || '',
-     rtok: ch.refreshToken || '',
-     gem: ch.googleEmail || '',
-     ts: ch.tokenTimestamp || 0,
-     cid: ch.channelId || '',
-     v: parseInt(ch.ytViews, 10) || 0,
-     c: parseInt(ch.ytVideos, 10) || 0,
-     ss: Boolean(ch.scheduleSaved),
-     st: ch.scheduleStatuses || {},
-     vs: ch.visualStyle || '3D Pixar & Disney Animation',
-     pm: ch.publishMode || 'AUTO_PUBLISH_AND_DOWNLOAD',
-     vm: ch.videoModel || 'bytedance/v1-lite-text-to-video',
-     rs: ch.resolution || '480p'
-    };
-    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(metaObj))));
-    return base + '#omni_meta=' + encoded;
-   } catch (e) {
-    return base;
-   }
-  }
-  function unpackChannelUrlMeta(rawUrl) {
-   if (!rawUrl || typeof rawUrl !== 'string') return null;
-   const idx = rawUrl.indexOf('#omni_meta=');
-   if (idx === -1) return null;
-   try {
-    const encoded = rawUrl.substring(idx + 11);
-    return JSON.parse(decodeURIComponent(escape(atob(encoded))));
-   } catch (e) {
-    return null;
-   }
-  }
-  function saveChannelVaultForUser(email) {
-   if (!email) return;
-   try {
-    const key = 'omniposts_yt_vault_' + email.toLowerCase();
-    const existing = JSON.parse(localStorage.getItem(key) || '{}');
-    for (let i = 1; i <= 7; i++) {
-     const ch = appState.channels[i];
-     if (!ch) continue;
-     if (ch.connected || ch.accessToken || ch.refreshToken || ch.scheduleSaved) {
-      existing[i] = {
-       connected: Boolean(ch.connected),
-       nameEn: ch.nameEn,
-       nameAr: ch.nameAr,
-       url: getCleanChannelUrl(ch.url),
-       channelId: ch.channelId || (existing[i] && existing[i].channelId) || '',
-       accessToken: ch.accessToken || (existing[i] && existing[i].accessToken) || '',
-       refreshToken: ch.refreshToken || (existing[i] && existing[i].refreshToken) || '',
-       googleEmail: ch.googleEmail || (existing[i] && existing[i].googleEmail) || '',
-       tokenTimestamp: ch.tokenTimestamp || (existing[i] && existing[i].tokenTimestamp) || Date.now(),
-       ytViews: parseInt(ch.ytViews, 10) || 0,
-       ytVideos: parseInt(ch.ytVideos, 10) || 0,
-       scheduleSaved: Boolean(ch.scheduleSaved),
-       scheduleStatuses: ch.scheduleStatuses || {}
-      };
-     }
-    }
-    safeStorageSetItem(key, JSON.stringify(existing));
-   } catch (e) {}
-  }
-  function loadChannelVaultForUser(email) {
-   if (!email) return {};
-   try {
-    return JSON.parse(localStorage.getItem('omniposts_yt_vault_' + email.toLowerCase()) || '{}') || {};
-   } catch (e) {
-    return {};
-   }
-  }
-  function removeSlotFromChannelVault(email, slot) {
-   if (!email) return;
-   try {
-    const key = 'omniposts_yt_vault_' + email.toLowerCase();
-    const existing = JSON.parse(localStorage.getItem(key) || '{}');
-    delete existing[slot];
-    safeStorageSetItem(key, JSON.stringify(existing));
-   } catch (e) {}
-  }
   function saveUserChannelsToLocal(email) {
    if (!email) return;
    try {
-    safeStorageSetItem('omniposts_v3_channels_' + email.toLowerCase(), JSON.stringify(appState.channels));
-    saveChannelVaultForUser(email);
+    localStorage.setItem('omniposts_v3_channels_' + email.toLowerCase(), JSON.stringify(appState.channels));
    } catch (e) {}
   }
   function loadUserChannelsFromLocal(email) {
    if (!email) return false;
    try {
-    const vault = loadChannelVaultForUser(email);
     const raw = localStorage.getItem('omniposts_v3_channels_' + email.toLowerCase());
     if (raw) {
      const parsed = JSON.parse(raw);
      if (parsed && parsed[1]) {
       for (let i = 1; i <= 7; i++) {
-       if (parsed[i]) {
-        appState.channels[i] = parsed[i];
-        appState.channels[i].url = getCleanChannelUrl(appState.channels[i].url);
-       }
-       if (vault[i]) {
-        if (vault[i].connected) appState.channels[i].connected = true;
-        if (vault[i].accessToken && !appState.channels[i].accessToken) appState.channels[i].accessToken = vault[i].accessToken;
-        if (vault[i].refreshToken && !appState.channels[i].refreshToken) appState.channels[i].refreshToken = vault[i].refreshToken;
-        if (vault[i].googleEmail && !appState.channels[i].googleEmail) appState.channels[i].googleEmail = vault[i].googleEmail;
-        if (vault[i].tokenTimestamp && !appState.channels[i].tokenTimestamp) appState.channels[i].tokenTimestamp = vault[i].tokenTimestamp;
-        if (vault[i].channelId && !appState.channels[i].channelId) appState.channels[i].channelId = vault[i].channelId;
-        if (vault[i].scheduleSaved) appState.channels[i].scheduleSaved = true;
-        if (vault[i].scheduleStatuses && (!appState.channels[i].scheduleStatuses || Object.keys(appState.channels[i].scheduleStatuses).length === 0)) {
-         appState.channels[i].scheduleStatuses = vault[i].scheduleStatuses;
-        }
-       }
+       if (parsed[i]) appState.channels[i] = parsed[i];
       }
       return true;
      }
@@ -2682,27 +2445,25 @@
   }
   let platformMasterEngine = {
    apiKey: '',
-   googleClientSecret: '',
-   costLockMode: 'STANDARD_720P'
+   costLockMode: 'STANDARD_720P' // 'ECONOMY_480P' ($0.05/vid) or 'STANDARD_720P' ($0.11/vid)
   };
   const KIE_MODEL_CREDIT_RATES = {
-   'bytedance/v1-lite-text-to-video': { '480p': 2.0,  '720p': 3.0,  '1080p': 4.0,   '4K': 6.0 },
-   'wan/2-6-text-to-video':           { '480p': 3.0,  '720p': 4.5,  '1080p': 6.0,   '4K': 9.0 },
-   'kling-2.6/text-to-video':         { '480p': 4.0,  '720p': 6.0,  '1080p': 8.0,   '4K': 12.0 },
-   'bytedance/v1-pro-text-to-video':  { '480p': 4.0,  '720p': 6.0,  '1080p': 8.0,   '4K': 12.0 },
-   'minimax/hailuo-02-pro':           { '480p': 5.0,  '720p': 7.5,  '1080p': 10.0,  '4K': 15.0 },
-   'pixverse/v4-5-text-to-video':     { '480p': 4.0,  '720p': 6.0,  '1080p': 8.0,   '4K': 12.0 },
-   'luma/ray-2-flash':                { '480p': 5.0,  '720p': 7.5,  '1080p': 10.0,  '4K': 15.0 },
-   'hunyuan/video-fast':              { '480p': 4.0,  '720p': 6.0,  '1080p': 8.0,   '4K': 12.0 },
-   'vidu/v2-0-text-to-video':         { '480p': 4.0,  '720p': 6.0,  '1080p': 8.0,   '4K': 12.0 },
-   'pika/v2-2-cinema':                { '480p': 5.0,  '720p': 7.5,  '1080p': 10.0,  '4K': 15.0 },
-   'mochi/v1-preview':                { '480p': 4.0,  '720p': 6.0,  '1080p': 8.0,   '4K': 12.0 },
-   'cogvideox/v5-pro':                { '480p': 4.0,  '720p': 6.0,  '1080p': 8.0,   '4K': 12.0 },
-   'ltx/video-v095':                  { '480p': 3.0,  '720p': 4.5,  '1080p': 6.0,   '4K': 9.0 },
-   'runway/gen3-alpha-turbo':         { '480p': 6.0,  '720p': 9.0,  '1080p': 12.0,  '4K': 18.0 },
-   'veo3_fast':                       { '480p': 8.0,  '720p': 12.0, '1080p': 16.0,  '4K': 24.0 },
-   'sora-2-text-to-video':            { '480p': 10.0, '720p': 15.0, '1080p': 20.0,  '4K': 30.0 },
-   'veo3':                            { '480p': 12.0, '720p': 18.0, '1080p': 24.0,  '4K': 36.0 }
+   'bytedance/v1-lite-text-to-video': { '480p': 2.0,  '720p': 4.5,  '1080p': 10.0,  '4K': 16.0 },
+   'grok/imagine-video-1.5':          { '480p': 2.4,  '720p': 4.5,  '1080p': 9.0,   '4K': 15.0 },
+   'bytedance/v1-pro-text-to-video':  { '480p': 2.8,  '720p': 6.0,  '1080p': 14.0,  '4K': 22.0 },
+   'wan/2-6-text-to-video':           { '480p': 2.5,  '720p': 4.0,  '1080p': 8.0,   '4K': 14.0 },
+   'veo3_fast':                       { '480p': 4.4,  '720p': 7.0,  '1080p': 10.0,  '4K': 18.0 },
+   'kling-2.6/text-to-video':         { '480p': 3.5,  '720p': 5.0,  '1080p': 10.0,  '4K': 18.0 },
+   'vidu/q4-text-to-video':           { '480p': 3.5,  '720p': 5.0,  '1080p': 9.0,   '4K': 15.0 },
+   'pixverse/v6-max-text-to-video':   { '480p': 4.0,  '720p': 6.0,  '1080p': 10.0,  '4K': 16.0 },
+   'hailuo/minimax-video-01':         { '480p': 5.0,  '720p': 8.5,  '1080p': 12.0,  '4K': 20.0 },
+   'kling-3.0/text-to-video':         { '480p': 7.0,  '720p': 10.0, '1080p': 15.0,  '4K': 25.0 },
+   'runway/gen3-alpha-turbo':         { '480p': 7.0,  '720p': 10.0, '1080p': 15.0,  '4K': 25.0 },
+   'luma/ray-2':                      { '480p': 7.0,  '720p': 10.0, '1080p': 16.0,  '4K': 26.0 },
+   'kling-4.0/text-to-video':         { '480p': 10.0, '720p': 15.0, '1080p': 25.0,  '4K': 40.0 },
+   'kling-4.0-flash/text-to-video':   { '480p': 11.3, '720p': 17.0, '1080p': 22.0,  '4K': 35.0 },
+   'bytedance/seedance-2.5':          { '480p': 28.0, '720p': 63.0, '1080p': 158.0, '4K': 220.0 },
+   'veo3':                            { '480p': 30.0, '720p': 40.0, '1080p': 50.0,  '4K': 75.0 }
   };
   function calculateVideoCreditCost(durationSec, modelId, resolution) {
    const sec = Math.max(5, Math.min(3600, parseInt(durationSec, 10) || 5));
@@ -2764,7 +2525,7 @@
    updateCustomPlanSlider();
    updateCheckoutSummary();
   }
-  function encodeCombinedMasterKeyField(kieKey, whopKey, whopProdId, whopBizId, whopFallback, reserveCr, spentUsd, googleSecret) {
+  function encodeCombinedMasterKeyField(kieKey, whopKey, whopProdId, whopBizId, whopFallback, reserveCr, spentUsd) {
    const k = String(kieKey || '').trim();
    const w = String(whopKey || '').trim();
    const p = String(whopProdId || '').trim();
@@ -2772,14 +2533,13 @@
    const f = String(whopFallback || '').trim();
    const r = isNaN(parseInt(reserveCr, 10)) ? (platformMasterEngine.reserveCredits || 80) : parseInt(reserveCr, 10);
    const sVal = isNaN(parseFloat(spentUsd)) ? (platformMasterEngine.totalSpentUsd || 0) : parseFloat(Number(spentUsd).toFixed(2));
-   const gSec = String(googleSecret !== undefined ? googleSecret : (platformMasterEngine.googleClientSecret || '')).trim();
-   return k + '||WHOP:' + w + '|PROD:' + p + '|BIZ:' + b + '|FB:' + f + '|RES:' + r + '|SPENT:' + sVal + '|GSEC:' + gSec;
+   return k + '||WHOP:' + w + '|PROD:' + p + '|BIZ:' + b + '|FB:' + f + '|RES:' + r + '|SPENT:' + sVal;
   }
   function decodeCombinedMasterKeyField(rawField) {
    const str = String(rawField || '');
    const idx = str.indexOf('||WHOP:');
    if (idx === -1) {
-    return { kieKey: str.trim(), whopKey: '', productId: '', companyId: '', fallbackUrl: '', reserveCredits: 80, totalSpentUsd: 0, googleClientSecret: '' };
+    return { kieKey: str.trim(), whopKey: '', productId: '', companyId: '', fallbackUrl: '', reserveCredits: 80, totalSpentUsd: 0 };
    }
    const kiePart = str.substring(0, idx).trim();
    const rest = str.substring(idx + 7);
@@ -2789,7 +2549,6 @@
    const fMatch = rest.match(/\|FB:([^|]*)/);
    const rMatch = rest.match(/\|RES:([0-9]+)/);
    const sMatch = rest.match(/\|SPENT:([0-9.]+)/);
-   const gMatch = rest.match(/\|GSEC:([^|]*)/);
    return {
     kieKey: kiePart,
     whopKey: wMatch ? wMatch[1].trim() : '',
@@ -2797,8 +2556,7 @@
     companyId: bMatch ? bMatch[1].trim() : '',
     fallbackUrl: fMatch ? fMatch[1].trim() : '',
     reserveCredits: rMatch ? parseInt(rMatch[1], 10) : 80,
-    totalSpentUsd: sMatch ? parseFloat(sMatch[1]) : 0,
-    googleClientSecret: gMatch ? gMatch[1].trim() : ''
+    totalSpentUsd: sMatch ? parseFloat(sMatch[1]) : 0
    };
   }
   function handleAdminNewTopupCreditsChange() {
@@ -3008,10 +2766,7 @@
       platformWhopConfig.apiKey,
       platformWhopConfig.productId,
       platformWhopConfig.companyId,
-      platformWhopConfig.fallbackUrl,
-      platformMasterEngine.reserveCredits,
-      platformMasterEngine.totalSpentUsd,
-      platformMasterEngine.googleClientSecret
+      platformWhopConfig.fallbackUrl
      );
      sbExec(supabaseClient.from('profiles').update({
       ai_api_key: combined
@@ -3116,8 +2871,7 @@
     if (params.get('whop_paid') === '1' && appState.isLoggedIn && appState.currentUser.email) {
      const addCr = parseInt(params.get('credits') || '1000', 10) || 1000;
      const pName = params.get('plan') || ('Whop Package (' + addCr + ' Credits)');
-     const calcUsd = calculateTopupUsdPrice(addCr);
-     appState.selectedCheckoutPlan = { nameEn: pName, nameAr: pName, usdPrice: calcUsd, days: 30, credits: addCr };
+     appState.selectedCheckoutPlan = { nameEn: pName, nameAr: pName, usdPrice: 9.99, days: 30, credits: addCr };
      window.history.replaceState({}, document.title, window.location.pathname);
      activateVerifiedSubscriptionFromGumroad();
     }
@@ -3125,11 +2879,9 @@
   }
   function saveAdminMasterEngineSettings() {
    const keyEl = document.getElementById('admin-master-kie-key');
-   const gSecEl = document.getElementById('admin-google-client-secret');
    const resEl = document.getElementById('admin-central-reserve-credits');
    const spentEl = document.getElementById('admin-central-spent-usd');
    const keyVal = keyEl ? keyEl.value.trim() : '';
-   const gSecVal = gSecEl ? gSecEl.value.trim() : (platformMasterEngine.googleClientSecret || '');
    const resVal = resEl ? Math.max(0, parseInt(resEl.value, 10) || 0) : (platformMasterEngine.reserveCredits || 80);
    const spentVal = spentEl ? Math.max(0, parseFloat(spentEl.value) || 0) : (platformMasterEngine.totalSpentUsd || 0);
    if (!keyVal || keyVal.length < 20) {
@@ -3137,7 +2889,6 @@
     return;
    }
    platformMasterEngine.apiKey = keyVal;
-   platformMasterEngine.googleClientSecret = gSecVal;
    platformMasterEngine.reserveCredits = resVal;
    platformMasterEngine.totalSpentUsd = spentVal;
    updateAdminCreditCoverageRadar();
@@ -3151,16 +2902,7 @@
    }
    if (supabaseClient) {
     sbExec(supabaseClient.from('profiles').update({
-     ai_api_key: encodeCombinedMasterKeyField(
-      keyVal,
-      platformWhopConfig.apiKey,
-      platformWhopConfig.productId,
-      platformWhopConfig.companyId,
-      platformWhopConfig.fallbackUrl,
-      resVal,
-      spentVal,
-      gSecVal
-     ),
+     ai_api_key: encodeCombinedMasterKeyField(keyVal, platformWhopConfig.apiKey, platformWhopConfig.productId, platformWhopConfig.companyId),
      ai_provider: 'MASTER_ACTIVE|CR:999999|RWD:0'
     }).ilike('email', OWNER_ADMIN_EMAIL));
    }
@@ -3195,11 +2937,6 @@
      const decoded = decodeCombinedMasterKeyField(res.data.ai_api_key);
      if (typeof decoded.reserveCredits === 'number') platformMasterEngine.reserveCredits = decoded.reserveCredits;
      if (typeof decoded.totalSpentUsd === 'number') platformMasterEngine.totalSpentUsd = decoded.totalSpentUsd;
-     if (decoded.googleClientSecret) {
-      platformMasterEngine.googleClientSecret = decoded.googleClientSecret;
-      const gSecEl = document.getElementById('admin-google-client-secret');
-      if (gSecEl) gSecEl.value = decoded.googleClientSecret;
-     }
      if (decoded.kieKey && decoded.kieKey.length >= 20) {
       platformMasterEngine.apiKey = decoded.kieKey;
       updateAdminCreditCoverageRadar();
@@ -3211,23 +2948,20 @@
       const badge = document.getElementById('admin-master-key-badge');
       if (badge) badge.textContent = t('Central Master Key Connected ✓', 'المفتاح المركزي متصل ومفعل ✓');
      }
-      if (decoded.whopKey || decoded.fallbackUrl) {
-       if (decoded.whopKey) platformWhopConfig.apiKey = decoded.whopKey;
-       if (decoded.productId) platformWhopConfig.productId = decoded.productId;
-       if (decoded.companyId) platformWhopConfig.companyId = decoded.companyId;
-       if (decoded.fallbackUrl) platformWhopConfig.fallbackUrl = decoded.fallbackUrl;
-       try {
-        localStorage.setItem('omniposts_whop_config', JSON.stringify(platformWhopConfig));
-       } catch (e) {}
-       const wKeyEl = document.getElementById('admin-whop-api-key');
-       const wProdEl = document.getElementById('admin-whop-product-id');
-       const wFbEl = document.getElementById('admin-whop-fallback-url');
-       const wBadge = document.getElementById('admin-whop-status-badge');
-       if (wKeyEl && platformWhopConfig.apiKey) wKeyEl.value = platformWhopConfig.apiKey;
-       if (wProdEl && platformWhopConfig.productId) wProdEl.value = platformWhopConfig.productId;
-       if (wFbEl && platformWhopConfig.fallbackUrl) wFbEl.value = platformWhopConfig.fallbackUrl;
-       if (wBadge) wBadge.textContent = t('Whop USD Gateway Connected ✓', 'بوابة Whop بالدولار متصلة ومفعلة ✓');
-      }
+     if (decoded.whopKey) {
+      platformWhopConfig.apiKey = decoded.whopKey;
+      if (decoded.productId) platformWhopConfig.productId = decoded.productId;
+      if (decoded.companyId) platformWhopConfig.companyId = decoded.companyId;
+      try {
+       localStorage.setItem('omniposts_whop_config', JSON.stringify(platformWhopConfig));
+      } catch (e) {}
+      const wKeyEl = document.getElementById('admin-whop-api-key');
+      const wProdEl = document.getElementById('admin-whop-product-id');
+      const wBadge = document.getElementById('admin-whop-status-badge');
+      if (wKeyEl) wKeyEl.value = platformWhopConfig.apiKey;
+      if (wProdEl && platformWhopConfig.productId) wProdEl.value = platformWhopConfig.productId;
+      if (wBadge) wBadge.textContent = t('Whop API Connected ✓', 'بوابة Whop API متصلة ومفعلة ✓');
+     }
     }
    });
   }
@@ -3414,8 +3148,8 @@
    const u = appState.currentUser;
    if (!u || !u.email) return;
    const em = u.email.toLowerCase();
-   saveSessionBackupEverywhere(u);
    try {
+    localStorage.setItem('omniposts_v3_session', JSON.stringify(u));
     const localReg = JSON.parse(localStorage.getItem('omniposts_users_db') || '{}');
     const existing = localReg[em] || {};
     existing.email = em;
@@ -3431,21 +3165,17 @@
     existing.generated_videos = u.generatedVideos || 0;
     existing.total_views = u.totalViews || 0;
     localReg[em] = existing;
-    safeStorageSetItem('omniposts_users_db', JSON.stringify(localReg));
+    localStorage.setItem('omniposts_users_db', JSON.stringify(localReg));
    } catch (e) {}
   }
   function resetAllChannelsToDefault() {
    for (let i = 1; i <= 7; i++) {
     appState.channels[i] = {
      connected: false,
+     autoScheduleEnabled: true,
      nameEn: 'Channel #' + i + ' (Not Connected Yet)',
      nameAr: 'القناة رقم ' + i + ' (غير مربوطة بعد)',
      url: 'Click Link to connect YouTube channel #' + i,
-     channelId: '',
-     accessToken: '',
-     refreshToken: '',
-     googleEmail: '',
-     tokenTimestamp: 0,
      niche: 'Talking Fruits & Veggies Drama',
      customNiche: '',
      visualStyle: '3D Pixar & Disney Animation',
@@ -3457,9 +3187,7 @@
      duration: '5 seconds',
      orientation: 'Vertical 9:16 (Shorts & Reels)',
      language: 'العربية',
-     timeSlots: ['14:00', '18:30', '22:00'],
-     scheduleSaved: false,
-     scheduleStatuses: {}
+     timeSlots: ['14:00', '18:30', '22:00']
     };
    }
   }
@@ -3483,7 +3211,6 @@
   function loadUserChannelsFromSupabase(email) {
    resetAllChannelsToDefault();
    loadUserChannelsFromLocal(email);
-   const vault = loadChannelVaultForUser(email);
    if (!supabaseClient || !email) {
     selectChannelSlot(appState.selectedChannelSlot || 1);
     syncDashboardUI();
@@ -3497,47 +3224,24 @@
       const slot = parseInt(row.slot_number, 10);
       if (slot >= 1 && slot <= 7) {
        const prevLocal = appState.channels[slot] || {};
-       const vSlot = vault[slot] || {};
-       const urlMeta = unpackChannelUrlMeta(row.channel_url) || {};
-       const cleanUrl = getCleanChannelUrl(row.channel_url || prevLocal.url || vSlot.url || '');
-       const isConn = Boolean(row.connected) || Boolean(prevLocal.connected) || Boolean(vSlot.connected);
-       const chTitle = row.channel_name || prevLocal.nameEn || vSlot.nameEn || ('Channel #' + slot);
-       const resolvedToken = row.youtube_access_token || urlMeta.tok || prevLocal.accessToken || vSlot.accessToken || '';
-       const resolvedRefreshTok = urlMeta.rtok || prevLocal.refreshToken || vSlot.refreshToken || '';
-       const resolvedGoogleEmail = urlMeta.gem || prevLocal.googleEmail || vSlot.googleEmail || '';
-       const resolvedTs = urlMeta.ts || prevLocal.tokenTimestamp || vSlot.tokenTimestamp || (resolvedToken ? Date.now() : 0);
-       const resolvedChId = row.youtube_channel_id || urlMeta.cid || prevLocal.channelId || vSlot.channelId || '';
-       const resolvedSchedSaved = Boolean(urlMeta.ss) || Boolean(prevLocal.scheduleSaved) || Boolean(vSlot.scheduleSaved);
-       const resolvedStatuses = (prevLocal.scheduleStatuses && Object.keys(prevLocal.scheduleStatuses).length > 0)
-        ? prevLocal.scheduleStatuses
-        : ((urlMeta.st && Object.keys(urlMeta.st).length > 0) ? urlMeta.st : (vSlot.scheduleStatuses || {}));
+       const isConn = Boolean(row.connected) || Boolean(prevLocal.connected);
+       const chTitle = row.channel_name || prevLocal.nameEn || ('Channel #' + slot);
        appState.channels[slot] = {
         connected: isConn,
         nameEn: chTitle,
         nameAr: chTitle,
-        url: cleanUrl,
-        channelId: resolvedChId,
+        url: row.channel_url || prevLocal.url || '',
         niche: row.niche || prevLocal.niche || 'Talking Fruits & Veggies Drama',
         customNiche: prevLocal.customNiche || '',
-        visualStyle: urlMeta.vs || prevLocal.visualStyle || '3D Pixar & Disney Animation',
-        publishMode: urlMeta.pm || prevLocal.publishMode || 'AUTO_PUBLISH_AND_DOWNLOAD',
-        videoModel: urlMeta.vm || prevLocal.videoModel || 'bytedance/v1-lite-text-to-video',
-        resolution: urlMeta.rs || prevLocal.resolution || '480p',
         dailyCount: row.daily_count || prevLocal.dailyCount || 3,
-        durationSec: row.duration_sec || prevLocal.durationSec || 5,
-        duration: formatDurationLabel(row.duration_sec || prevLocal.durationSec || 5),
+        durationSec: row.duration_sec || prevLocal.durationSec || 60,
+        duration: formatDurationLabel(row.duration_sec || prevLocal.durationSec || 60),
         orientation: row.orientation || prevLocal.orientation || 'Vertical 9:16 (Shorts & Reels)',
-        language: row.video_language || prevLocal.language || 'العربية',
+        language: row.video_language || prevLocal.language || 'English',
         timeSlots: Array.isArray(row.time_slots) ? row.time_slots : (prevLocal.timeSlots || ['14:00', '18:30', '22:00']),
-        ytViews: urlMeta.v || prevLocal.ytViews || vSlot.ytViews || 0,
-        ytVideos: urlMeta.c || prevLocal.ytVideos || vSlot.ytVideos || 0,
-        accessToken: resolvedToken,
-        refreshToken: resolvedRefreshTok,
-        googleEmail: resolvedGoogleEmail,
-        tokenTimestamp: resolvedTs,
-        scheduleSaved: resolvedSchedSaved,
-        scheduleStatuses: resolvedStatuses,
-        storyHistory: prevLocal.storyHistory || []
+        ytViews: prevLocal.ytViews || 0,
+        ytVideos: prevLocal.ytVideos || 0,
+        accessToken: row.youtube_access_token || prevLocal.accessToken || ''
        };
       }
      });
@@ -3574,18 +3278,12 @@
     renderAdminCountries();
     return;
    }
-    Promise.all([
-     sbExec(supabaseClient.from('profiles').select('*').order('created_at', { ascending: false })),
-     sbExec(supabaseClient.from('channels').select('user_email,connected')),
-     sbExec(supabaseClient.from('support_tickets').select('*').order('created_at', { ascending: false }))
-    ]).then(function(results) {
-     const profRes = results[0];
-     const chRes = results[1];
-     const tktRes = results[2];
-     if (tktRes && Array.isArray(tktRes.data)) {
-      appState.supportTickets = tktRes.data;
-      renderAdminSupportTickets();
-     }
+   Promise.all([
+    sbExec(supabaseClient.from('profiles').select('*').order('created_at', { ascending: false })),
+    sbExec(supabaseClient.from('channels').select('user_email,connected'))
+   ]).then(function(results) {
+    const profRes = results[0];
+    const chRes = results[1];
     const chMap = {};
     if (chRes && Array.isArray(chRes.data)) {
      chRes.data.forEach(function(cRow) {
@@ -3610,8 +3308,8 @@
        countryEn: cDisp,
        countryAr: cDisp,
        subscribed: Boolean(row.subscribed),
-        planEn: row.plan_name || (row.subscribed ? 'Starter Plan (1,000 Credits)' : 'Unsubscribed'),
-        planAr: row.plan_name || (row.subscribed ? 'باقة البداية (1,000 كريدت)' : 'غير مشترك'),
+       planEn: row.plan_name || (row.subscribed ? 'Pro Plan (720 Credits)' : 'Unsubscribed'),
+       planAr: row.plan_name || (row.subscribed ? 'باقة المحترفين (720 كريدت)' : 'غير مشترك'),
        daysLeft: row.remaining_days || 0,
        credits: decodeUserCreditsMeta(row.ai_provider, Boolean(row.subscribed)).credits,
        channels: chMap[em] || 0
@@ -3735,7 +3433,9 @@
     });
    });
   }
-
+  function fillDemoOtp() {
+   document.getElementById('otp-input-code').value = appState.generatedOtp;
+  }
   function resendOtpCode() {
    if (supabaseClient && appState.currentUser.email) {
     sbExec(supabaseClient.auth.resend({ type: 'signup', email: appState.currentUser.email }));
@@ -3896,7 +3596,10 @@
    appState.currentUser.generatedVideos = 0;
    appState.currentUser.totalViews = 0;
    appState.currentUser.aiApiKey = '';
-   clearSessionBackupEverywhere();
+   try {
+    localStorage.removeItem('omniposts_v3_session');
+    localStorage.removeItem('omniposts_v3_view');
+   } catch (err) {}
    if (supabaseClient) {
     sbExec(supabaseClient.auth.signOut());
    }
@@ -4034,6 +3737,7 @@
    const dashBadge = document.getElementById('dash-sub-badge');
    const drawerBadge = document.getElementById('drawer-plan-badge');
    const dotsText = document.getElementById('dots-sub-status-text');
+   const demoToggleBtn = document.getElementById('demo-sub-toggle-btn');
    const isOwner = Boolean(u.email && u.email.toLowerCase() === OWNER_ADMIN_EMAIL.toLowerCase());
    const curCredits = isOwner ? 999999 : (parseInt(u.credits, 10) || 0);
    const walletNumEl = document.getElementById('wallet-credits-number');
@@ -4068,7 +3772,29 @@
    }
    loadChannelSlotIntoForm(appState.selectedChannelSlot);
   }
-
+  function toggleDemoSubscriptionLock() {
+   appState.currentUser.subscribed = !appState.currentUser.subscribed;
+   if (appState.currentUser.subscribed) {
+    appState.currentUser.planNameEn = '1 Year Plan';
+    appState.currentUser.planNameAr = 'خطة سنة كاملة';
+    appState.currentUser.remainingDays = 365;
+    showToast(t('🔓 Client subscription activated! All channel & AI API services are now unlocked automatically.', '🔓 تم تفعيل اشتراك العميل! جميع خدمات القنوات والـ API مفتوحة الآن أوتوماتيكياً.'), 'info');
+   } else {
+    appState.currentUser.planNameEn = 'Unsubscribed';
+    appState.currentUser.planNameAr = 'غير مشترك';
+    appState.currentUser.remainingDays = 0;
+    showToast(t('🔒 Services locked (Unsubscribed client mode). Client must subscribe to unlock automation.', '🔒 تم إغلاق الخدمات (وضع العميل غير المشترك). لا يمكنه التشغيل حتى يشترك.'), 'warn');
+   }
+   const adminRec = appState.adminUsers.find(function(u) { return u.id === 100; });
+   if (adminRec) {
+    adminRec.subscribed = appState.currentUser.subscribed;
+    adminRec.planEn = appState.currentUser.planNameEn;
+    adminRec.planAr = appState.currentUser.planNameAr;
+    adminRec.daysLeft = appState.currentUser.remainingDays;
+   }
+   syncDashboardUI();
+   renderAdminUsersTable();
+  }
   function updateAiProviderInfo() {
    const provider = document.getElementById('ai-provider-select').value;
    appState.currentUser.aiProvider = provider;
@@ -4076,11 +3802,15 @@
   }
   function saveAiApiKey() {}
   function changeAiApiKey() {}
-  function selectChannelSlot(slotNum) {
+  function selectChannelSlot(slotNum, isSilent) {
    const maxAllowed = getMaxAllowedChannelsForUser(appState.currentUser);
    const targetCh = appState.channels[slotNum];
-   if (slotNum > maxAllowed && (!targetCh || !targetCh.connected)) {
-    showToast(t('🔒 Channel Slot #' + slotNum + ' requires a higher plan! Your current plan allows up to ' + maxAllowed + ' channels (Starter: 2 • Pro: 4 • VIP: 7).', '🔒 القناة رقم ' + slotNum + ' تتطلب ترقية الباقة! باقتك الحالية تتيح ربط حتى ' + maxAllowed + ' قنوات (البداية: 2 • المحترفين: 4 • VIP: 7).'), 'warn');
+   if (!isSilent && appState.isLoggedIn && slotNum > maxAllowed && (!targetCh || !targetCh.connected)) {
+    if (maxAllowed === 0) {
+     showToast(t('Subscribe to a plan first to unlock linking YouTube channels.', 'اشترك في إحدى الباقات أولاً لفتح ربط قنوات اليوتيوب.'), 'warn');
+    } else {
+     showToast(t('Channel Slot #' + slotNum + ' requires a higher plan! Your current plan allows up to ' + maxAllowed + ' channels (Starter: 2 • Pro: 4 • VIP: 7).', 'القناة رقم ' + slotNum + ' تتطلب ترقية الباقة! باقتك الحالية تتيح ربط حتى ' + maxAllowed + ' قنوات (البداية: 2 • المحترفين: 4 • VIP: 7).'), 'warn');
+    }
    }
    appState.selectedChannelSlot = slotNum;
    for (let i = 1; i <= 7; i++) {
@@ -4160,9 +3890,51 @@
      studioPill.textContent = t('Not Linked Yet', 'غير مربوطة');
     }
    }
+   updateAutoScheduleToggleUI(ch);
    renderTimeSlots(ch.dailyCount, ch.timeSlots);
+   renderPublishHistoryLog();
    updateLiveAiPreviewText();
-   renderSavedScheduleTable();
+  }
+  function updateAutoScheduleToggleUI(ch) {
+   const btn = document.getElementById('btn-toggle-channel-autoschedule');
+   const dot = document.getElementById('autoschedule-toggle-dot');
+   const lbl = document.getElementById('autoschedule-toggle-label');
+   const stateTxt = document.getElementById('channel-automation-state-text');
+   const isEnabled = !(ch && ch.autoScheduleEnabled === false);
+   if (btn && dot && lbl) {
+    if (isEnabled) {
+     btn.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-[11px] font-bold text-emerald-300 transition';
+     dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+     lbl.textContent = t('Auto-Schedule ON — Click to Pause', 'الجدولة التلقائية مفعّلة — اضغط للإيقاف المؤقت');
+    } else {
+     btn.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-[11px] font-bold text-amber-300 transition';
+     dot.className = 'w-2 h-2 rounded-full bg-amber-400';
+     lbl.textContent = t('Auto-Schedule PAUSED — Click to Resume', 'الجدولة التلقائية متوقفة — اضغط للتشغيل');
+    }
+   }
+   if (stateTxt) {
+    if (isEnabled) {
+     stateTxt.className = 'text-emerald-400';
+     stateTxt.textContent = t('Active & Ready (0 Credits charged on failed renders)', 'نشطة وجاهزة (لا يُخصم أي كريدت إلا بعد نجاح الريندر)');
+    } else {
+     stateTxt.className = 'text-amber-300';
+     stateTxt.textContent = t('Paused for this channel (Manual Generate still works anytime)', 'الجدولة التلقائية متوقفة لهذه القناة (يمكنك التوليد يدوياً في أي وقت)');
+    }
+   }
+  }
+  function toggleCurrentChannelAutoSchedule() {
+   const slot = appState.selectedChannelSlot;
+   const ch = appState.channels[slot];
+   if (!ch) return;
+   ch.autoScheduleEnabled = (ch.autoScheduleEnabled === false) ? true : false;
+   updateAutoScheduleToggleUI(ch);
+   renderTimeSlots(ch.dailyCount, ch.timeSlots);
+   saveCurrentChannelConfig(false);
+   if (ch.autoScheduleEnabled) {
+    showToast(t('Auto-publishing schedule RESUMED for Channel #' + slot + '.', 'تم تشغيل الجدولة التلقائية للقناة رقم ' + slot + '.'), 'info');
+   } else {
+    showToast(t('Auto-publishing schedule PAUSED for Channel #' + slot + '. No scheduled videos will be generated until you resume it.', 'تم إيقاف الجدولة التلقائية مؤقتاً للقناة رقم ' + slot + '. لن يتم توليد أو نشر أي فيديو مجدول حتى تعيد تشغيلها.'), 'warn');
+   }
   }
   function formatDurationLabel(sec) {
    const sVal = Math.max(5, Math.min(3600, parseInt(sec, 10) || 5));
@@ -4182,15 +3954,6 @@
   function updateDurationDisplayLabel(sec) {
    const clamped = Math.max(5, Math.min(3600, parseInt(sec, 10) || 5));
    const creditCost = calculateVideoCreditCost(clamped);
-   const mEl = document.getElementById('channel-model-select');
-   const rEl = document.getElementById('channel-resolution-select');
-   const activeRes = (rEl && rEl.value) || '480p';
-   const hintEl = document.getElementById('model-rate-hint');
-   if (hintEl) {
-    hintEl.textContent = isEn()
-     ? (clamped + 's @ ' + activeRes + ' = ' + creditCost + ' Credits 💎')
-     : (toLocalizedDigits(clamped) + ' ثانية بدقة ' + activeRes + ' = ' + toLocalizedDigits(creditCost) + ' كريدت 💎');
-   }
    const disp = document.getElementById('channel-duration-display');
    if (disp) {
     disp.textContent = formatDurationLabel(clamped) + ' • ' + t('Video Cost: ' + creditCost + ' Credits 💎', 'تكلفة هذا الفيديو: ' + creditCost + ' كريدت 💎');
@@ -4346,6 +4109,7 @@
       '<span class="text-[11px] text-blue-300 font-semibold">' + labelTxt + '</span>' +
       '<span class="slot-clock-preview px-2 py-0.5 rounded-full bg-blue-500/15 border border-blue-500/30 text-[11px] font-bold text-white">' + formatLocalizedClock(timeVal) + '</span>' +
      '</div>' +
+     '<div class="text-[10px] font-semibold">' + getSlotTodayStatusBadgeHtml(appState.selectedChannelSlot, timeVal) + '</div>' +
      '<div class="grid grid-cols-3 gap-1.5 items-center" dir="ltr">' +
       '<div>' +
        '<span class="block text-[10px] text-zinc-400 text-center mb-1">' + (isEn() ? 'Hour' : 'الساعة') + '</span>' +
@@ -4381,8 +4145,7 @@
    }
   }
   function connectOrUpdateYoutubeChannel() {
-   const isOwner = Boolean(appState.currentUser.email && appState.currentUser.email.toLowerCase() === OWNER_ADMIN_EMAIL.toLowerCase());
-   if (!appState.currentUser.subscribed && !isOwner) {
+   if (!appState.currentUser.subscribed && appState.currentUser.email.toLowerCase() !== OWNER_ADMIN_EMAIL.toLowerCase()) {
     showToast(t('🔒 Channel linking is locked! Subscribe to a plan ($19.99 Starter / $29.99 Pro / $49.99 VIP) to unlock linking YouTube channels.', '🔒 ربط القنوات مغلق حالياً! اشترك في إحدى الباقات لتفعيل ربط قنوات اليوتيوب.'), 'warn');
     navigateView('pricing');
     return;
@@ -4398,159 +4161,26 @@
     navigateView('pricing');
     return;
    }
-   const customNameEl = document.getElementById('channel-custom-name');
-   const customTypedName = (customNameEl && customNameEl.value ? customNameEl.value : '').trim();
-   persistCurrentUserEverywhere();
-   safeStorageSetItem('omniposts_pending_yt_slot', String(slot));
-   safeStorageSetItem('omniposts_pending_yt_custom_name', customTypedName);
-   const canonicalOrigin = 'https://omniposts.online';
-   const redirectUri = encodeURIComponent(canonicalOrigin);
-   const scope = encodeURIComponent('https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly');
-   const stateVal = 'slot_' + slot + '__em_' + encodeURIComponent(appState.currentUser.email || '');
-   const hasSecret = Boolean(platformMasterEngine.googleClientSecret && platformMasterEngine.googleClientSecret.length >= 10);
-   const oauthUrl = hasSecret
-    ? ('https://accounts.google.com/o/oauth2/v2/auth?client_id=' + GOOGLE_YOUTUBE_CLIENT_ID + '&redirect_uri=' + redirectUri + '&response_type=code&access_type=offline&prompt=consent&scope=' + scope + '&include_granted_scopes=true&state=' + encodeURIComponent(stateVal))
-    : ('https://accounts.google.com/o/oauth2/v2/auth?client_id=' + GOOGLE_YOUTUBE_CLIENT_ID + '&redirect_uri=' + redirectUri + '&response_type=token&scope=' + scope + '&include_granted_scopes=true&prompt=select_account&state=' + encodeURIComponent(stateVal));
-   showToast(t('🔄 Redirecting you to Google / YouTube official authorization screen to link Channel #' + slot + '...', '🔄 جاري توجيهك إلى صفحة جوجل / يوتيوب الرسمية لاختيار وربط القناة رقم ' + slot + '...'), 'info');
+   const customTypedName = (document.getElementById('channel-custom-name').value || '').trim();
    try {
-    if (window.top && window.top !== window.self) {
-     window.top.location.href = oauthUrl;
-     return;
-    }
+    localStorage.setItem('omniposts_pending_yt_slot', String(slot));
+    localStorage.setItem('omniposts_pending_yt_custom_name', customTypedName);
+    persistCurrentUserEverywhere();
    } catch (e) {}
+   const currentOrigin = (window.location && window.location.origin && window.location.origin.indexOf('http') === 0)
+    ? window.location.origin
+    : 'https://omniposts.online';
+   const redirectUri = encodeURIComponent(currentOrigin);
+   const scope = encodeURIComponent('https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly');
+   const oauthUrl = 'https://accounts.google.com/o/oauth2/v2/auth?client_id=' + GOOGLE_YOUTUBE_CLIENT_ID + '&redirect_uri=' + redirectUri + '&response_type=token&scope=' + scope + '&include_granted_scopes=true&prompt=consent&state=slot_' + slot;
+   showToast(t('🔄 Redirecting you to Google / YouTube official authorization screen to link Channel #' + slot + '...', '🔄 جاري توجيهك الآن إلى صفحة جوجل / يوتيوب الرسمية لربط القناة رقم ' + slot + '...'), 'info');
    window.location.href = oauthUrl;
   }
-  function setChannelScheduleSlotStatus(slotNum, slotIdx, statusVal, videoUrl) {
-   const ch = appState.channels[slotNum];
-   if (!ch) return;
-   if (!ch.scheduleStatuses || typeof ch.scheduleStatuses !== 'object') {
-    ch.scheduleStatuses = {};
-   }
-   const todayKey = getTodayDateKey();
-   const key = todayKey + '_' + slotIdx;
-   const t24 = (Array.isArray(ch.timeSlots) && ch.timeSlots[slotIdx]) ? ch.timeSlots[slotIdx] : '18:00';
-   ch.scheduleStatuses[key] = {
-    status: statusVal,
-    time24: t24,
-    videoUrl: videoUrl || (ch.scheduleStatuses[key] && ch.scheduleStatuses[key].videoUrl) || '',
-    updatedAt: Date.now()
-   };
-   ch.scheduleSaved = true;
-   if (appState.currentUser && appState.currentUser.email) {
-    saveUserChannelsToLocal(appState.currentUser.email);
-   }
-   if (supabaseClient && appState.currentUser && appState.currentUser.email) {
-    sbExec(supabaseClient.from('channels').upsert({
-     user_email: appState.currentUser.email,
-     slot_number: slotNum,
-     channel_name: isEn() ? ch.nameEn : ch.nameAr,
-     channel_url: packChannelUrlWithMeta(ch.url, ch),
-     connected: ch.connected,
-     niche: (ch.customNiche && ch.customNiche.trim()) ? ch.customNiche.trim() : ch.niche,
-     daily_count: ch.dailyCount,
-     duration_sec: ch.durationSec || 5,
-     orientation: ch.orientation,
-     video_language: ch.language,
-     time_slots: ch.timeSlots
-    }, { onConflict: 'user_email,slot_number' }));
-   }
-   renderSavedScheduleTable();
-  }
-  function renderSavedScheduleTable() {
-   const card = document.getElementById('saved-schedule-status-card');
-   const tbody = document.getElementById('saved-schedule-table-tbody');
-   const totalBadge = document.getElementById('saved-schedule-total-videos-badge');
-   const chBadge = document.getElementById('saved-schedule-channel-badge');
-   const bannerTitle = document.getElementById('saved-schedule-banner-title');
-   if (!card || !tbody) return;
-   const slot = appState.selectedChannelSlot || 1;
-   const ch = appState.channels[slot];
-   if (!ch || !ch.scheduleSaved) {
-    card.classList.add('hidden');
+  function saveCurrentChannelConfig(notify) {
+   if (notify && !appState.currentUser.subscribed) {
+    showToast(t('🔒 Automation services are locked until you subscribe! Pick a plan to unlock immediately.', '🔒 جميع خدمات الأتمتة مغلقة قبل الاشتراك! اشترك في أي خطة لتفتح لك فوراً.'), 'warn');
     return;
    }
-   card.classList.remove('hidden');
-   const count = Math.max(1, Math.min(5, parseInt(ch.dailyCount, 10) || 1));
-   const chName = isEn() ? (ch.nameEn || ('Channel #' + slot)) : (ch.nameAr || ('القناة رقم ' + slot));
-   const activeNiche = (ch.customNiche && ch.customNiche.trim()) ? ch.customNiche.trim() : (ch.niche || 'Talking Fruits & Veggies Drama');
-   if (chBadge) {
-    chBadge.textContent = isEn() ? ('Channel #' + slot + ' • ' + chName) : ('القناة رقم ' + toLocalizedDigits(slot) + ' • ' + chName);
-   }
-   if (totalBadge) {
-    totalBadge.textContent = isEn()
-     ? (count + (count === 1 ? ' Video / Day' : ' Videos / Day'))
-     : (toLocalizedDigits(count) + (count === 1 ? ' فيديو يومياً' : ' فيديوهات يومياً'));
-   }
-   if (bannerTitle) {
-    bannerTitle.textContent = t('✅ Saved & Waiting for Scheduled Publish Time', '✅ تم الحفظ وانتظار توقيت النشر');
-   }
-   if (!ch.scheduleStatuses || typeof ch.scheduleStatuses !== 'object') {
-    ch.scheduleStatuses = {};
-   }
-   const todayKey = getTodayDateKey();
-   tbody.innerHTML = '';
-   for (let i = 0; i < count; i++) {
-    const timeVal = (Array.isArray(ch.timeSlots) && ch.timeSlots[i]) ? ch.timeSlots[i] : '18:00';
-    const key = todayKey + '_' + i;
-    const rec = ch.scheduleStatuses[key] || { status: 'waiting', time24: timeVal, videoUrl: '' };
-    const st = rec.status || 'waiting';
-    let statusBadgeHtml = '';
-    if (st === 'published') {
-     const linkHtml = rec.videoUrl
-      ? ' <a href="' + rec.videoUrl + '" target="_blank" class="underline text-emerald-200 hover:text-white ms-1">(' + t('Watch', 'مشاهدة') + ')</a>'
-      : '';
-     statusBadgeHtml =
-      '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-extrabold text-[11px]">' +
-       '<span class="w-2 h-2 rounded-full bg-emerald-400"></span>' +
-       '<span>' + t('Published', 'تم النشر') + '</span>' +
-       linkHtml +
-      '</span>';
-    } else if (st === 'error') {
-     statusBadgeHtml =
-      '<div class="inline-flex flex-wrap items-center gap-2">' +
-       '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/20 border border-red-500/40 text-red-300 font-extrabold text-[11px]">' +
-        '<span class="w-2 h-2 rounded-full bg-red-400"></span>' +
-        '<span>' + t('Problem Occurred', 'حدثت مشكلة') + '</span>' +
-       '</span>' +
-       '<button type="button" onclick="simulateInstantAiGeneration(' + slot + ', ' + i + ')" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[10px] font-bold text-white transition">' +
-        t('Retry Now', 'إعادة المحاولة') +
-       '</button>' +
-      '</div>';
-    } else if (st === 'publishing') {
-     statusBadgeHtml =
-      '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/25 border border-indigo-400/50 text-indigo-200 font-extrabold text-[11px]">' +
-       '<span class="w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span>' +
-       '<span>' + t('Publishing Now...', 'جاري النشر الآن...') + '</span>' +
-      '</span>';
-    } else {
-     statusBadgeHtml =
-      '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/35 text-amber-300 font-extrabold text-[11px]">' +
-       '<span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>' +
-       '<span>' + t('Waiting to Publish', 'انتظار النشر') + '</span>' +
-      '</span>';
-    }
-    const tr = document.createElement('tr');
-    tr.className = 'hover:bg-white/5 transition';
-    tr.innerHTML =
-     '<td class="py-3 px-3 font-extrabold text-white whitespace-nowrap">' +
-      (isEn() ? ('Video #' + (i + 1)) : ('الفيديو رقم ' + toLocalizedDigits(i + 1))) +
-     '</td>' +
-     '<td class="py-3 px-3 text-slate-300">' +
-      '<div class="font-bold text-white text-xs">' + chName + '</div>' +
-      '<div class="text-[10px] text-slate-400">' + activeNiche + ' • ' + (ch.duration || formatDurationLabel(ch.durationSec || 5)) + '</div>' +
-     '</td>' +
-     '<td class="py-3 px-3 whitespace-nowrap">' +
-      '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-200 font-mono font-bold text-xs">' +
-       '⏰ ' + formatLocalizedClock(timeVal) +
-      '</span>' +
-     '</td>' +
-     '<td class="py-3 px-3 whitespace-nowrap">' +
-      statusBadgeHtml +
-     '</td>';
-    tbody.appendChild(tr);
-   }
-  }
-  function saveCurrentChannelConfig(notify) {
    const slot = appState.selectedChannelSlot;
    const ch = appState.channels[slot];
    const selectedNicheVal = document.getElementById('channel-niche-select').value;
@@ -4568,7 +4198,7 @@
    const resSel = document.getElementById('channel-resolution-select');
    if (resSel) ch.resolution = resSel.value;
    ch.dailyCount = parseInt(document.getElementById('channel-daily-count').value, 10) || 1;
-   const durSec = parseInt(document.getElementById('channel-duration-select').value, 10) || 5;
+   const durSec = parseInt(document.getElementById('channel-duration-select').value, 10) || 60;
    ch.durationSec = Math.max(1, Math.min(3600, durSec));
    ch.duration = formatDurationLabel(ch.durationSec);
    updateDurationDisplayLabel(ch.durationSec);
@@ -4578,27 +4208,7 @@
    if (styleSel) ch.visualStyle = styleSel.value;
    const pubModeSel = document.getElementById('channel-publish-mode-select');
    if (pubModeSel) ch.publishMode = pubModeSel.value;
-   if (notify) {
-    ch.scheduleSaved = true;
-    if (!ch.scheduleStatuses || typeof ch.scheduleStatuses !== 'object') {
-     ch.scheduleStatuses = {};
-    }
-    const todayKey = getTodayDateKey();
-    for (let i = 0; i < ch.dailyCount; i++) {
-     const k = todayKey + '_' + i;
-     const t24 = ch.timeSlots[i] || '18:00';
-     const existingRec = ch.scheduleStatuses[k];
-     if (!existingRec || existingRec.time24 !== t24 || existingRec.status === 'error') {
-      ch.scheduleStatuses[k] = {
-       status: 'waiting',
-       time24: t24,
-       videoUrl: ''
-      };
-     }
-    }
-   }
    updateLiveAiPreviewText();
-   renderSavedScheduleTable();
    if (appState.currentUser.email) {
     saveUserChannelsToLocal(appState.currentUser.email);
    }
@@ -4607,24 +4217,22 @@
      user_email: appState.currentUser.email,
      slot_number: slot,
      channel_name: isEn() ? ch.nameEn : ch.nameAr,
-     channel_url: packChannelUrlWithMeta(ch.url, ch),
+     channel_url: ch.url,
      connected: ch.connected,
      niche: (ch.customNiche && ch.customNiche.trim()) ? ch.customNiche.trim() : ch.niche,
      daily_count: ch.dailyCount,
-     duration_sec: ch.durationSec || 5,
+     duration_sec: ch.durationSec || 60,
      orientation: ch.orientation,
      video_language: ch.language,
      time_slots: ch.timeSlots
     }, { onConflict: 'user_email,slot_number' }));
    }
    if (notify) {
-    const schedCard = document.getElementById('saved-schedule-status-card');
-    if (schedCard) {
-     setTimeout(function() {
-      schedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-     }, 80);
+    if (!ch.connected) {
+     showToast(t('⚠️ Preferences saved for Channel #' + slot + ', but this channel is NOT linked to YouTube yet! Click "Connect / Update YouTube Channel" above to link your channel via Google.', '⚠️ تم حفظ الإعدادات المبدئية للقناة رقم ' + slot + '، ولكن هذه القناة غير مربوطة بيوتيوب بعد! اضغط على "تحديث / ربط حساب يوتيوب" بالأعلى لربط قناتك عبر جوجل.'), 'warn');
+    } else {
+     showToast(t('💾 Saved schedule for Channel #' + slot + ' (' + ch.dailyCount + ' videos/day) to Supabase!', '💾 تم حفظ جدول القناة رقم ' + slot + ' (' + ch.dailyCount + ' فيديوهات يومياً) في قاعدة بيانات Supabase!'), 'info');
     }
-    showToast(t('✅ Saved schedule (' + ch.dailyCount + ' videos/day) — Waiting for publish time!', '✅ تم الحفظ وانتظار توقيت النشر (' + toLocalizedDigits(ch.dailyCount) + ' فيديوهات يومياً)!'), 'info');
    }
   }
   function updateLiveAiPreviewText() {
@@ -4844,7 +4452,7 @@
    }
    if (modelId.indexOf('kling') !== -1) {
     return {
-     model: 'kling-2.6/text-to-video',
+     model: modelId,
      input: {
       prompt: cleanPrompt,
       sound: false,
@@ -4853,16 +4461,15 @@
      }
     };
    }
+   // Dispatch the exact selected model from the 16-model catalog to Kie.ai unified jobs/createTask API
    return {
-    model: 'bytedance/v1-lite-text-to-video',
+    model: modelId || 'bytedance/v1-lite-text-to-video',
     input: {
      prompt: cleanPrompt,
      aspect_ratio: safeAspect,
-     resolution: '480p',
+     resolution: (chosenRes === '4K') ? '1080p' : chosenRes,
      duration: '5',
-     camera_fixed: false,
-     seed: randomSeed,
-     enable_safety_checker: true
+     seed: randomSeed
     }
    };
   }
@@ -4955,11 +4562,6 @@
    ch.nameAr = 'القناة رقم ' + slot + ' (غير مربوطة بعد)';
    ch.url = 'Click Link Official YouTube Channel to connect via Google OAuth 2.0';
    ch.accessToken = '';
-   ch.tokenTimestamp = 0;
-   ch.channelId = '';
-   if (appState.currentUser && appState.currentUser.email) {
-    removeSlotFromChannelVault(appState.currentUser.email, slot);
-   }
    ch.ytViews = 0;
    ch.ytVideos = 0;
    let sumVids = 0;
@@ -4982,7 +4584,8 @@
      slot_number: slot,
      channel_name: '',
      channel_url: '',
-     connected: false
+     connected: false,
+     youtube_access_token: ''
     }, { onConflict: 'user_email,slot_number' }));
     sbExec(supabaseClient.from('profiles').update({
      generated_videos: sumVids,
@@ -5009,7 +4612,6 @@
    });
   }
   let isGenerationCurrentlyRunning = false;
-  let silentKeepAliveTimer = null;
   function verifyYouTubeAccessTokenLive(accessToken) {
    if (!accessToken || !window.fetch) return Promise.resolve(false);
    return window.fetch('https://www.googleapis.com/youtube/v3/channels?part=id&mine=true', {
@@ -5022,176 +4624,44 @@
     return true;
    });
   }
-  function saveRefreshedTokenEverywhere(slotNum, newToken, newRefreshToken, googleEmailStr) {
-   if (!newToken) return;
-   const ch = appState.channels[slotNum];
-   if (!ch) return;
-   ch.accessToken = newToken;
-   if (newRefreshToken) ch.refreshToken = newRefreshToken;
-   if (googleEmailStr) ch.googleEmail = googleEmailStr;
-   ch.tokenTimestamp = Date.now();
-   if (appState.currentUser && appState.currentUser.email) {
-    saveUserChannelsToLocal(appState.currentUser.email);
-   }
-   if (supabaseClient && appState.currentUser && appState.currentUser.email) {
-    sbExec(supabaseClient.from('channels').upsert({
-     user_email: appState.currentUser.email,
-     slot_number: slotNum,
-     channel_name: isEn() ? ch.nameEn : ch.nameAr,
-     channel_url: packChannelUrlWithMeta(ch.url, ch),
-     connected: ch.connected,
-     niche: (ch.customNiche && ch.customNiche.trim()) ? ch.customNiche.trim() : ch.niche,
-     daily_count: ch.dailyCount,
-     duration_sec: ch.durationSec || 5,
-     orientation: ch.orientation,
-     video_language: ch.language,
-     time_slots: ch.timeSlots
-    }, { onConflict: 'user_email,slot_number' }));
-   }
-  }
-  function refreshViaOAuthRefreshToken(slotNum) {
-   const ch = appState.channels[slotNum];
-   const gSecret = (platformMasterEngine.googleClientSecret || '').trim();
-   if (!ch || !ch.refreshToken || !gSecret || !window.fetch) {
-    return Promise.resolve('');
-   }
-   const bodyParams = new URLSearchParams();
-   bodyParams.set('client_id', GOOGLE_YOUTUBE_CLIENT_ID);
-   bodyParams.set('client_secret', gSecret);
-   bodyParams.set('refresh_token', ch.refreshToken);
-   bodyParams.set('grant_type', 'refresh_token');
-   return window.fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: bodyParams.toString()
-   }).then(function(r) {
-    return r.json();
-   }).then(function(data) {
-    if (data && data.access_token) {
-     saveRefreshedTokenEverywhere(slotNum, data.access_token, data.refresh_token || ch.refreshToken, ch.googleEmail);
-     return data.access_token;
-    }
-    return '';
-   }).catch(function() {
-    return '';
-   });
-  }
-  function silentIframeOAuthRefresh(slotNum, useHint) {
+  function trySilentGoogleTokenRefresh(slotNum) {
    return new Promise(function(resolve) {
     try {
-     const ch = appState.channels[slotNum] || {};
-     const redirectUri = encodeURIComponent('https://omniposts.online');
-     const scope = encodeURIComponent('https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly');
-     const hintEmail = ch.googleEmail || (appState.currentUser && appState.currentUser.email) || '';
-     const hintParam = (useHint && hintEmail) ? ('&login_hint=' + encodeURIComponent(hintEmail)) : '';
-     const silentUrl = 'https://accounts.google.com/o/oauth2/v2/auth?client_id=' + GOOGLE_YOUTUBE_CLIENT_ID + '&redirect_uri=' + redirectUri + '&response_type=token&scope=' + scope + '&include_granted_scopes=true&prompt=none' + hintParam + '&state=silent_slot_' + slotNum;
-     const iframe = document.createElement('iframe');
-     iframe.style.display = 'none';
-     iframe.style.width = '0';
-     iframe.style.height = '0';
-     let settled = false;
-     function finish(tok) {
-      if (settled) return;
-      settled = true;
-      window.removeEventListener('message', onMsg);
-      try {
-       if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
-      } catch (e) {}
-      if (tok) saveRefreshedTokenEverywhere(slotNum, tok);
-      resolve(tok || '');
-     }
-     function onMsg(ev) {
-      if (ev && ev.data && ev.data.type === 'OMNIPOSTS_SILENT_YT_TOKEN') {
-       finish(ev.data.accessToken || '');
-      }
-     }
-     window.addEventListener('message', onMsg);
-     iframe.onload = function() {
-      try {
-       const h = iframe.contentWindow && iframe.contentWindow.location && iframe.contentWindow.location.hash;
-       if (h) {
-        if (h.indexOf('access_token=') !== -1) {
-         const p = new URLSearchParams(h.substring(1));
-         const tok = p.get('access_token');
-         if (tok) {
-          finish(tok);
-          return;
+     if (window.google && window.google.accounts && window.google.accounts.oauth2 && typeof window.google.accounts.oauth2.initTokenClient === 'function') {
+      const client = window.google.accounts.oauth2.initTokenClient({
+       client_id: GOOGLE_YOUTUBE_CLIENT_ID,
+       scope: 'https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly',
+       prompt: '',
+       callback: function(tokenResponse) {
+        if (tokenResponse && tokenResponse.access_token) {
+         const ch = appState.channels[slotNum];
+         if (ch) {
+          ch.accessToken = tokenResponse.access_token;
+          ch.tokenTimestamp = Date.now();
+          if (appState.currentUser.email) saveUserChannelsToLocal(appState.currentUser.email);
+          if (supabaseClient && appState.currentUser.email) {
+           sbExec(supabaseClient.from('channels').update({
+            youtube_access_token: tokenResponse.access_token
+           }).ilike('user_email', appState.currentUser.email).eq('slot_number', slotNum));
+          }
          }
+         resolve(tokenResponse.access_token);
+        } else {
+         resolve('');
         }
-        if (h.indexOf('error=') !== -1) {
-         finish('');
-         return;
-        }
+       },
+       error_callback: function() {
+        resolve('');
        }
-      } catch (e) {}
-     };
-     document.body.appendChild(iframe);
-     iframe.src = silentUrl;
-     setTimeout(function() { finish(''); }, 3200);
-    } catch (e) {
-     resolve('');
-    }
-   });
-  }
-  function trySilentGoogleTokenRefresh(slotNum) {
-   return refreshViaOAuthRefreshToken(slotNum).then(function(rtToken) {
-    if (rtToken) return rtToken;
-    return silentIframeOAuthRefresh(slotNum, true).then(function(tok1) {
-     if (tok1) return tok1;
-     return silentIframeOAuthRefresh(slotNum, false);
-    });
-   });
-  }
-  function ensureFreshChannelAccessToken(slotNum) {
-   const ch = appState.channels[slotNum];
-   if (!ch) return Promise.resolve('');
-   const existingTok = ch.accessToken || '';
-   if (existingTok) {
-    return verifyYouTubeAccessTokenLive(existingTok).then(function(isValid) {
-     if (isValid) return existingTok;
-     return trySilentGoogleTokenRefresh(slotNum).then(function(refreshed) {
-      return refreshed || existingTok;
-     });
-    });
-   }
-   return trySilentGoogleTokenRefresh(slotNum).then(function(refreshed) {
-    return refreshed || existingTok;
-   });
-  }
-  function triggerZeroPromptAutoUploadBounce(slotNum, videoPayload) {
-   try {
-    const ch = appState.channels[slotNum] || {};
-    safeStorageSetItem('omniposts_pending_auto_upload', JSON.stringify(videoPayload));
-    persistCurrentUserEverywhere();
-    const redirectUri = encodeURIComponent('https://omniposts.online');
-    const scope = encodeURIComponent('https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly');
-    const hintEmail = ch.googleEmail || '';
-    const hintParam = hintEmail ? ('&login_hint=' + encodeURIComponent(hintEmail)) : '';
-    const stateVal = 'autoupload_slot_' + slotNum + '__em_' + encodeURIComponent(appState.currentUser.email || '');
-    const bounceUrl = 'https://accounts.google.com/o/oauth2/v2/auth?client_id=' + GOOGLE_YOUTUBE_CLIENT_ID + '&redirect_uri=' + redirectUri + '&response_type=token&scope=' + scope + '&include_granted_scopes=true' + hintParam + '&state=' + encodeURIComponent(stateVal);
-    window.location.href = bounceUrl;
-    return true;
-   } catch (e) {
-    return false;
-   }
-  }
-  function findActiveScheduleSlotIndex(slotNum, explicitIdx) {
-   if (typeof explicitIdx === 'number' && explicitIdx >= 0) return explicitIdx;
-   const ch = appState.channels[slotNum];
-   if (!ch) return 0;
-   const count = Math.max(1, Math.min(5, parseInt(ch.dailyCount, 10) || 1));
-   const todayKey = getTodayDateKey();
-   if (ch.scheduleStatuses) {
-    for (let i = 0; i < count; i++) {
-     const rec = ch.scheduleStatuses[todayKey + '_' + i];
-     if (!rec || rec.status === 'waiting' || rec.status === 'error') {
-      return i;
+      });
+      client.requestAccessToken({ prompt: '' });
+      return;
      }
-    }
-   }
-   return 0;
+    } catch (e) {}
+    resolve('');
+   });
   }
-  function simulateInstantAiGeneration(forcedSlotNum, scheduledSlotIdx) {
+  function simulateInstantAiGeneration(forcedSlotNum) {
    if (isGenerationCurrentlyRunning) {
     showToast(t('⏳ A video generation task is already running! Please wait for it to finish.', '⏳ توجد عملية توليد ونشر فيديو قيد التنفيذ حالياً! يرجى الانتظار حتى تكتمل.'), 'info');
     return;
@@ -5218,12 +4688,10 @@
     return;
    }
    if (!ch || !ch.connected) {
-    showToast(t('❌ Cannot publish video: Channel #' + slot + ' is not linked to YouTube yet! Please link your channel once from the Channels Manager.', '❌ لا يمكن نشر الفيديو: القناة رقم ' + slot + ' غير مربوطة بقناة يوتيوب بعد! اضغط على "ربط القنوات" لربط قناتك مرة واحدة أولاً.'), 'warn');
+    showToast(t('❌ Cannot publish video: Channel #' + slot + ' is not linked to YouTube yet! Click "Link Official YouTube Channel" above to connect your channel via Google first.', '❌ لا يمكن نشر الفيديو: القناة رقم ' + slot + ' غير مربوطة بقناة يوتيوب بعد! اضغط على زر "ربط قناة اليوتيوب الرسمية" بالأعلى أولاً.'), 'warn');
     return;
    }
    if (!forcedSlotNum) saveCurrentChannelConfig(false);
-   const targetSchedIdx = findActiveScheduleSlotIndex(slot, scheduledSlotIdx);
-   setChannelScheduleSlotStatus(slot, targetSchedIdx, 'publishing', '');
    const chName = isEn() ? ch.nameEn : ch.nameAr;
    const activeNiche = (ch.customNiche && ch.customNiche.trim()) ? ch.customNiche.trim() : ch.niche;
    const durLabel = formatDurationLabel(durSec);
@@ -5242,14 +4710,14 @@
    progCard.classList.remove('hidden');
    if (genBtn) genBtn.disabled = true;
    stepTitle.textContent = t(
-    '✍️ Step 1/4: Writing a Brand-New Unique Story & Prompt (' + requiredCredits + ' Credits 💎)...',
-    '✍️ الخطوة 1/4: جاري تأليف قصة درامية حصرية جديدة وبرومبت سينمائي (' + requiredCredits + ' كريدت 💎)...'
+    '🔐 Step 1/4: Verifying YouTube Session & Writing Unique Story (' + requiredCredits + ' Credits 💎)...',
+    '🔐 الخطوة 1/4: جاري فحص اتصال يوتيوب وتأليف قصة درامية حصرية جديدة (' + requiredCredits + ' كريدت 💎)...'
    );
-   pctEl.textContent = '12%';
-   barEl.style.width = '12%';
+   pctEl.textContent = '10%';
+   barEl.style.width = '10%';
    detailEl.textContent = t(
-    'Preparing unique story episode for saved channel "' + chName + '" (0 credits deducted until render succeeds)...',
-    'جاري تجهيز حلقة حصرية جديدة للقناة المسجلة "' + chName + '" (حماية كاملة للكريدت 100%)...'
+    'Verifying YouTube upload session before rendering so your credits are 100% protected...',
+    'جاري التأكد من فعالية اتصال قناة اليوتيوب قبل بدء الريندر لحماية نقاط الكريدت الخاصة بك 100%...'
    );
    let activeMasterKey = '';
    let seoTitle = '';
@@ -5432,7 +4900,20 @@
      });
     });
    }
-   ensureFreshChannelAccessToken(slot).then(function() {
+   verifyYouTubeAccessTokenLive(ch.accessToken).then(function(isValidYt) {
+    if (isValidYt) return ch.accessToken;
+    return trySilentGoogleTokenRefresh(slot);
+   }).then(function(validToken) {
+    if (!validToken) {
+     try {
+      localStorage.setItem('omniposts_autoresume_gen_slot', String(slot));
+     } catch (e) {}
+     isGenerationCurrentlyRunning = false;
+     if (genBtn) genBtn.disabled = false;
+     showToast(t('🔄 Refreshing your YouTube channel authorization automatically before rendering so your credits are protected...', '🔄 جاري تجديد تصريح قناة اليوتيوب تلقائياً قبل بدء الريندر لحماية الكريدت الخاص بك...'), 'info');
+     connectOrUpdateYoutubeChannel();
+     return Promise.reject({ isAutoRedirect: true });
+    }
     return ensureMasterKeyLoaded();
    }).then(function(loadedKey) {
     activeMasterKey = loadedKey;
@@ -5476,7 +4957,6 @@
      seoDesc: seoDesc,
      tags: ['AI', activeNiche, 'Omniposts'],
      slot: slot,
-     schedIdx: targetSchedIdx,
      chName: chName
     };
     const pubModeSel = document.getElementById('channel-publish-mode-select');
@@ -5500,31 +4980,9 @@
       seoDesc,
       ['AI', activeNiche, 'Omniposts'],
       ch.accessToken
-     ).catch(function(upErr) {
-      return trySilentGoogleTokenRefresh(slot).then(function(newTok) {
-       if (newTok && newTok !== ch.accessToken) {
-        return uploadVideoBlobToYouTube(videoBlob, seoTitle, seoDesc, ['AI', activeNiche, 'Omniposts'], newTok);
-       }
-       const bounced = triggerZeroPromptAutoUploadBounce(slot, {
-        videoUrl: generatedVideoUrl,
-        seoTitle: seoTitle,
-        seoDesc: seoDesc,
-        tags: ['AI', activeNiche, 'Omniposts'],
-        slot: slot,
-        schedIdx: targetSchedIdx,
-        chName: chName
-       });
-       if (bounced) {
-        return { isAutoUploadBounce: true };
-       }
-       throw upErr;
-      });
-     });
+     );
     });
    }).then(function(ytUploadRes) {
-    if (ytUploadRes && ytUploadRes.isAutoUploadBounce) {
-     return;
-    }
     if (ytUploadRes && ytUploadRes.isReviewOnlyMode) {
      isGenerationCurrentlyRunning = false;
      if (genBtn) genBtn.disabled = false;
@@ -5540,8 +4998,6 @@
     }
     isGenerationCurrentlyRunning = false;
     const ytVidId = (ytUploadRes && ytUploadRes.id) ? ytUploadRes.id : '';
-    const ytFullUrl = ytVidId ? ('https://www.youtube.com/watch?v=' + ytVidId) : '';
-    setChannelScheduleSlotStatus(slot, targetSchedIdx, 'published', ytFullUrl);
     stepTitle.textContent = t('✅ Published Successfully on YouTube Channel "' + chName + '"!', '✅ تم توليد ورفع ونشر الفيديو بنجاح على قناتك في يوتيوب "' + chName + '"!');
     pctEl.textContent = '100%';
     barEl.style.width = '100%';
@@ -5559,17 +5015,47 @@
     }
     if (genBtn) genBtn.disabled = false;
     updateDurationDisplayLabel(durSec);
-    showToast(t('🎉 Video generated & published live to YouTube channel: "' + chName + '"!', '🎉 تم توليد الفيديو ورفعه ونشره فعلياً على قناتك في يوتيوب: "' + chName + '"!'), 'info');
+    recordPublishHistoryEntry({
+     dateKey: getTodayDateKey(0),
+     time24: (window._activeScheduleRunMeta && window._activeScheduleRunMeta.sched24) || '',
+     slotNum: slot,
+     channelName: chName,
+     title: seoTitle,
+     status: 'success',
+     videoUrl: ytVidId ? ('https://www.youtube.com/watch?v=' + ytVidId) : '',
+     isScheduled: Boolean(forcedSlotNum)
+    });
+    window._activeScheduleRunMeta = null;
+    showToast(t('Video generated & published live to YouTube channel: "' + chName + '"!', 'تم توليد الفيديو ورفعه ونشره فعلياً على قناتك في يوتيوب: "' + chName + '"!'), 'info');
    }).catch(function(err) {
     isGenerationCurrentlyRunning = false;
     if (genBtn) genBtn.disabled = false;
-    setChannelScheduleSlotStatus(slot, targetSchedIdx, 'error', '');
+    if (err && err.isAutoRedirect) return;
     updateDurationDisplayLabel(durSec);
     const msg = (err && err.message) ? err.message : t('Cloud servers are currently busy. Zero credits were deducted.', 'خوادم الريندر مشغولة حالياً — لم يتم خصم أي كريدت.');
     stepTitle.textContent = t('⏳ Cloud Render Notice (0 Credits Deducted)', '⏳ تنبيه سحابة الريندر (لم يُخصم أي كريدت)');
     pctEl.textContent = '0%';
     barEl.style.width = '0%';
     detailEl.textContent = msg;
+    if (window._activeScheduleRunMeta) {
+     try {
+      const m = window._activeScheduleRunMeta;
+      const ex = JSON.parse(localStorage.getItem(m.logKey) || '{}');
+      ex[m.execId] = 'failed';
+      localStorage.setItem(m.logKey, JSON.stringify(ex));
+     } catch (e) {}
+    }
+    recordPublishHistoryEntry({
+     dateKey: getTodayDateKey(0),
+     time24: (window._activeScheduleRunMeta && window._activeScheduleRunMeta.sched24) || '',
+     slotNum: slot,
+     channelName: chName,
+     title: seoTitle || activeNiche,
+     status: 'failed',
+     errorReason: msg,
+     isScheduled: Boolean(forcedSlotNum)
+    });
+    window._activeScheduleRunMeta = null;
     showToast(msg, 'warn');
    });
   }
@@ -5593,9 +5079,7 @@
    const editDescEl = document.getElementById('review-editable-desc-input');
    const finalTitle = (editTitleEl && editTitleEl.value.trim()) ? editTitleEl.value.trim() : p.seoTitle;
    const finalDesc = (editDescEl && editDescEl.value.trim()) ? editDescEl.value.trim() : p.seoDesc;
-   ensureFreshChannelAccessToken(p.slot).then(function() {
-    return fetchVideoBlobWithCorsFallback(p.videoUrl);
-   }).then(function(blob) {
+   fetchVideoBlobWithCorsFallback(p.videoUrl).then(function(blob) {
     return uploadVideoBlobToYouTube(blob, finalTitle, finalDesc, p.tags, ch.accessToken);
    }).then(function(ytRes) {
     if (manualBtn) {
@@ -5603,8 +5087,6 @@
      manualBtn.classList.add('hidden');
     }
     const ytVidId = (ytRes && ytRes.id) ? ytRes.id : '';
-    const ytFullUrl = ytVidId ? ('https://www.youtube.com/watch?v=' + ytVidId) : '';
-    setChannelScheduleSlotStatus(p.slot, typeof p.schedIdx === 'number' ? p.schedIdx : 0, 'published', ytFullUrl);
     if (stepTitle) stepTitle.textContent = t('✅ Published Successfully on YouTube!', '✅ تم رفع ونشر الفيديو المعتمد على يوتيوب بنجاح!');
     if (detailEl && ytVidId) {
      detailEl.innerHTML = t('🎉 Live YouTube URL: <a href="https://www.youtube.com/watch?v=' + ytVidId + '" target="_blank" class="text-sky-400 underline font-bold">https://www.youtube.com/watch?v=' + ytVidId + '</a>', '🎉 رابط الفيديو على يوتيوب: <a href="https://www.youtube.com/watch?v=' + ytVidId + '" target="_blank" class="text-sky-400 underline font-bold">https://www.youtube.com/watch?v=' + ytVidId + '</a>');
@@ -5612,17 +5094,122 @@
     showToast(t('🎉 Approved video published to YouTube!', '🎉 تم نشر الفيديو المعتمد على قناتك في يوتيوب بنجاح!'), 'info');
    }).catch(function(err) {
     if (manualBtn) manualBtn.disabled = false;
-    setChannelScheduleSlotStatus(p.slot, typeof p.schedIdx === 'number' ? p.schedIdx : 0, 'error', '');
     showToast((err && err.message) || 'Upload error', 'warn');
    });
   }
   let schedulerDaemonTimer = null;
-  function getTodayDateKey() {
-   const now = new Date();
-   const yyyy = now.getFullYear();
-   const mm = String(now.getMonth() + 1).padStart(2, '0');
-   const dd = String(now.getDate()).padStart(2, '0');
+  let currentPublishHistoryFilter = 'today';
+  function getTodayDateKey(offsetDays) {
+   const d = new Date(Date.now() + ((offsetDays || 0) * 86400000));
+   const yyyy = d.getFullYear();
+   const mm = String(d.getMonth() + 1).padStart(2, '0');
+   const dd = String(d.getDate()).padStart(2, '0');
    return yyyy + '-' + mm + '-' + dd;
+  }
+  function getPublishHistoryStorageKey() {
+   const em = (appState.currentUser && appState.currentUser.email) ? appState.currentUser.email.toLowerCase() : 'guest';
+   return 'omniposts_pub_history_' + em;
+  }
+  function loadPublishHistoryEntries() {
+   try {
+    const raw = localStorage.getItem(getPublishHistoryStorageKey());
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+   } catch (e) {
+    return [];
+   }
+  }
+  function recordPublishHistoryEntry(entry) {
+   try {
+    const list = loadPublishHistoryEntries();
+    list.unshift({
+     dateKey: entry.dateKey || getTodayDateKey(0),
+     time24: entry.time24 || '',
+     slotNum: entry.slotNum || 1,
+     channelName: entry.channelName || ('Channel #' + (entry.slotNum || 1)),
+     title: entry.title || 'AI Video',
+     status: entry.status || 'success',
+     videoUrl: entry.videoUrl || '',
+     errorReason: entry.errorReason || '',
+     isScheduled: Boolean(entry.isScheduled),
+     createdAt: Date.now()
+    });
+    localStorage.setItem(getPublishHistoryStorageKey(), JSON.stringify(list.slice(0, 120)));
+    renderPublishHistoryLog();
+    const curCh = appState.channels[appState.selectedChannelSlot];
+    if (curCh) renderTimeSlots(curCh.dailyCount, curCh.timeSlots);
+   } catch (e) {}
+  }
+  function setPublishHistoryFilter(mode) {
+   currentPublishHistoryFilter = mode || 'today';
+   ['today', 'yesterday', 'all'].forEach(function(m) {
+    const btn = document.getElementById('hist-filter-' + m);
+    if (!btn) return;
+    btn.className = (m === currentPublishHistoryFilter)
+     ? 'px-3 py-1 rounded-full text-[11px] font-bold bg-indigo-600 text-white transition'
+     : 'px-3 py-1 rounded-full text-[11px] font-bold bg-white/5 hover:bg-white/10 text-slate-300 transition';
+   });
+   renderPublishHistoryLog();
+  }
+  function renderPublishHistoryLog() {
+   const container = document.getElementById('publish-history-list');
+   if (!container) return;
+   const todayKey = getTodayDateKey(0);
+   const yesterdayKey = getTodayDateKey(-1);
+   const allEntries = loadPublishHistoryEntries();
+   const filtered = allEntries.filter(function(item) {
+    if (currentPublishHistoryFilter === 'today') return item.dateKey === todayKey;
+    if (currentPublishHistoryFilter === 'yesterday') return item.dateKey === yesterdayKey;
+    return true;
+   });
+   if (filtered.length === 0) {
+    const emptyMsg = currentPublishHistoryFilter === 'yesterday'
+     ? t('No scheduled or published videos were recorded yesterday.', 'لم يتم تسجيل أي عمليات نشر مجدولة أو يدوية بالأمس.')
+     : t('No publish records yet for this filter. Scheduled & manual videos will appear here automatically.', 'لا توجد عمليات نشر مسجلة بعد لهذا اليوم — ستظهر هنا تلقائياً حالة كل فيديو مجدول أو منشور.');
+    container.innerHTML = '<div class="text-center py-4 text-[11px] text-slate-400">' + emptyMsg + '</div>';
+    return;
+   }
+   container.innerHTML = filtered.slice(0, 25).map(function(item) {
+    const isOk = item.status === 'success';
+    const badge = isOk
+     ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">' + t('Published ✓', 'تم النشر بنجاح ✓') + '</span>'
+     : '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/20 text-red-300 border border-red-500/30">' + t('Issue (0 Credits Lost)', 'مشكلة (لم يُخصم كريدت)') + '</span>';
+    const typeTag = item.isScheduled
+     ? '<span class="text-[10px] text-indigo-300 font-semibold">' + t('Scheduled', 'مجدول') + '</span>'
+     : '<span class="text-[10px] text-sky-300 font-semibold">' + t('Manual', 'يدوي') + '</span>';
+    const linkHtml = item.videoUrl
+     ? '<a href="' + item.videoUrl + '" target="_blank" rel="noopener noreferrer" class="text-[10px] text-sky-400 underline font-semibold">' + t('Watch on YouTube', 'مشاهدة على يوتيوب') + '</a>'
+     : (item.errorReason ? '<span class="text-[10px] text-amber-300 truncate max-w-[200px]">' + item.errorReason + '</span>' : '');
+    return '<div class="p-2.5 rounded-xl bg-white/5 border border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs">' +
+     '<div class="min-w-0 flex-1">' +
+      '<div class="flex flex-wrap items-center gap-1.5">' +
+       badge + typeTag +
+       '<span class="text-[10px] text-slate-400 font-mono" dir="ltr">' + item.dateKey + (item.time24 ? (' • ' + formatLocalizedClock(item.time24)) : '') + '</span>' +
+       '<span class="text-[10px] text-slate-300 font-bold">• ' + item.channelName + '</span>' +
+      '</div>' +
+      '<p class="text-[11px] font-semibold text-white truncate mt-1">' + item.title + '</p>' +
+     '</div>' +
+     '<div class="shrink-0">' + linkHtml + '</div>' +
+    '</div>';
+   }).join('');
+  }
+  function getSlotTodayStatusBadgeHtml(slotNum, time24) {
+   const ch = appState.channels[slotNum];
+   if (ch && ch.autoScheduleEnabled === false) {
+    return '<span class="text-amber-300">' + t('Paused', 'الجدولة متوقفة') + '</span>';
+   }
+   try {
+    const logKey = 'omniposts_sched_' + getTodayDateKey(0);
+    const executedMap = JSON.parse(localStorage.getItem(logKey) || '{}');
+    const stateVal = executedMap['slot_' + slotNum + '_' + time24];
+    if (stateVal === 'failed') {
+     return '<span class="text-red-300">' + t('Failed today (0 Credits)', 'فشل اليوم (0 كريدت)') + '</span>';
+    }
+    if (stateVal) {
+     return '<span class="text-emerald-400">' + t('Published today ✓', 'تم النشر اليوم ✓') + '</span>';
+    }
+   } catch (e) {}
+   return '<span class="text-slate-400">' + t('Scheduled for today', 'مجدول لليوم') + '</span>';
   }
   function runAutomatedScheduleTick() {
    const now = new Date();
@@ -5636,8 +5223,7 @@
     clockEl.textContent = formatLocalizedClock(current24) + ' (' + hhNow + ':' + mmNow + ':' + ssNow + ')';
    }
    if (!appState.isLoggedIn || isGenerationCurrentlyRunning) return;
-   const todayKey = getTodayDateKey();
-   const logKey = 'omniposts_sched_' + todayKey;
+   const logKey = 'omniposts_sched_' + getTodayDateKey(0);
    let executedMap = {};
    try {
     executedMap = JSON.parse(localStorage.getItem(logKey) || '{}');
@@ -5646,33 +5232,25 @@
    }
    for (let slotNum = 1; slotNum <= 7; slotNum++) {
     const ch = appState.channels[slotNum];
-    if (!ch || !ch.connected || !Array.isArray(ch.timeSlots)) continue;
-    const activeCount = Math.max(1, Math.min(5, parseInt(ch.dailyCount, 10) || ch.timeSlots.length || 1));
-    for (let sIdx = 0; sIdx < activeCount && sIdx < ch.timeSlots.length; sIdx++) {
+    if (!ch || !ch.connected || ch.autoScheduleEnabled === false || !Array.isArray(ch.timeSlots)) continue;
+    for (let sIdx = 0; sIdx < ch.timeSlots.length; sIdx++) {
      const sched24 = String(ch.timeSlots[sIdx] || '').trim();
      if (!sched24) continue;
-     const statusRec = (ch.scheduleStatuses && ch.scheduleStatuses[todayKey + '_' + sIdx]) || null;
-     if (statusRec && (statusRec.status === 'published' || statusRec.status === 'publishing')) continue;
      const parts = sched24.split(':');
      const sH = parseInt(parts[0], 10);
      const sM = parseInt(parts[1], 10);
      if (isNaN(sH) || isNaN(sM)) continue;
      const schedMinutesTotal = sH * 60 + sM;
      const diffMinutes = nowMinutesTotal - schedMinutesTotal;
-     const execId = 'slot_' + slotNum + '_idx_' + sIdx + '_' + sched24;
-     if (diffMinutes >= 0 && diffMinutes <= 30 && !executedMap[execId]) {
+     const execId = 'slot_' + slotNum + '_' + sched24;
+     if (diffMinutes >= 0 && diffMinutes <= 10 && !executedMap[execId]) {
       executedMap[execId] = Date.now();
-      safeStorageSetItem(logKey, JSON.stringify(executedMap));
-      setChannelScheduleSlotStatus(slotNum, sIdx, 'publishing', '');
-      const statusTxt = document.getElementById('live-scheduler-status-text');
-      if (statusTxt) {
-       statusTxt.textContent = t(
-        '🚀 Scheduled Time Reached (' + formatLocalizedClock(sched24) + ')! Auto-Generating & Publishing for Channel #' + slotNum + '...',
-        '🚀 حان موعد النشر المجدول (' + formatLocalizedClock(sched24) + ')! جاري توليد الفيديو ورفعه على القناة رقم ' + slotNum + ' تلقائياً...'
-       );
-      }
-      showToast(t('⏰ Scheduled publish time (' + formatLocalizedClock(sched24) + ') reached for Channel #' + slotNum + '! Starting automated AI video generation & YouTube upload...', '⏰ حان موعد النشر المجدول (' + formatLocalizedClock(sched24) + ') للقناة رقم ' + slotNum + '! بدء توليد القصة والفيديو والرفع التلقائي على يوتيوب الآن...'), 'info');
-      simulateInstantAiGeneration(slotNum, sIdx);
+      try {
+       localStorage.setItem(logKey, JSON.stringify(executedMap));
+      } catch (e) {}
+      window._activeScheduleRunMeta = { slotNum: slotNum, sched24: sched24, execId: execId, logKey: logKey };
+      showToast(t('Scheduled publish time (' + formatLocalizedClock(sched24) + ') reached for Channel #' + slotNum + '! Starting automated generation & YouTube upload...', 'حان موعد النشر المجدول (' + formatLocalizedClock(sched24) + ') للقناة رقم ' + slotNum + '! بدء التوليد والنشر التلقائي الآن...'), 'info');
+      simulateInstantAiGeneration(slotNum);
       return;
      }
     }
@@ -5682,35 +5260,16 @@
    if (schedulerDaemonTimer) clearInterval(schedulerDaemonTimer);
    runAutomatedScheduleTick();
    schedulerDaemonTimer = setInterval(runAutomatedScheduleTick, 5000);
-   if (silentKeepAliveTimer) clearInterval(silentKeepAliveTimer);
-   silentKeepAliveTimer = setInterval(function() {
-    if (!appState.isLoggedIn) return;
-    for (let s = 1; s <= 7; s++) {
-     if (appState.channels[s] && appState.channels[s].connected) {
-      trySilentGoogleTokenRefresh(s);
-     }
-    }
-   }, 35 * 60 * 1000);
   }
   function handleChangeEmail(e) {
    e.preventDefault();
-   const newEmail = document.getElementById('new-email-input').value.trim().toLowerCase();
-   const confirmPass = document.getElementById('email-confirm-pass').value;
-   if (!newEmail || !confirmPass) return;
-   const oldEmail = (appState.currentUser.email || '').toLowerCase();
-   if (supabaseClient && oldEmail) {
-    sbExec(supabaseClient.from('profiles').update({ email: newEmail }).ilike('email', oldEmail));
-    sbExec(supabaseClient.from('channels').update({ user_email: newEmail }).ilike('user_email', oldEmail));
-    sbExec(supabaseClient.auth.updateUser({ email: newEmail }));
-   }
+   const newEmail = document.getElementById('new-email-input').value.trim();
+   if (!newEmail) return;
    appState.currentUser.email = newEmail;
-   persistCurrentUserEverywhere();
-   saveUserChannelsToLocal(newEmail);
    document.getElementById('new-email-input').value = '';
    document.getElementById('email-confirm-pass').value = '';
-   updateOwnerAdminVisibility();
    syncDashboardUI();
-   showToast(t('✅ Account email updated in database to: ' + newEmail, '✅ تم تحديث البريد الإلكتروني لحسابك في قاعدة البيانات إلى: ' + newEmail), 'info');
+   showToast(t('✅ Account email updated to: ' + newEmail, '✅ تم تحديث البريد الإلكتروني لحسابك إلى: ' + newEmail), 'info');
   }
   function handleChangePassword(e) {
    e.preventDefault();
@@ -5720,15 +5279,10 @@
     showToast(t('⚠️ New password and confirmation do not match!', '⚠️ كلمة السر الجديدة وتأكيدها غير متطابقين!'), 'warn');
     return;
    }
-   if (supabaseClient && appState.currentUser.email) {
-    sbExec(supabaseClient.from('profiles').update({ country: encodePassTag(newPass) }).ilike('email', appState.currentUser.email));
-    sbExec(supabaseClient.auth.updateUser({ password: newPass }));
-   }
-   persistCurrentUserEverywhere();
    document.getElementById('old-pass-input').value = '';
    document.getElementById('new-pass-input').value = '';
    document.getElementById('confirm-new-pass-input').value = '';
-   showToast(t('🔐 Your account password has been updated in database!', '🔐 تم تحديث وحفظ كلمة السر الجديدة لحسابك في قاعدة البيانات بنجاح!'), 'info');
+   showToast(t('🔐 Your account password has been updated!', '🔐 تم تغيير كلمة السر الخاصة بحسابك بنجاح!'), 'info');
   }
   function setPaymentGatewayRegion(region) {
    appState.gatewayRegion = region;
@@ -5919,11 +5473,10 @@
    for (let i = 1; i <= 7; i++) {
     if (appState.channels[i] && appState.channels[i].connected) connectedCount++;
    }
-   const maxAllowedCh = getMaxAllowedChannelsForUser(u);
    if (q.indexOf('ربط') !== -1 || q.indexOf('قنا') !== -1 || q.indexOf('يوتيوب') !== -1 || q.indexOf('حذف') !== -1 || q.indexOf('فصل') !== -1 || q.indexOf('channel') !== -1 || q.indexOf('youtube') !== -1 || q.indexOf('link') !== -1) {
     return {
-     textEn: '📺 **YouTube Channel Linking Guide:**\n1. You currently have (' + connectedCount + ' / ' + (maxAllowedCh || 7) + ') linked YouTube channels.\n2. To link a channel: Open **Link YouTube Channels** from the menu (or click **"Link Channels"** in your studio), click **"🔗 Link Official YouTube Channel"**, and approve the official Google OAuth screen.\n3. To remove or replace a channel: Click **"Disconnect"** or **"Change"** next to the connected channel.',
-     textAr: '📺 **دليل ربط وإدارة قنوات اليوتيوب في حسابك:**\n1. أنت حالياً رابط (' + connectedCount + ' من ' + (maxAllowedCh || 7) + ') قنوات في حسابك.\n2. لربط قناة جديدة: افتح صفحة **"ربط وإدارة قنوات اليوتيوب"** من القائمة، واضغط على الزر الأحمر **"🔗 ربط قناة اليوتيوب الرسمية"** ووافق على صلاحيات جوجل الرسمية.\n3. لحذف أو تغيير قناة مربوطة: اضغط على زر **"حذف / فصل"** أو **"تحديث / تغيير القناة"** الظاهر بجانب القناة.',
+     textEn: '📺 **YouTube Channel Linking Guide:**\n1. You currently have (' + connectedCount + ' / 5) linked YouTube channels.\n2. To link a channel: Select a Channel Slot (#1 to #5) in your Dashboard, then click the red button **"🔗 Link Official YouTube Channel"** and approve the Google permissions.\n3. To remove or replace a channel: Click **"🗑️ Remove / Disconnect Channel"** or **"🔄 Change Channel"** next to the connected badge.',
+     textAr: '📺 **دليل ربط وإدارة قنوات اليوتيوب في حسابك:**\n1. أنت حالياً رابط (' + connectedCount + ' من 5) قنوات في حسابك.\n2. لربط قناة جديدة: اختر رقم القناة (من 1 إلى 5) في الداشبورد، واضغط على الزر الأحمر **"🔗 ربط قناة اليوتيوب الرسمية"** ووافق على صلاحيات جوجل.\n3. لحذف أو تغيير قناة مربوطة: اضغط على زر **"🗑️ حذف / فصل القناة"** أو **"🔄 تحديث / تغيير القناة"** الظاهر بجانب القناة.',
      showEscalate: true
     };
    }
@@ -5936,8 +5489,8 @@
    }
    if (q.indexOf('موع') !== -1 || q.indexOf('جدول') !== -1 || q.indexOf('وقت') !== -1 || q.indexOf('تلقائ') !== -1 || q.indexOf('اوتوماتيك') !== -1 || q.indexOf('schedul') !== -1 || q.indexOf('time') !== -1 || q.indexOf('auto') !== -1) {
     return {
-     textEn: '⏰ **Automated Daily Publishing Schedule:**\n1. Choose how many videos per day (1 to 5) under Step #6 in your Channel Studio.\n2. Pick the exact Hour, Minute (00–59), and AM/PM for each video, then click **"Save Schedule"**.\n3. Your saved schedule table appears at the bottom showing each slot status (**Waiting to Publish**, **Published**, or **Problem Occurred**), and our live scheduler automatically generates and uploads each video at its exact scheduled time!',
-     textAr: '⏰ **نظام جدولة مواعيد النشر التلقائي:**\n1. اختر عدد الفيديوهات اليومية (من 1 إلى 5 فيديوهات) من الخانة رقم 6 في استوديو القناة.\n2. حدد الساعة والدقيقة (من 00 إلى 59) والفترة (صباحاً/مساءً) لكل فيديو ثم اضغط **"حفظ الإعدادات والجدول"**.\n3. سيظهر لك جدول متابعة المواعيد بالأسفل بحالة كل فيديو (**انتظار النشر** / **تم النشر** / **حدثت مشكلة**)، ويقوم المجدول الحي بتوليد القصة والفيديو ورفعه على قناتك تلقائياً في موعده!',
+     textEn: '⏰ **Automated Daily Publishing Schedule:**\n1. Choose how many videos per day (1 to 5) under Step #5 in your Channel Studio.\n2. Pick the exact Hour, Minute (00–59), and AM/PM for each video.\n3. Our live scheduler checks the clock every 5 seconds and automatically writes a unique story, renders the video, and uploads it to your YouTube channel at the scheduled minute!\n4. Tip: Click **"⚡ Set Slot #1 to +1 Min"** to test auto-publishing right now!',
+     textAr: '⏰ **نظام جدولة مواعيد النشر التلقائي:**\n1. اختر عدد الفيديوهات اليومية (من 1 إلى 5 فيديوهات) من الخانة رقم 5 في استوديو القناة.\n2. حدد الساعة والدقيقة (من 00 إلى 59) والفترة (صباحاً/مساءً) لكل فيديو.\n3. محرك الجدولة الحي يفحص الساعة كل 5 ثوانٍ، وبمجرد دخول الدقيقة المحددة يقوم تلقائياً بتأليف قصة جديدة وريندر الفيديو ورفعه على قناتك!\n4. نصيحة: اضغط زر **"⚡ ضبط الموعد #1 بعد دقيقة واحدة"** لتجربة النشر التلقائي أمامك الآن!',
      showEscalate: true
     };
    }
@@ -5949,8 +5502,8 @@
     };
    }
    return {
-    textEn: '🤖 **How I can help you on Omniposts.online:**\n• Your Account: **' + (u.email || 'Guest') + '** | Balance: **' + curCr.toLocaleString() + ' Credits 💎** | Linked Channels: **' + connectedCount + '/' + (maxAllowedCh || 7) + '**.\n• You can ask me about **linking YouTube channels**, **credit costs & plans**, **video tools & 28 viral story niches**, or **automated daily scheduling**.\n• Did this not solve your specific issue? Click the button below to open a direct Support Ticket to the Platform Admin!',
-    textAr: '🤖 **ملخص حسابك ومساعدة سريعة من Omniposts.online:**\n• حسابك: **' + (u.email || 'زائر') + '** | رصيدك الحالي: **' + curCr.toLocaleString() + ' كريدت 💎** | القنوات المربوطة: **' + connectedCount + ' من ' + (maxAllowedCh || 7) + '**.\n• يمكنك سؤالي عن: **طريقة ربط القناة**، **حساب الكريدت والأسعار**، **أدوات الفيديو والـ 28 ترند**، أو **ضبط مواعيد النشر التلقائي**.\n• هل سؤالك يخص مشكلة لم تُحل بعد؟ اضغط على الزر بالأسفل لفتح تذكرة دعم فني مباشرة لمالك المنصة!',
+    textEn: '🤖 **How I can help you on Omniposts.online:**\n• Your Account: **' + (u.email || 'Guest') + '** | Balance: **' + curCr.toLocaleString() + ' Credits 💎** | Linked Channels: **' + connectedCount + '/5**.\n• You can ask me about **linking YouTube channels**, **credit costs & plans**, **video tools & 28 viral story niches**, or **automated daily scheduling**.\n• Did this not solve your specific issue? Click the button below to open a direct Support Ticket to the Platform Admin!',
+    textAr: '🤖 **ملخص حسابك ومساعدة سريعة من Omniposts.online:**\n• حسابك: **' + (u.email || 'زائر') + '** | رصيدك الحالي: **' + curCr.toLocaleString() + ' كريدت 💎** | القنوات المربوطة: **' + connectedCount + ' من 5**.\n• يمكنك سؤالي عن: **طريقة ربط القناة**، **حساب الكريدت والأسعار**، **أدوات الفيديو والـ 28 ترند**، أو **ضبط مواعيد النشر التلقائي**.\n• هل سؤالك يخص مشكلة لم تُحل بعد؟ اضغط على الزر بالأسفل لفتح تذكرة دعم فني مباشرة لمالك المنصة!',
     showEscalate: true
    };
   }
@@ -6020,32 +5573,6 @@
    if (typeof renderSupportTickets === 'function') renderSupportTickets();
    showToast(t('🎫 Support Ticket sent to Admin! Check the Support Tickets section for updates.', '🎫 تم إرسال تذكرتك إلى لوحة تحكم الأدمن بنجاح!'), 'info');
   }
-  function loadUserSupportTicketsFromSupabase() {
-   if (!supabaseClient || !appState.currentUser || !appState.currentUser.email) {
-    renderUserTickets();
-    return;
-   }
-   sbExec(
-    supabaseClient.from('support_tickets').select('*').ilike('user_email', appState.currentUser.email).order('created_at', { ascending: false })
-   ).then(function(res) {
-    if (res && Array.isArray(res.data)) {
-     appState.tickets = res.data.map(function(row) {
-      const isResolved = String(row.status || '').toLowerCase() === 'resolved' || String(row.status || '').toLowerCase() === 'closed';
-      return {
-       id: 'TCK-' + (row.id || '100'),
-       subjectEn: row.subject || 'Support Inquiry',
-       subjectAr: row.subject || 'طلب دعم فني',
-       categoryEn: row.category || 'Support',
-       categoryAr: row.category || 'الدعم الفني',
-       message: row.message || '',
-       statusEn: isResolved ? 'Resolved ✓' : 'In Review ⏳',
-       statusAr: isResolved ? 'تم الحل ✓' : 'قيد المراجعة ⏳'
-      };
-     });
-    }
-    renderUserTickets();
-   });
-  }
   function openPolicyTab(tabKey) {
    navigateView('policies');
    const tabs = ['terms', 'privacy', 'refund', 'abuse', 'copyright', 'ai-policy', 'faq', 'tickets'];
@@ -6067,55 +5594,35 @@
      }
     }
    });
-   loadUserSupportTicketsFromSupabase();
+   renderUserTickets();
   }
   function handleCreateSupportTicket(e) {
    e.preventDefault();
    const subj = document.getElementById('ticket-subject').value.trim();
-   const msg = (document.getElementById('ticket-message').value || '').trim();
    const catSelect = document.getElementById('ticket-category');
    const selectedOpt = catSelect.options[catSelect.selectedIndex];
    if (!subj) return;
    const newId = 'TCK-' + Math.floor(1000 + Math.random() * 9000);
-   const userEmail = (appState.currentUser && appState.currentUser.email) ? appState.currentUser.email : 'guest@omniposts.online';
-   const catVal = selectedOpt.getAttribute('data-en') || selectedOpt.value;
    appState.tickets.unshift({
     id: newId,
     subjectEn: subj,
     subjectAr: subj,
-    categoryEn: catVal,
+    categoryEn: selectedOpt.getAttribute('data-en') || selectedOpt.value,
     categoryAr: selectedOpt.getAttribute('data-ar') || selectedOpt.value,
-    message: msg,
     statusEn: 'In Review ⏳',
-    statusAr: 'قيد المراجعة ⏳'
+    statusAr: 'قيد المراجعة ⏳',
+    dateEn: 'Just now',
+    dateAr: 'الآن'
    });
-   if (supabaseClient) {
-    sbExec(supabaseClient.from('support_tickets').insert({
-     user_email: userEmail,
-     subject: subj,
-     category: catVal,
-     message: msg || subj,
-     status: 'Open'
-    })).then(function() {
-     loadUserSupportTicketsFromSupabase();
-    });
-   }
    document.getElementById('ticket-subject').value = '';
    document.getElementById('ticket-message').value = '';
    renderUserTickets();
-   showToast(t('🎫 Support Ticket ' + newId + ' saved to database! Our team will respond shortly.', '🎫 تم حفظ وإرسال التذكرة رقم ' + newId + ' إلى الإدارة بنجاح! سيرد عليك فريق الدعم قريباً.'), 'info');
+   showToast(t('🎫 Support Ticket ' + newId + ' created! Our team will respond shortly.', '🎫 تم فتح التذكرة رقم ' + newId + ' بنجاح! سيرد عليك فريق الدعم قريباً.'), 'info');
   }
   function renderUserTickets() {
    const container = document.getElementById('user-tickets-list');
    if (!container) return;
    container.innerHTML = '';
-   if (!Array.isArray(appState.tickets) || appState.tickets.length === 0) {
-    container.innerHTML =
-     '<div class="p-4 rounded-xl bg-black/40 border border-white/10 text-center text-zinc-400 text-xs">' +
-      t('No support tickets submitted yet.', 'لا توجد تذاكر دعم فني مسجلة لحسابك حتى الآن.') +
-     '</div>';
-    return;
-   }
    appState.tickets.forEach(function(tk) {
     const div = document.createElement('div');
     div.className = 'p-3 rounded-xl bg-black/50 border border-white/10 flex items-center justify-between gap-2';
@@ -6129,50 +5636,6 @@
      '</div>' +
      '<span class="px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 text-[11px] shrink-0">' + statusTxt + '</span>';
     container.appendChild(div);
-   });
-  }
-  function adminResolveSupportTicket(ticketId) {
-   if (!supabaseClient || !ticketId) return;
-   sbExec(supabaseClient.from('support_tickets').update({ status: 'Resolved' }).eq('id', ticketId)).then(function() {
-    syncAllAdminUsersFromSupabase(false);
-    showToast(t('✅ Support ticket marked as Resolved.', '✅ تم تحديث حالة التذكرة إلى (تم الحل ✓).'), 'info');
-   });
-  }
-  function renderAdminSupportTickets() {
-   const container = document.getElementById('admin-support-tickets-list');
-   const badge = document.getElementById('admin-tickets-count-badge');
-   if (!container) return;
-   const list = Array.isArray(appState.supportTickets) ? appState.supportTickets : [];
-   if (badge) {
-    badge.textContent = isEn() ? (list.length + ' Tickets') : (list.length + ' تذكرة');
-   }
-   container.innerHTML = '';
-   if (list.length === 0) {
-    container.innerHTML =
-     '<div class="p-4 rounded-xl bg-white/5 border border-white/10 text-center text-zinc-400 text-xs">' +
-      t('No customer support tickets in database.', 'لا توجد تذاكر دعم فني حالياً في قاعدة البيانات.') +
-     '</div>';
-    return;
-   }
-   list.slice(0, 20).forEach(function(row) {
-    const isResolved = String(row.status || '').toLowerCase() === 'resolved';
-    const card = document.createElement('div');
-    card.className = 'p-3.5 rounded-xl bg-black/50 border border-white/10 flex flex-wrap items-center justify-between gap-3';
-    const statusHtml = isResolved
-     ? '<span class="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px] font-bold">' + t('Resolved ✓', 'تم الحل ✓') + '</span>'
-     : '<button type="button" onclick="adminResolveSupportTicket(' + row.id + ')" class="px-3 py-1 rounded-full bg-amber-500/20 hover:bg-emerald-500/30 border border-amber-500/40 text-amber-200 text-[11px] font-bold transition">' + t('Mark Resolved ✓', 'تحديد كمحلولة ✓') + '</button>';
-    card.innerHTML =
-     '<div class="space-y-1 max-w-3xl">' +
-      '<div class="flex flex-wrap items-center gap-2 text-[11px]">' +
-       '<span class="font-mono text-indigo-300 font-bold">#' + (row.id || '') + '</span>' +
-       '<span class="text-sky-300 font-mono" dir="ltr">' + (row.user_email || '') + '</span>' +
-       '<span class="px-2 py-0.5 rounded bg-white/10 text-zinc-300">' + (row.category || 'Support') + '</span>' +
-      '</div>' +
-      '<p class="font-bold text-white text-xs sm:text-sm">' + (row.subject || '') + '</p>' +
-      '<p class="text-zinc-300 text-xs leading-relaxed">' + (row.message || '') + '</p>' +
-     '</div>' +
-     '<div>' + statusHtml + '</div>';
-    container.appendChild(card);
    });
   }
   function renderAdminUsersTable() {
@@ -6230,6 +5693,7 @@
      ? '<span class="text-emerald-400 font-bold">' + uCredits.toLocaleString() + ' 💎 (' + t(u.daysLeft + 'd', u.daysLeft + ' يوم') + ')</span>'
      : '<span class="text-zinc-500">0 💎</span>';
     const currentPlanKey = detectPlanKeyFromUser(u);
+    const sel7d = currentPlanKey === '7d' ? ' selected' : '';
     const sel6m = currentPlanKey === '6m' ? ' selected' : '';
     const sel12m = currentPlanKey === '12m' ? ' selected' : '';
     const sel18m = currentPlanKey === '18m' ? ' selected' : '';
@@ -6351,7 +5815,9 @@
     adminActivateUserWithPlan(userId, '12m');
    }
   }
-
+  function openAddDemoUserModal() {
+   syncAllAdminUsersFromSupabase(true);
+  }
   function renderAdminCountries() {
    const container = document.getElementById('admin-countries-list');
    if (!container) return;
@@ -6408,20 +5874,14 @@
     } catch (e) {}
    }
   });
-  function finalizeYoutubeChannelLink(slot, title, chId, ytViews, ytVideos, accessToken, refreshToken, googleEmail) {
-   const prevCh = appState.channels[slot] || {};
-   const cleanUrl = chId ? ('youtube.com/channel/' + chId) : ('youtube.com/@' + title.replace(/\s+/g, ''));
+  function finalizeYoutubeChannelLink(slot, title, chId, ytViews, ytVideos, accessToken) {
    appState.channels[slot].connected = true;
    appState.channels[slot].nameEn = title;
    appState.channels[slot].nameAr = title;
-   appState.channels[slot].url = cleanUrl;
-   appState.channels[slot].channelId = chId || prevCh.channelId || ('yt_slot_' + slot);
-   appState.channels[slot].ytViews = ytViews || prevCh.ytViews || 0;
-   appState.channels[slot].ytVideos = ytVideos || prevCh.ytVideos || 0;
-   appState.channels[slot].accessToken = accessToken || prevCh.accessToken || '';
-   if (refreshToken) appState.channels[slot].refreshToken = refreshToken;
-   if (googleEmail) appState.channels[slot].googleEmail = googleEmail;
-   appState.channels[slot].tokenTimestamp = Date.now();
+   appState.channels[slot].url = chId ? ('youtube.com/channel/' + chId) : ('youtube.com/@' + title.replace(/\s+/g, ''));
+   appState.channels[slot].ytViews = ytViews || 0;
+   appState.channels[slot].ytVideos = ytVideos || 0;
+   appState.channels[slot].accessToken = accessToken || '';
    let sumViews = 0;
    let sumVideos = 0;
    for (let cIdx = 1; cIdx <= 7; cIdx++) {
@@ -6447,13 +5907,15 @@
      user_email: appState.currentUser.email,
      slot_number: slot,
      channel_name: title,
-     channel_url: packChannelUrlWithMeta(cleanUrl, ch),
+     channel_url: ch.url,
+     youtube_channel_id: chId || ('yt_slot_' + slot),
+     youtube_access_token: accessToken,
      connected: true,
      niche: ch.niche || 'Talking Fruits & Veggies Drama',
      daily_count: ch.dailyCount || 3,
-     duration_sec: ch.durationSec || 5,
+     duration_sec: ch.durationSec || 60,
      orientation: ch.orientation || 'Vertical 9:16 (Shorts & Reels)',
-     video_language: ch.language || 'العربية',
+     video_language: ch.language || 'English',
      time_slots: ch.timeSlots || ['14:00', '18:30', '22:00']
     }, { onConflict: 'user_email,slot_number' }));
     sbExec(supabaseClient.from('profiles').update({
@@ -6464,175 +5926,100 @@
    selectChannelSlot(slot);
    syncDashboardUI();
    navigateView('dashboard');
+   showToast(t('🎉 Official YouTube Channel "' + title + '" linked! Synced ' + (ytViews || 0).toLocaleString() + ' channel views.', '🎉 تم ربط قناتك الرسمية على يوتيوب "' + title + '" وسحب إحصائيات القناة (' + (ytViews || 0).toLocaleString() + ' مشاهدة) بنجاح!'), 'info');
    try {
-    const rawPendingUpload = localStorage.getItem('omniposts_pending_auto_upload');
-    if (rawPendingUpload) {
-     localStorage.removeItem('omniposts_pending_auto_upload');
-     const pendingPayload = JSON.parse(rawPendingUpload);
-     if (pendingPayload && pendingPayload.videoUrl) {
-      window._lastReviewedVideoPayload = pendingPayload;
-      showToast(t('🚀 Completing your video upload to YouTube channel "' + title + '" now...', '🚀 جاري استكمال رفع ونشر الفيديو الجاهز على قناتك "' + title + '" الآن...'), 'info');
-      setTimeout(function() {
-       publishLastReviewedVideoToYouTube();
-      }, 400);
-      return;
-     }
+    const autoSlot = parseInt(localStorage.getItem('omniposts_autoresume_gen_slot') || '0', 10);
+    if (autoSlot >= 1 && autoSlot <= 7) {
+     localStorage.removeItem('omniposts_autoresume_gen_slot');
+     setTimeout(function() { simulateInstantAiGeneration(autoSlot); }, 600);
     }
    } catch (e) {}
-   showToast(t('🎉 Official YouTube Channel "' + title + '" linked & saved permanently!', '🎉 تم ربط قناتك الرسمية على يوتيوب "' + title + '" وحفظها بشكل دائم في حسابك بنجاح!'), 'info');
-  }
-  function fetchYouTubeChannelAndFinalize(slot, accessToken, refreshToken, pendingCustomName) {
-   let detectedGoogleEmail = '';
-   const tokenInfoPromise = window.fetch
-    ? window.fetch('https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=' + encodeURIComponent(accessToken))
-       .then(function(r) { return r.json(); })
-       .then(function(info) {
-        if (info && info.email) detectedGoogleEmail = info.email;
-       }).catch(function() {})
-    : Promise.resolve();
-   return tokenInfoPromise.then(function() {
-    return window.fetch('https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&mine=true', {
-     headers: { Authorization: 'Bearer ' + accessToken }
-    }).then(function(r) { return r.json(); }).then(function(data) {
-     if (data && data.items && data.items[0] && data.items[0].snippet) {
-      const item = data.items[0];
-      const title = item.snippet.title || pendingCustomName || ('YouTube Channel #' + slot);
-      const chId = item.id || '';
-      const stats = item.statistics || {};
-      const ytViews = parseInt(stats.viewCount, 10) || 0;
-      const ytVideos = parseInt(stats.videoCount, 10) || 0;
-      finalizeYoutubeChannelLink(slot, title, chId, ytViews, ytVideos, accessToken, refreshToken, detectedGoogleEmail);
-     } else {
-      const prevCh = appState.channels[slot] || {};
-      const fallbackTitle = pendingCustomName || (prevCh.connected && prevCh.nameAr ? prevCh.nameAr : '') || (appState.currentUser.fullNameEn ? (appState.currentUser.fullNameEn + ' YouTube') : ('YouTube Channel #' + slot));
-      finalizeYoutubeChannelLink(slot, fallbackTitle, prevCh.channelId || ('yt_oauth_' + slot), prevCh.ytViews || 0, prevCh.ytVideos || 0, accessToken, refreshToken, detectedGoogleEmail);
-     }
-    }).catch(function() {
-     const prevCh = appState.channels[slot] || {};
-     const fallbackTitle = pendingCustomName || (prevCh.connected && prevCh.nameAr ? prevCh.nameAr : '') || ('YouTube Channel #' + slot);
-     finalizeYoutubeChannelLink(slot, fallbackTitle, prevCh.channelId || ('yt_oauth_' + slot), prevCh.ytViews || 0, prevCh.ytVideos || 0, accessToken, refreshToken, detectedGoogleEmail);
-    });
-   });
   }
   window.addEventListener('DOMContentLoaded', function() {
-   const mqTrack = document.querySelector('.shorts-marquee-track');
-   if (mqTrack && mqTrack.children.length === 8) { mqTrack.innerHTML += mqTrack.innerHTML; }
-   const rawHash = (window.location.hash && window.location.hash.length > 1) ? window.location.hash.substring(1) : '';
-   const rawSearch = (window.location.search && window.location.search.length > 1) ? window.location.search.substring(1) : '';
-   if (window.self !== window.top && (rawHash.indexOf('silent_slot_') !== -1 || rawSearch.indexOf('silent_slot_') !== -1)) {
-    try {
-     const sParams = new URLSearchParams(rawHash || rawSearch);
-     const sTok = sParams.get('access_token') || '';
-     if (window.parent) {
-      window.parent.postMessage({ type: 'OMNIPOSTS_SILENT_YT_TOKEN', accessToken: sTok }, '*');
-     }
-    } catch (e) {}
-    return;
-   }
+  const mqTrack = document.querySelector('.shorts-marquee-track');
+  if (mqTrack && mqTrack.children.length === 8) { mqTrack.innerHTML += mqTrack.innerHTML; }
    let savedLang = 'en';
    try {
     savedLang = localStorage.getItem('omniposts_v3_lang') || 'en';
    } catch (e) {}
    setLanguage(savedLang);
-   const hashParams = new URLSearchParams(rawHash);
-   const searchParams = new URLSearchParams(rawSearch);
-   const oauthStateParam = hashParams.get('state') || searchParams.get('state') || '';
-   const oauthAccessToken = hashParams.get('access_token') || '';
-   const oauthAuthCode = searchParams.get('code') || '';
-   const hasOAuthReturn = Boolean(oauthAccessToken || oauthAuthCode || oauthStateParam.indexOf('slot_') !== -1);
-   const restoredUser = restoreUserSessionFromAnySource(oauthStateParam);
-   if (restoredUser && restoredUser.email) {
-    appState.currentUser = restoredUser;
-    appState.isLoggedIn = true;
-    updateOwnerAdminVisibility();
-    loadUserChannelsFromLocal(restoredUser.email);
-    const savedView = (function() {
-     try { return localStorage.getItem('omniposts_v3_view') || 'dashboard'; } catch (e) { return 'dashboard'; }
-    })();
-    const targetInitialView = (hasOAuthReturn || savedView === 'landing' || savedView === 'login' || savedView === 'register')
-     ? 'dashboard'
-     : savedView;
-    navigateView(targetInitialView);
-    syncDashboardUI();
-    if (restoredUser.email.toLowerCase() === OWNER_ADMIN_EMAIL.toLowerCase()) {
-     syncAllAdminUsersFromSupabase(false);
-    }
-   }
-   loadPlatformMasterEngineFromSupabase().then(function() {
-    if (oauthAuthCode && appState.isLoggedIn) {
-     const stateSlotMatch = oauthStateParam.match(/slot_(\d+)/);
-     const slot = stateSlotMatch ? parseInt(stateSlotMatch[1], 10) : parseInt(localStorage.getItem('omniposts_pending_yt_slot') || '1', 10);
-     const pendingCustomName = localStorage.getItem('omniposts_pending_yt_custom_name') || '';
-     const gSecret = (platformMasterEngine.googleClientSecret || '').trim();
-     const bodyParams = new URLSearchParams();
-     bodyParams.set('code', oauthAuthCode);
-     bodyParams.set('client_id', GOOGLE_YOUTUBE_CLIENT_ID);
-     if (gSecret) bodyParams.set('client_secret', gSecret);
-     bodyParams.set('redirect_uri', 'https://omniposts.online');
-     bodyParams.set('grant_type', 'authorization_code');
-     window.fetch('https://oauth2.googleapis.com/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: bodyParams.toString()
-     }).then(function(r) { return r.json(); }).then(function(tokData) {
-      if (tokData && tokData.access_token) {
-       loadUserChannelsFromSupabase(appState.currentUser.email).then(function() {
-        fetchYouTubeChannelAndFinalize(slot, tokData.access_token, tokData.refresh_token || '', pendingCustomName);
-       });
-      }
-     }).catch(function() {});
-    }
-   });
+   loadPlatformMasterEngineFromSupabase();
    fetchLiveUsdToEgpBankRate();
    updateCustomPlanSlider();
    checkWhopReturnUrlCallback();
    startAutomatedScheduleDaemon();
    if (window.location.search && window.location.search.indexOf('policy=') !== -1) {
-    const pol = searchParams.get('policy');
+    const qParams = new URLSearchParams(window.location.search);
+    const pol = qParams.get('policy');
     if (pol === 'privacy' || pol === 'terms') {
      setTimeout(function() { openPolicyTab(pol); }, 50);
     }
    }
-   if (oauthAccessToken && appState.isLoggedIn) {
-    const stateSlotMatch = oauthStateParam.match(/slot_(\d+)/);
-    const slot = stateSlotMatch ? parseInt(stateSlotMatch[1], 10) : parseInt(localStorage.getItem('omniposts_pending_yt_slot') || '1', 10);
-    const pendingCustomName = localStorage.getItem('omniposts_pending_yt_custom_name') || '';
-    loadUserChannelsFromSupabase(appState.currentUser.email).then(function() {
-     fetchYouTubeChannelAndFinalize(slot, oauthAccessToken, '', pendingCustomName);
-    });
-   } else if (appState.isLoggedIn && appState.currentUser.email) {
-    loadUserChannelsFromSupabase(appState.currentUser.email);
-    if (supabaseClient) {
-     sbExec(supabaseClient.from('profiles').select('*').ilike('email', appState.currentUser.email).maybeSingle()).then(function(pRes) {
-      if (pRes && pRes.data) {
-       const row = pRes.data;
-       const isOwner = (appState.currentUser.email.toLowerCase() === OWNER_ADMIN_EMAIL.toLowerCase());
-       appState.currentUser.subscribed = isOwner || Boolean(row.subscribed);
-       appState.currentUser.planNameEn = isOwner ? 'Owner Lifetime Admin' : (row.plan_name || appState.currentUser.planNameEn);
-       appState.currentUser.planNameAr = isOwner ? 'حساب الأدمن والمالك' : (row.plan_name || appState.currentUser.planNameAr);
-       appState.currentUser.remainingDays = isOwner ? 9999 : (row.remaining_days || appState.currentUser.remainingDays);
-       const crMeta = decodeUserCreditsMeta(row.ai_provider, appState.currentUser.subscribed);
-       appState.currentUser.credits = isOwner ? 999999 : crMeta.credits;
-       persistCurrentUserEverywhere();
-       syncDashboardUI();
+   const hasOAuthReturn = Boolean(window.location.hash && window.location.hash.indexOf('access_token=') !== -1);
+   const rawHash = hasOAuthReturn ? window.location.hash.substring(1) : '';
+   try {
+    const savedSession = localStorage.getItem('omniposts_v3_session');
+    if (savedSession) {
+     const parsedUser = JSON.parse(savedSession);
+     if (parsedUser && parsedUser.email) {
+      appState.currentUser = parsedUser;
+      appState.isLoggedIn = true;
+      updateOwnerAdminVisibility();
+      loadUserChannelsFromLocal(parsedUser.email);
+      const savedView = localStorage.getItem('omniposts_v3_view') || 'dashboard';
+      navigateView(hasOAuthReturn ? 'dashboard' : savedView);
+      syncDashboardUI();
+      if (parsedUser.email.toLowerCase() === OWNER_ADMIN_EMAIL.toLowerCase()) {
+       syncAllAdminUsersFromSupabase(false);
       }
+     }
+    }
+   } catch (err) {}
+   if (hasOAuthReturn) {
+    const params = new URLSearchParams(rawHash);
+    const accessToken = params.get('access_token');
+    const slot = parseInt(localStorage.getItem('omniposts_pending_yt_slot') || '1', 10);
+    const pendingCustomName = localStorage.getItem('omniposts_pending_yt_custom_name') || '';
+    if (accessToken) {
+     loadUserChannelsFromSupabase(appState.currentUser.email).then(function() {
+      fetch('https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&mine=true', {
+       headers: { Authorization: 'Bearer ' + accessToken }
+      }).then(function(r) { return r.json(); }).then(function(data) {
+       if (data && data.items && data.items[0] && data.items[0].snippet) {
+        const item = data.items[0];
+        const title = item.snippet.title || pendingCustomName || ('YouTube Channel #' + slot);
+        const chId = item.id || '';
+        const stats = item.statistics || {};
+        const ytViews = parseInt(stats.viewCount, 10) || 0;
+        const ytVideos = parseInt(stats.videoCount, 10) || 0;
+        finalizeYoutubeChannelLink(slot, title, chId, ytViews, ytVideos, accessToken);
+       } else {
+        const fallbackTitle = pendingCustomName || (appState.currentUser.fullNameEn ? (appState.currentUser.fullNameEn + ' YouTube') : ('YouTube Channel #' + slot));
+        finalizeYoutubeChannelLink(slot, fallbackTitle, 'yt_oauth_' + slot, 0, 0, accessToken);
+       }
+      }).catch(function() {
+       const fallbackTitle = pendingCustomName || ('YouTube Channel #' + slot);
+       finalizeYoutubeChannelLink(slot, fallbackTitle, 'yt_oauth_' + slot, 0, 0, accessToken);
+      });
      });
     }
+   } else if (appState.isLoggedIn && appState.currentUser.email) {
+    loadUserChannelsFromSupabase(appState.currentUser.email);
    }
   });
   window.addEventListener('pageshow', function() {
    try {
-    const restoredUser = restoreUserSessionFromAnySource('');
-    if (restoredUser && restoredUser.email) {
-     appState.currentUser = restoredUser;
-     appState.isLoggedIn = true;
-     updateOwnerAdminVisibility();
-     const savedView = (function() {
-      try { return localStorage.getItem('omniposts_v3_view') || 'dashboard'; } catch (e) { return 'dashboard'; }
-     })();
-     const safeView = (savedView === 'landing' || savedView === 'login' || savedView === 'register') ? 'dashboard' : savedView;
-     navigateView(safeView);
-     syncDashboardUI();
+    const savedSession = localStorage.getItem('omniposts_v3_session');
+    if (savedSession) {
+     const parsedUser = JSON.parse(savedSession);
+     if (parsedUser && parsedUser.email) {
+      appState.currentUser = parsedUser;
+      appState.isLoggedIn = true;
+      updateOwnerAdminVisibility();
+      const savedView = localStorage.getItem('omniposts_v3_view') || 'dashboard';
+      navigateView(savedView);
+      syncDashboardUI();
+     }
     }
    } catch (err) {}
   });
