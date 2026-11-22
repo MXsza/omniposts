@@ -1219,9 +1219,10 @@
       <div>
        <label class="block text-[11px] text-slate-300 mb-1.5 font-semibold" data-en="6. Daily Videos (1 to 5/Day):" data-ar="6. عدد الفيديوهات يومياً (1–5):">6. Daily Videos (1 to 5/Day):</label>
        <select id="channel-daily-count" onchange="handleDailyCountChange()" class="apple-input w-full px-3 py-2 text-xs font-semibold text-sky-300">
+        <option value="0" selected data-en="0 Videos / Day (No Schedule Yet)" data-ar="0 فيديو (بدون جدولة حالياً)">0 Videos / Day (No Schedule Yet)</option>
         <option value="1" data-en="1 Video / Day (30 / Month)" data-ar="1 فيديو يومياً (30 شهرياً)">1 Video / Day (30 / Month)</option>
         <option value="2" data-en="2 Videos / Day (60 / Month)" data-ar="2 فيديو يومياً (60 شهرياً)">2 Videos / Day (60 / Month)</option>
-        <option value="3" selected data-en="3 Videos / Day (90 / Month)" data-ar="3 فيديوهات يومياً (90 شهرياً)">3 Videos / Day (90 / Month)</option>
+        <option value="3" data-en="3 Videos / Day (90 / Month)" data-ar="3 فيديوهات يومياً (90 شهرياً)">3 Videos / Day (90 / Month)</option>
         <option value="4" data-en="4 Videos / Day (120 / Month)" data-ar="4 فيديوهات يومياً (120 شهرياً)">4 Videos / Day (120 / Month)</option>
         <option value="5" data-en="5 Videos / Day (150 / Month)" data-ar="5 فيديوهات يومياً (150 شهرياً)">5 Videos / Day (150 / Month)</option>
        </select>
@@ -1322,23 +1323,28 @@
       </div>
      </div>
      <!-- Saved Channels & Schedules Summary Table (Shown after clicking Save Schedule) -->
-     <div id="saved-schedules-summary-card" class="mt-4 p-4 rounded-2xl bg-slate-900/90 border border-emerald-500/30 space-y-3">
-      <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-white/10">
-       <div class="flex items-center gap-2">
-        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-        <h5 class="text-xs sm:text-sm font-bold text-white" data-en="Saved Channels & Daily Publish Schedule Table" data-ar="جدول القنوات والمواعيد المجدولة المحفوظة">جدول القنوات والمواعيد المجدولة المحفوظة</h5>
+     <div id="saved-schedules-summary-card" class="mt-4 p-4 sm:p-5 rounded-2xl bg-slate-900/95 border border-emerald-500/35 shadow-xl space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-white/10">
+       <div class="flex items-center gap-2.5">
+        <span class="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-300 shrink-0">
+         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        </span>
+        <div>
+         <h5 class="text-xs sm:text-sm font-extrabold text-white" data-en="Saved Channels & Daily Publish Schedule Table" data-ar="جدول القنوات والمواعيد المجدولة">جدول القنوات والمواعيد المجدولة</h5>
+         <p class="text-[10px] text-slate-400" data-en="Pause, resume, or delete any scheduled publish time directly from this table" data-ar="يمكنك إيقاف الجدولة مؤقتاً أو تشغيلها أو حذف أي موعد مباشرة من الجدول">يمكنك إيقاف الجدولة مؤقتاً أو تشغيلها أو حذف أي موعد مباشرة من الجدول</p>
+        </div>
        </div>
-       <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-semibold" data-en="24/7 Cloud Synced" data-ar="متزامن مع السحابة 24/7">متزامن مع السحابة 24/7</span>
+       <span class="text-[10px] px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-bold" data-en="24/7 Cloud Synced" data-ar="متزامن مع السحابة 24/7">متزامن مع السحابة 24/7</span>
       </div>
       <div class="overflow-x-auto">
        <table class="w-full text-start text-xs">
         <thead>
-         <tr class="border-b border-white/10 text-slate-400 text-[11px]">
-          <th class="py-2 px-2" data-en="Channel" data-ar="اسم القناة">اسم القناة</th>
-          <th class="py-2 px-2" data-en="Content Niche" data-ar="المحتوى المختار">المحتوى المختار</th>
-          <th class="py-2 px-2 text-center" data-en="Daily Videos" data-ar="عدد الفيديوهات">عدد الفيديوهات</th>
-          <th class="py-2 px-2" data-en="Scheduled Times" data-ar="مواعيد النشر">مواعيد النشر</th>
-          <th class="py-2 px-2 text-end" data-en="Status" data-ar="الحالة">الحالة</th>
+         <tr class="border-b border-white/10 text-slate-400 text-[11px] bg-white/5">
+          <th class="py-2.5 px-3 rounded-s-lg" data-en="Channel" data-ar="اسم القناة">اسم القناة</th>
+          <th class="py-2.5 px-3" data-en="Content Niche" data-ar="المحتوى">المحتوى</th>
+          <th class="py-2.5 px-3 text-center" data-en="Count" data-ar="عدد الفيديوهات">عدد الفيديوهات</th>
+          <th class="py-2.5 px-3" data-en="Scheduled Times (Click Delete to Remove)" data-ar="مواعيد النشر">مواعيد النشر</th>
+          <th class="py-2.5 px-3 text-end rounded-e-lg" data-en="Control" data-ar="التحكم والحالة">التحكم والحالة</th>
          </tr>
         </thead>
         <tbody id="saved-schedules-summary-tbody" class="divide-y divide-white/10">
@@ -2252,13 +2258,13 @@
    },
    selectedChannelSlot: 1,
    channels: {
-    1: { connected: false, autoScheduleEnabled: true, nameEn: 'Channel #1 (Not Connected Yet)', nameAr: 'القناة رقم 1 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #1', niche: 'Talking Fruits & Veggies Drama', visualStyle: '3D Pixar & Disney Animation', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 3, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية', timeSlots: ['14:00', '18:30', '22:00'] },
-    2: { connected: false, autoScheduleEnabled: true, nameEn: 'Channel #2 (Not Connected Yet)', nameAr: 'القناة رقم 2 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #2', niche: 'Chubby Ginger Cat Emotional Stories', visualStyle: '3D Pixar & Disney Animation', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 2, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية', timeSlots: ['16:00', '21:00'] },
-    3: { connected: false, autoScheduleEnabled: true, nameEn: 'Channel #3 (Not Connected Yet)', nameAr: 'القناة رقم 3 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #3', niche: 'Tiny Miniature Workers Giant Food', visualStyle: 'Hyper-Realistic 8K Cinema', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 2, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'English', timeSlots: ['19:00', '22:30'] },
-    4: { connected: false, autoScheduleEnabled: true, nameEn: 'Channel #4 (Not Connected Yet)', nameAr: 'القناة رقم 4 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #4', niche: 'Glass & Crystal Fruit Slicing ASMR', visualStyle: 'Macro ASMR & Crystal Physics', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 2, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'English', timeSlots: ['15:00', '20:00'] },
-    5: { connected: false, autoScheduleEnabled: true, nameEn: 'Channel #5 (Not Connected Yet)', nameAr: 'القناة رقم 5 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #5', niche: 'POV Ancient History Vlog', visualStyle: 'POV Handheld Vlog Realism', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 2, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية', timeSlots: ['13:00', '21:00'] },
-    6: { connected: false, autoScheduleEnabled: true, nameEn: 'Channel #6 (Not Connected Yet)', nameAr: 'القناة رقم 6 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #6', niche: 'Stoic & BillionaireSuccess Parables', visualStyle: 'Dark Luxury & Moody Cinema', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 2, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'English', timeSlots: ['17:00', '22:00'] },
-    7: { connected: false, autoScheduleEnabled: true, nameEn: 'Channel #7 (Not Connected Yet)', nameAr: 'القناة رقم 7 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #7', niche: '3D Pixar Moral Kids Stories', visualStyle: '3D Pixar & Disney Animation', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 2, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية', timeSlots: ['18:00', '23:00'] }
+    1: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #1 (Not Connected Yet)', nameAr: 'القناة رقم 1 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #1', niche: 'Talking Fruits & Veggies Drama', visualStyle: '3D Pixar & Disney Animation', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 0, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية', timeSlots: [] },
+    2: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #2 (Not Connected Yet)', nameAr: 'القناة رقم 2 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #2', niche: 'Chubby Ginger Cat Emotional Stories', visualStyle: '3D Pixar & Disney Animation', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 0, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية', timeSlots: [] },
+    3: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #3 (Not Connected Yet)', nameAr: 'القناة رقم 3 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #3', niche: 'Tiny Miniature Workers Giant Food', visualStyle: 'Hyper-Realistic 8K Cinema', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 0, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'English', timeSlots: [] },
+    4: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #4 (Not Connected Yet)', nameAr: 'القناة رقم 4 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #4', niche: 'Glass & Crystal Fruit Slicing ASMR', visualStyle: 'Macro ASMR & Crystal Physics', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 0, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'English', timeSlots: [] },
+    5: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #5 (Not Connected Yet)', nameAr: 'القناة رقم 5 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #5', niche: 'POV Ancient History Vlog', visualStyle: 'POV Handheld Vlog Realism', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 0, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية', timeSlots: [] },
+    6: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #6 (Not Connected Yet)', nameAr: 'القناة رقم 6 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #6', niche: 'Stoic & BillionaireSuccess Parables', visualStyle: 'Dark Luxury & Moody Cinema', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 0, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'English', timeSlots: [] },
+    7: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #7 (Not Connected Yet)', nameAr: 'القناة رقم 7 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #7', niche: '3D Pixar Moral Kids Stories', visualStyle: '3D Pixar & Disney Animation', publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD', dailyCount: 0, durationSec: 5, duration: '5 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية', timeSlots: [] }
    },
    selectedCheckoutPlan: {
     nameEn: '1 Year Plan (20% OFF)',
@@ -3232,7 +3238,7 @@
    for (let i = 1; i <= 7; i++) {
     appState.channels[i] = {
      connected: false,
-     autoScheduleEnabled: true,
+     autoScheduleEnabled: false,
      nameEn: 'Channel #' + i + ' (Not Connected Yet)',
      nameAr: 'القناة رقم ' + i + ' (غير مربوطة بعد)',
      url: 'Click Link to connect YouTube channel #' + i,
@@ -3242,12 +3248,12 @@
      publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD',
      videoModel: 'bytedance/v1-lite-text-to-video',
      resolution: '480p',
-     dailyCount: 3,
+     dailyCount: 0,
      durationSec: 5,
      duration: '5 seconds',
      orientation: 'Vertical 9:16 (Shorts & Reels)',
      language: 'العربية',
-     timeSlots: ['14:00', '18:30', '22:00']
+     timeSlots: []
     };
    }
   }
@@ -3293,12 +3299,17 @@
         url: row.channel_url || prevLocal.url || '',
         niche: row.niche || prevLocal.niche || 'Talking Fruits & Veggies Drama',
         customNiche: prevLocal.customNiche || '',
-        dailyCount: row.daily_count || prevLocal.dailyCount || 3,
+        dailyCount: (row.daily_count !== undefined && row.daily_count !== null) ? row.daily_count : (prevLocal.dailyCount || 0),
         durationSec: row.duration_sec || prevLocal.durationSec || 60,
         duration: formatDurationLabel(row.duration_sec || prevLocal.durationSec || 60),
         orientation: row.orientation || prevLocal.orientation || 'Vertical 9:16 (Shorts & Reels)',
         language: row.video_language || prevLocal.language || 'English',
-        timeSlots: Array.isArray(row.time_slots) ? row.time_slots : (prevLocal.timeSlots || ['14:00', '18:30', '22:00']),
+        timeSlots: Array.isArray(row.time_slots) ? row.time_slots : (prevLocal.timeSlots || []),
+         autoScheduleEnabled: row.auto_schedule_enabled !== undefined ? Boolean(row.auto_schedule_enabled) : (prevLocal.autoScheduleEnabled || false),
+         visualStyle: row.visual_style || prevLocal.visualStyle || '3D Pixar & Disney Animation',
+         videoModel: row.video_model || prevLocal.videoModel || 'bytedance/v1-lite-text-to-video',
+         resolution: row.resolution || prevLocal.resolution || '480p',
+         publishMode: row.publish_mode || prevLocal.publishMode || 'AUTO_PUBLISH_AND_DOWNLOAD',
         ytViews: prevLocal.ytViews || 0,
         ytVideos: prevLocal.ytVideos || 0,
         accessToken: row.youtube_access_token || prevLocal.accessToken || ''
@@ -4077,17 +4088,27 @@
    saveCurrentChannelConfig(false);
   }
   function handleDailyCountChange() {
-   const count = parseInt(document.getElementById('channel-daily-count').value, 10) || 1;
+   const rawVal = parseInt(document.getElementById('channel-daily-count').value, 10);
+   const count = isNaN(rawVal) ? 0 : Math.max(0, Math.min(5, rawVal));
    const ch = appState.channels[appState.selectedChannelSlot];
    ch.dailyCount = count;
-   const defaultTimes = ['12:00', '15:00', '18:00', '20:30', '23:00'];
-   while (ch.timeSlots.length < count) {
-    ch.timeSlots.push(defaultTimes[ch.timeSlots.length] || '19:00');
+   if (count === 0) {
+    ch.timeSlots = [];
+    ch.autoScheduleEnabled = false;
+   } else {
+    const defaultTimes = ['12:00', '15:00', '18:00', '20:30', '23:00'];
+    if (!Array.isArray(ch.timeSlots)) ch.timeSlots = [];
+    while (ch.timeSlots.length < count) {
+     ch.timeSlots.push(defaultTimes[ch.timeSlots.length] || '19:00');
+    }
+    ch.timeSlots = ch.timeSlots.slice(0, count);
+    ch.autoScheduleEnabled = true;
    }
-   ch.timeSlots = ch.timeSlots.slice(0, count);
+   updateAutoScheduleToggleUI(ch);
    renderTimeSlots(count, ch.timeSlots);
+   renderSavedSchedulesTable();
    updateLiveAiPreviewText();
-   showToast(t('⏰ Opened ' + count + ' daily publish time-slot pickers for Channel #' + appState.selectedChannelSlot, '⏰ تم فتح ' + count + ' خانات لتحديد وقت نشر كل فيديو يومياً للقناة رقم ' + appState.selectedChannelSlot), 'info');
+   saveCurrentChannelConfig(false);
   }
   function toLocalizedDigits(str) {
    const s = String(str);
@@ -4129,14 +4150,73 @@
     return toLocalizedDigits(hh + ':' + mm) + ' ' + periodAr;
    }
   }
+  function removeTimeSlotAtIndex(idx) {
+   removeChannelTimeSlotBySlot(appState.selectedChannelSlot, idx);
+  }
+  function removeChannelTimeSlotBySlot(slotNum, idx) {
+   const ch = appState.channels[slotNum];
+   if (!ch || !Array.isArray(ch.timeSlots)) return;
+   ch.timeSlots.splice(idx, 1);
+   ch.dailyCount = ch.timeSlots.length;
+   if (ch.dailyCount === 0) ch.autoScheduleEnabled = false;
+   if (slotNum === appState.selectedChannelSlot) {
+    const dcSel = document.getElementById('channel-daily-count');
+    if (dcSel) dcSel.value = String(ch.dailyCount);
+    updateAutoScheduleToggleUI(ch);
+    renderTimeSlots(ch.dailyCount, ch.timeSlots);
+   }
+   saveCurrentChannelConfig(false);
+   renderSavedSchedulesTable();
+   showToast(t('Time slot deleted.', 'تم حذف الموعد بنجاح.'), 'info');
+  }
+  function toggleSpecificChannelAutoSchedule(slotNum) {
+   const ch = appState.channels[slotNum];
+   if (!ch) return;
+   ch.autoScheduleEnabled = (ch.autoScheduleEnabled === false) ? true : false;
+   if (slotNum === appState.selectedChannelSlot) {
+    updateAutoScheduleToggleUI(ch);
+    renderTimeSlots(ch.dailyCount, ch.timeSlots);
+   }
+   saveCurrentChannelConfig(false);
+   renderSavedSchedulesTable();
+   showToast(
+    ch.autoScheduleEnabled
+     ? t('Auto-schedule resumed for Channel #' + slotNum, 'تم تشغيل الجدولة التلقائية للقناة رقم ' + slotNum)
+     : t('Auto-schedule paused for Channel #' + slotNum, 'تم إيقاف الجدولة التلقائية مؤقتاً للقناة رقم ' + slotNum),
+    ch.autoScheduleEnabled ? 'info' : 'warn'
+   );
+  }
+  function clearAllChannelScheduleSlots(slotNum) {
+   const ch = appState.channels[slotNum];
+   if (!ch) return;
+   ch.timeSlots = [];
+   ch.dailyCount = 0;
+   ch.autoScheduleEnabled = false;
+   if (slotNum === appState.selectedChannelSlot) {
+    const dcSel = document.getElementById('channel-daily-count');
+    if (dcSel) dcSel.value = '0';
+    updateAutoScheduleToggleUI(ch);
+    renderTimeSlots(0, []);
+   }
+   saveCurrentChannelConfig(false);
+   renderSavedSchedulesTable();
+   showToast(t('All scheduled slots removed for Channel #' + slotNum, 'تم حذف جميع المواعيد المجدولة للقناة رقم ' + slotNum), 'info');
+  }
   function renderTimeSlots(count, timeValues) {
    const grid = document.getElementById('dynamic-time-slots-grid');
    const badge = document.getElementById('slots-count-badge');
+   const safeCount = Math.max(0, parseInt(count, 10) || 0);
    badge.textContent = isEn()
-    ? (count + (count === 1 ? ' Active Daily Slot' : ' Active Daily Slots'))
-    : (toLocalizedDigits(count) + (count === 1 ? ' موعد يومي نشط' : ' مواعيد يومية نشطة'));
+    ? (safeCount + (safeCount === 1 ? ' Active Daily Slot' : ' Active Daily Slots'))
+    : (toLocalizedDigits(safeCount) + (safeCount === 1 ? ' موعد يومي نشط' : ' مواعيد يومية نشطة'));
    grid.innerHTML = '';
-   for (let i = 0; i < count; i++) {
+   if (safeCount === 0) {
+    grid.innerHTML = '<div class="col-span-full text-center py-4 px-3 rounded-xl bg-black/30 border border-dashed border-white/15 text-xs text-slate-400">' +
+     t('No daily publish times scheduled yet. Select Daily Videos (1–5) above to add publish times.', 'لا توجد مواعيد مجدولة لهذه القناة حالياً — اختر عدد الفيديوهات يومياً (من 1 إلى 5) بالأعلى لإضافة المواعيد.') +
+    '</div>';
+    return;
+   }
+   for (let i = 0; i < safeCount; i++) {
     const timeVal = timeValues[i] || '18:00';
     const parsed = parse24HourTime(timeVal);
     const card = document.createElement('div');
@@ -4168,7 +4248,10 @@
     card.innerHTML =
      '<div class="flex items-center justify-between gap-1">' +
       '<span class="text-[11px] text-blue-300 font-semibold">' + labelTxt + '</span>' +
-      '<span class="slot-clock-preview px-2 py-0.5 rounded-full bg-blue-500/15 border border-blue-500/30 text-[11px] font-bold text-white">' + formatLocalizedClock(timeVal) + '</span>' +
+      '<div class="flex items-center gap-1.5">' +
+       '<span class="slot-clock-preview px-2 py-0.5 rounded-full bg-blue-500/15 border border-blue-500/30 text-[11px] font-bold text-white">' + formatLocalizedClock(timeVal) + '</span>' +
+       '<button type="button" onclick="removeTimeSlotAtIndex(' + i + ')" class="px-2 py-0.5 rounded-full bg-red-500/20 hover:bg-red-500/35 border border-red-500/40 text-red-300 text-[10px] font-bold transition">' + t('Delete', 'حذف') + '</button>' +
+      '</div>' +
      '</div>' +
      '<div class="text-[10px] font-semibold">' + getSlotTodayStatusBadgeHtml(appState.selectedChannelSlot, timeVal) + '</div>' +
      '<div class="grid grid-cols-3 gap-1.5 items-center" dir="ltr">' +
@@ -4258,7 +4341,7 @@
    if (modSel) ch.videoModel = modSel.value;
    const resSel = document.getElementById('channel-resolution-select');
    if (resSel) ch.resolution = resSel.value;
-   ch.dailyCount = parseInt(document.getElementById('channel-daily-count').value, 10) || 1;
+   const parsedDc = parseInt(document.getElementById('channel-daily-count').value, 10); ch.dailyCount = isNaN(parsedDc) ? 0 : parsedDc;
    const durSec = parseInt(document.getElementById('channel-duration-select').value, 10) || 60;
    ch.durationSec = Math.max(1, Math.min(3600, durSec));
    ch.duration = formatDurationLabel(ch.durationSec);
@@ -4311,34 +4394,38 @@
    const rows = [];
    for (let i = 1; i <= 7; i++) {
     const ch = appState.channels[i];
-    if (!ch) continue;
-    if (!ch.connected && i !== appState.selectedChannelSlot) continue;
+    if (!ch || !Array.isArray(ch.timeSlots) || ch.timeSlots.length === 0) continue;
     const chName = isEn() ? (ch.nameEn || ('Channel #' + i)) : (ch.nameAr || ('القناة #' + i));
     const nicheLabel = (ch.customNiche && ch.customNiche.trim()) ? ch.customNiche.trim() : (ch.niche || '—');
-    const timesFormatted = Array.isArray(ch.timeSlots) && ch.timeSlots.length > 0
-     ? ch.timeSlots.map(formatLocalizedClock).join(isEn() ? ', ' : ' ، ')
-     : '—';
-    let statusBadge = '';
-    if (!ch.connected) {
-     statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">' + t('Not Linked', 'غير مربوطة') + '</span>';
-    } else if (ch.autoScheduleEnabled === false) {
-     statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-700 text-slate-300 border border-white/10">' + t('Paused', 'متوقفة مؤقتاً') + '</span>';
-    } else {
-     statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">' + t('Active 24/7 ✓', 'نشطة 24/7 ✓') + '</span>';
-    }
+    const slotPills = ch.timeSlots.map(function(tm, idx) {
+     return '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-[11px] font-bold text-indigo-200">' +
+      '<span>' + formatLocalizedClock(tm) + '</span>' +
+      '<button type="button" onclick="removeChannelTimeSlotBySlot(' + i + ', ' + idx + ')" class="px-1.5 py-0.2 rounded-full bg-red-500/25 hover:bg-red-500/45 text-red-200 text-[10px] font-extrabold transition">' + t('Delete', 'حذف') + '</button>' +
+     '</span>';
+    }).join(' ');
+    const isPaused = (ch.autoScheduleEnabled === false);
+    const pauseBtn = isPaused
+     ? '<button type="button" onclick="toggleSpecificChannelAutoSchedule(' + i + ')" class="px-2.5 py-1 rounded-full bg-emerald-500/20 hover:bg-emerald-500/35 border border-emerald-500/40 text-emerald-300 text-[10px] font-bold transition">' + t('Resume', 'تشغيل الجدولة') + '</button>'
+     : '<button type="button" onclick="toggleSpecificChannelAutoSchedule(' + i + ')" class="px-2.5 py-1 rounded-full bg-amber-500/20 hover:bg-amber-500/35 border border-amber-500/40 text-amber-300 text-[10px] font-bold transition">' + t('Pause', 'إيقاف مؤقت') + '</button>';
+    const clearAllBtn = '<button type="button" onclick="clearAllChannelScheduleSlots(' + i + ')" class="px-2.5 py-1 rounded-full bg-red-500/20 hover:bg-red-500/35 border border-red-500/40 text-red-300 text-[10px] font-bold transition">' + t('Delete All', 'حذف الكل') + '</button>';
+    const statusPill = !ch.connected
+     ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">' + t('Not Linked', 'غير مربوطة') + '</span>'
+     : (isPaused
+       ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-700 text-slate-300 border border-white/10">' + t('Paused', 'متوقفة مؤقتاً') + '</span>'
+       : '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">' + t('Active 24/7 ✓', 'نشطة 24/7 ✓') + '</span>');
     rows.push(
-     '<tr class="hover:bg-white/5 transition">' +
-      '<td class="py-2.5 px-2 font-bold text-white">' + chName + '</td>' +
-      '<td class="py-2.5 px-2 text-slate-300 max-w-[180px] truncate">' + nicheLabel + '</td>' +
-      '<td class="py-2.5 px-2 text-center font-extrabold text-sky-300">' + toLocalizedDigits(ch.dailyCount || 1) + ' ' + t('/day', 'فيديو/يوم') + '</td>' +
-      '<td class="py-2.5 px-2 text-indigo-200 font-semibold">' + timesFormatted + '</td>' +
-      '<td class="py-2.5 px-2 text-end">' + statusBadge + '</td>' +
+     '<tr class="hover:bg-white/5 transition align-middle">' +
+      '<td class="py-3 px-3 font-bold text-white">' + chName + '<div class="mt-1">' + statusPill + '</div></td>' +
+      '<td class="py-3 px-3 text-slate-300 max-w-[160px] truncate">' + nicheLabel + '</td>' +
+      '<td class="py-3 px-3 text-center font-extrabold text-sky-300 whitespace-nowrap">' + toLocalizedDigits(ch.timeSlots.length) + ' ' + t('videos/day', 'فيديو/يوم') + '</td>' +
+      '<td class="py-3 px-3"><div class="flex flex-wrap gap-1.5">' + slotPills + '</div></td>' +
+      '<td class="py-3 px-3 text-end"><div class="flex flex-wrap items-center justify-end gap-1.5">' + pauseBtn + clearAllBtn + '</div></td>' +
      '</tr>'
     );
    }
    tbody.innerHTML = rows.length > 0
     ? rows.join('')
-    : '<tr><td colspan="5" class="py-4 text-center text-slate-400 text-[11px]">' + t('Configure a channel and click Save Schedule to view your schedule table.', 'اضبط إعدادات القناة واضغط حفظ الجدول ليظهر جدول مواعيدك هنا.') + '</td></tr>';
+    : '<tr><td colspan="5" class="py-5 text-center text-slate-400 text-xs">' + t('No scheduled videos yet. Choose Daily Videos (1–5) above and click Save Schedule.', 'لا توجد مواعيد مجدولة بعد — اختر عدد الفيديوهات والمواعيد بالأعلى ثم اضغط حفظ الإعدادات والجدول.') + '</td></tr>';
   }
   function updateLiveAiPreviewText() {
    const ch = appState.channels[appState.selectedChannelSlot];
@@ -6034,20 +6121,22 @@
      youtube_access_token: accessToken,
      connected: true,
      niche: ch.niche || 'Talking Fruits & Veggies Drama',
-     daily_count: ch.dailyCount || 3,
+     daily_count: ch.dailyCount || 0,
      duration_sec: ch.durationSec || 60,
      orientation: ch.orientation || 'Vertical 9:16 (Shorts & Reels)',
      video_language: ch.language || 'English',
-     time_slots: ch.timeSlots || ['14:00', '18:30', '22:00']
+     time_slots: Array.isArray(ch.timeSlots) ? ch.timeSlots : []
     }, { onConflict: 'user_email,slot_number' }));
     sbExec(supabaseClient.from('profiles').update({
      total_views: appState.currentUser.totalViews,
      generated_videos: appState.currentUser.generatedVideos
     }).ilike('email', appState.currentUser.email));
    }
-   selectChannelSlot(slot);
+   selectChannelSlot(slot, true);
    syncDashboardUI();
-   navigateView('dashboard');
+   renderSevenChannelsManagerGrid();
+   renderSavedSchedulesTable();
+   navigateView('channels');
    showToast(t('🎉 Official YouTube Channel "' + title + '" linked! Synced ' + (ytViews || 0).toLocaleString() + ' channel views.', '🎉 تم ربط قناتك الرسمية على يوتيوب "' + title + '" وسحب إحصائيات القناة (' + (ytViews || 0).toLocaleString() + ' مشاهدة) بنجاح!'), 'info');
    try {
     const autoSlot = parseInt(localStorage.getItem('omniposts_autoresume_gen_slot') || '0', 10);
@@ -6102,20 +6191,43 @@
    if (hasOAuthReturn) {
     const params = new URLSearchParams(rawHash);
     const rawAccessToken = params.get('access_token');
-    const slot = parseInt(localStorage.getItem('omniposts_pending_yt_slot') || '1', 10);
+    const stateStr = urlSearchParams.get('state') || params.get('state') || '';
+    const stateSlotMatch = stateStr.match(/slot_(\d+)/);
+    const slotFromState = stateSlotMatch ? parseInt(stateSlotMatch[1], 10) : 0;
+    const slot = slotFromState || parseInt(localStorage.getItem('omniposts_pending_yt_slot') || '1', 10) || 1;
     const pendingCustomName = localStorage.getItem('omniposts_pending_yt_custom_name') || '';
+    const curOrigin = (window.location.origin && window.location.origin.indexOf('http') === 0) ? window.location.origin : 'https://omniposts.online';
+    if (oauthCodeParam) {
+     showToast(t('Completing YouTube channel connection...', 'جاري إتمام ربط قناة اليوتيوب وحفظ التصريح الدائم...'), 'info');
+    }
     const exchangePromise = oauthCodeParam
      ? fetch(SUPABASE_URL + '/functions/v1/cloud-autopilot', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+        headers: {
+         'Content-Type': 'application/json',
+         'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+         'apikey': SUPABASE_ANON_KEY
+        },
         body: JSON.stringify({
          action: 'exchange_oauth_code',
          code: oauthCodeParam,
-         redirect_uri: (window.location.origin && window.location.origin.indexOf('http') === 0) ? window.location.origin : 'https://omniposts.online',
+         redirect_uri: curOrigin,
          user_email: (appState.currentUser && appState.currentUser.email) || '',
          slot_number: slot
         })
-       }).then(function(r) { return r.json(); }).then(function(j) { return (j && j.access_token) ? j.access_token : ''; }).catch(function() { return ''; })
+       }).then(function(r) {
+        return r.json().catch(function() { return { ok: false, error: 'HTTP ' + r.status }; });
+       }).then(function(j) {
+        if (j && j.access_token) {
+         return j.access_token;
+        }
+        const errText = (j && (j.error || j.message || j.msg)) ? String(j.error || j.message || j.msg) : 'Token exchange failed';
+        showToast(t('YouTube Link Error: ' + errText, 'تعذر إتمام ربط القناة: ' + errText), 'warn');
+        return '';
+       }).catch(function(err) {
+        showToast(t('Network error linking YouTube: ' + (err && err.message ? err.message : ''), 'خطأ اتصال أثناء ربط القناة — تأكد من نشر الدالة السحابية في Supabase.'), 'warn');
+        return '';
+       })
      : Promise.resolve(rawAccessToken || '');
     if (oauthCodeParam && window.history && window.history.replaceState) { try { window.history.replaceState({}, document.title, window.location.pathname); } catch (e) {} }
     exchangePromise.then(function(accessToken) {
