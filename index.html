@@ -2142,10 +2142,9 @@
   </div>
  </footer>
  <div id="ai-support-floating-wrapper" class="hidden fixed bottom-5 end-5 z-50">
-  <button type="button" id="ai-support-fab-btn" onclick="toggleAiSupportChat()" class="flex items-center gap-2.5 px-4 py-3 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-extrabold text-xs sm:text-sm shadow-2xl shadow-blue-600/40 border border-white/20 transition transform hover:scale-105">
-   <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-   <span>🤖</span>
-   <span data-en="AI Support Assistant" data-ar="المساعد الذكي والدعم الفوري">المساعد الذكي والدعم الفوري</span>
+  <button type="button" id="ai-support-fab-btn" onclick="toggleAiSupportChat()" title="AI Support Assistant" data-title-en="AI Support Assistant" data-title-ar="المساعد الذكي والدعم الفوري" class="relative w-12 h-12 rounded-full bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white flex items-center justify-center shadow-xl shadow-indigo-600/40 border border-white/25 transition transform hover:scale-105">
+   <span class="absolute top-0.5 end-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-slate-950"></span>
+   <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
   </button>
   <div id="ai-support-chat-window" class="hidden mt-3 w-[340px] sm:w-[390px] rounded-3xl apple-glass border-2 border-blue-500/40 shadow-2xl overflow-hidden flex flex-col" style="height: 520px; max-height: 82vh;">
    <div class="p-4 bg-gradient-to-r from-blue-950/90 via-indigo-950/90 to-purple-950/90 border-b border-white/10 flex items-center justify-between gap-2">
@@ -6225,7 +6224,8 @@
         showToast(t('YouTube Link Error: ' + errText, 'تعذر إتمام ربط القناة: ' + errText), 'warn');
         return '';
        }).catch(function(err) {
-        showToast(t('Network error linking YouTube: ' + (err && err.message ? err.message : ''), 'خطأ اتصال أثناء ربط القناة — تأكد من نشر الدالة السحابية في Supabase.'), 'warn');
+        const emsg = (err && err.message) ? err.message : 'CORS/Network';
+        showToast(t('YouTube Cloud Link Error (' + emsg + ') — Disable "Enforce JWT" in Supabase Edge Function Settings.', 'خطأ اتصال بالدالة السحابية (' + emsg + ') — عطّل خيار Verify/Enforce JWT من إعدادات cloud-autopilot في Supabase.'), 'warn');
         return '';
        })
      : Promise.resolve(rawAccessToken || '');
