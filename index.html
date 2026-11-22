@@ -1165,24 +1165,14 @@
        </select>
       </div>
       <div>
-       <label for="channel-model-select" class="block text-[11px] text-slate-300 mb-1.5 font-semibold" data-en="3. AI Video Engine (16 Models):" data-ar="3. محرك توليد الفيديو (16 أداة عالمية):">3. AI Video Engine (16 Models):</label>
+       <label for="channel-model-select" class="block text-[11px] text-slate-300 mb-1.5 font-semibold" data-en="3. AI Video Engine (Verified Engines):" data-ar="3. محرك توليد الفيديو (المحركات الرسمية):">3. AI Video Engine (Verified Engines):</label>
        <select id="channel-model-select" onchange="handleModelOrResolutionChange()" class="apple-input w-full px-3 py-2 text-xs font-semibold text-emerald-300">
-        <option value="bytedance/v1-lite-text-to-video" data-en="1. Seedance 1.0 Lite (2 Credits/s 480p • Best Saver)" data-ar="1. Seedance 1.0 Lite (الأوفر: 2 كريدت/ث 480p)">1. Seedance 1.0 Lite (2 Credits/s 480p • Best Saver)</option>
-        <option value="wan/2-6-text-to-video" data-en="2. Wan 2.6 Cinema (3 Credits/s • High Realism)" data-ar="2. Wan 2.6 Cinema (واقعية عالية: 3 كريدت/ث)">2. Wan 2.6 Cinema (3 Credits/s • High Realism)</option>
-        <option value="kling-2.6/text-to-video" data-en="3. Kling 2.6 Pro (4 Credits/s • Crisp Motion)" data-ar="3. Kling 2.6 Pro (حركة سينمائية: 4 كريدت/ث)">3. Kling 2.6 Pro (4 Credits/s • Crisp Motion)</option>
-        <option value="bytedance/v1-pro-text-to-video" data-en="4. Seedance 1.0 Pro (4 Credits/s • 1080p HD)" data-ar="4. Seedance 1.0 Pro (دقة عالية: 4 كريدت/ث)">4. Seedance 1.0 Pro (4 Credits/s • 1080p HD)</option>
-        <option value="minimax/hailuo-02-pro" data-en="5. Hailuo 02 Pro (5 Credits/s • Expressive 3D)" data-ar="5. Hailuo 02 Pro (تعبيرات وجه حية: 5 كريدت/ث)">5. Hailuo 02 Pro (5 Credits/s • Expressive 3D)</option>
-        <option value="pixverse/v4-5-text-to-video" data-en="6. PixVerse V4.5 (4 Credits/s • Viral Pixar/Anime)" data-ar="6. PixVerse V4.5 (أنيميشن وبيكسار: 4 كريدت/ث)">6. PixVerse V4.5 (4 Credits/s • Viral Pixar/Anime)</option>
-        <option value="luma/ray-2-flash" data-en="7. Luma Ray 2 Flash (5 Credits/s • Dream Machine)" data-ar="7. Luma Ray 2 Flash (إضاءة واقعية: 5 كريدت/ث)">7. Luma Ray 2 Flash (5 Credits/s • Dream Machine)</option>
-        <option value="hunyuan/video-fast" data-en="8. Tencent Hunyuan (4 Credits/s • Physics Engine)" data-ar="8. Tencent Hunyuan (فيزياء واقعية: 4 كريدت/ث)">8. Tencent Hunyuan (4 Credits/s • Physics Engine)</option>
-        <option value="vidu/v2-0-text-to-video" data-en="9. Vidu 2.0 Story (4 Credits/s • Character Consistency)" data-ar="9. Vidu 2.0 Story (ثبات الشخصيات: 4 كريدت/ث)">9. Vidu 2.0 Story (4 Credits/s • Character Consistency)</option>
-        <option value="pika/v2-2-cinema" data-en="10. Pika 2.2 Effects (5 Credits/s • ASMR & Morphs)" data-ar="10. Pika 2.2 Effects (مؤثرات بصرية: 5 كريدت/ث)">10. Pika 2.2 Effects (5 Credits/s • ASMR & Morphs)</option>
-        <option value="mochi/v1-preview" data-en="11. Genmo Mochi 1 (4 Credits/s • Smooth 60fps Feel)" data-ar="11. Genmo Mochi 1 (حركة ناعمة: 4 كريدت/ث)">11. Genmo Mochi 1 (4 Credits/s • Smooth 60fps Feel)</option>
-        <option value="cogvideox/v5-pro" data-en="12. CogVideoX 5B Pro (4 Credits/s • Story Scenes)" data-ar="12. CogVideoX 5B Pro (مشاهد قصصية: 4 كريدت/ث)">12. CogVideoX 5B Pro (4 Credits/s • Story Scenes)</option>
-        <option value="ltx/video-v095" data-en="13. Lightricks LTX Studio (3 Credits/s • Fast Render)" data-ar="13. Lightricks LTX (ريندر سريع: 3 كريدت/ث)">13. Lightricks LTX Studio (3 Credits/s • Fast Render)</option>
-        <option value="runway/gen3-alpha-turbo" data-en="14. Runway Gen-3 Turbo (6 Credits/s • Hollywood VFX)" data-ar="14. Runway Gen-3 Turbo (تأثيرات هوليوود: 6 كريدت/ث)">14. Runway Gen-3 Turbo (6 Credits/s • Hollywood VFX)</option>
-        <option value="veo3_fast" data-en="15. Google Veo 3.1 Fast (8 Credits/s • Cinema Audio)" data-ar="15. Google Veo 3.1 Fast (جوجل فيو: 8 كريدت/ث)">15. Google Veo 3.1 Fast (8 Credits/s • Cinema Audio)</option>
-        <option value="sora-2-text-to-video" data-en="16. OpenAI Sora 2 Pro (10 Credits/s • Flagship)" data-ar="16. OpenAI Sora 2 Pro (أقوى محرك عالمي: 10 كريدت/ث)">16. OpenAI Sora 2 Pro (10 Credits/s • Flagship)</option>
+        <option value="grok-imagine/text-to-video" data-en="1. Grok Imagine Video + Audio (2 Credits/s 480p • Best Saver)" data-ar="1. Grok Imagine فيديو بالصوت (الأوفر والأسرع: 2 كريدت/ث 480p)">1. Grok Imagine Video + Audio (2 Credits/s 480p • Best Saver)</option>
+        <option value="bytedance/v1-lite-text-to-video" data-en="2. Seedance 1.0 Lite (2 Credits/s 480p • Budget Saver)" data-ar="2. Seedance 1.0 Lite (اقتصادي: 2 كريدت/ث 480p)">2. Seedance 1.0 Lite (2 Credits/s 480p • Budget Saver)</option>
+        <option value="wan/2-6-text-to-video" data-en="3. Wan 2.6 Cinema (3 Credits/s • High Realism)" data-ar="3. Wan 2.6 Cinema (واقعية عالية: 3 كريدت/ث)">3. Wan 2.6 Cinema (3 Credits/s • High Realism)</option>
+        <option value="kling-2.6/text-to-video" data-en="4. Kling 2.6 Pro (4 Credits/s • Crisp Motion)" data-ar="4. Kling 2.6 Pro (حركة سينمائية: 4 كريدت/ث)">4. Kling 2.6 Pro (4 Credits/s • Crisp Motion)</option>
+        <option value="bytedance/v1-pro-text-to-video" data-en="5. Seedance 1.0 Pro (4 Credits/s • 1080p HD)" data-ar="5. Seedance 1.0 Pro (دقة عالية: 4 كريدت/ث)">5. Seedance 1.0 Pro (4 Credits/s • 1080p HD)</option>
+        <option value="veo3_fast" data-en="6. Google Veo 3.1 Fast (8 Credits/s • Cinema Audio)" data-ar="6. Google Veo 3.1 Fast (جوجل فيو بالصوت: 8 كريدت/ث)">6. Google Veo 3.1 Fast (8 Credits/s • Cinema Audio)</option>
        </select>
        <span id="model-rate-hint" class="block text-[10px] text-slate-400 mt-1">5s @ 480p = 10 Credits</span>
       </div>
@@ -2516,6 +2506,7 @@
    costLockMode: 'STANDARD_720P' // 'ECONOMY_480P' ($0.05/vid) or 'STANDARD_720P' ($0.11/vid)
   };
   const KIE_MODEL_CREDIT_RATES = {
+   'grok-imagine/text-to-video': { '480p': 2.0, '720p': 3.5, '1080p': 5.0, '4K': 7.0 },
    'bytedance/v1-lite-text-to-video': { '480p': 2.0,  '720p': 4.5,  '1080p': 10.0,  '4K': 16.0 },
    'grok/imagine-video-1.5':          { '480p': 2.4,  '720p': 4.5,  '1080p': 9.0,   '4K': 15.0 },
    'bytedance/v1-pro-text-to-video':  { '480p': 2.8,  '720p': 6.0,  '1080p': 14.0,  '4K': 22.0 },
@@ -3248,7 +3239,7 @@
      customNiche: '',
      visualStyle: '3D Pixar & Disney Animation',
      publishMode: 'AUTO_PUBLISH_AND_DOWNLOAD',
-     videoModel: 'bytedance/v1-lite-text-to-video',
+     videoModel: 'grok-imagine/text-to-video',
      resolution: '480p',
      dailyCount: 0,
      durationSec: 5,
@@ -4631,12 +4622,9 @@
    return Promise.resolve(procedural);
   }
   function resolveKieModelQueue(selectedModelId) {
-   const primary = selectedModelId || 'bytedance/v1-lite-text-to-video';
-   const queue = [primary];
-   if (primary !== 'bytedance/v1-lite-text-to-video') {
-    queue.push('bytedance/v1-lite-text-to-video');
-   }
-   return queue;
+   const primary = selectedModelId || 'grok-imagine/text-to-video';
+   // Strict Profit Protection: Never auto-failover to a more expensive engine than what the user paid for!
+   return [primary];
   }
   function sanitizeKiePrompt(rawPrompt) {
    return String(rawPrompt || 'Cinematic 3D Pixar style animated story scene with expressive characters and dramatic lighting')
@@ -4650,6 +4638,19 @@
    const chosenRes = resolutionStr || '480p';
    const safeAspect = (aspectRatioStr === '16:9') ? '16:9' : '9:16';
    const randomSeed = Math.floor(10000000 + Math.random() * 89999999);
+   if (modelId === 'grok-imagine/text-to-video') {
+    const grokRes = (chosenRes === '480p') ? '480p' : '720p';
+    return {
+     model: 'grok-imagine/text-to-video',
+     input: {
+      prompt: cleanPrompt,
+      aspect_ratio: safeAspect,
+      mode: 'normal',
+      duration: '6',
+      resolution: grokRes
+     }
+    };
+   }
    if (modelId === 'bytedance/v1-lite-text-to-video' || modelId === 'bytedance/v1-pro-text-to-video' || modelId === 'bytedance/seedance-2.5') {
     const safeRes = (chosenRes === '4K' || chosenRes === '1080p') ? '720p' : chosenRes;
     return {
@@ -4661,7 +4662,8 @@
       duration: '5',
       camera_fixed: false,
       seed: randomSeed,
-      enable_safety_checker: true
+      enable_safety_checker: true,
+      nsfw_checker: false
      }
     };
    }
