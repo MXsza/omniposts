@@ -5440,7 +5440,8 @@
    }).then(function(r) { return r.json(); }).then(function(j) {
     loadCloudPublishLogsFromSupabase();
     if (j && j.ok) {
-     showToast(t('Cloud Autopilot Active ✓ (Processed: ' + (j.processed || 0) + ' jobs)', 'السحابة نشطة وتعمل بنجاح ✓ (المهام المنفذة الآن: ' + (j.processed || 0) + ')'), 'info');
+     const dbg = j.debug ? (' | القنوات النشطة: ' + (j.debug.activeChannels || 0) + ' | توقيت السحابة: ' + (j.debug.sampleLocalTime || '--')) : '';
+     showToast(t('Cloud Autopilot Active ✓ (Processed: ' + (j.processed || 0) + ')', 'السحابة نشطة 24/7 ✓ (المهام المنفذة الآن: ' + (j.processed || 0) + dbg + ')'), 'info');
     } else {
      showToast(t('Cloud Notice: ' + ((j && (j.message || j.error)) || 'Check Supabase'), 'تنبيه السحابة: ' + ((j && (j.message || j.error)) || 'تأكد من حفظ مفتاح Kie.ai في لوحة الأدمن')), 'warn');
     }
@@ -5514,49 +5515,24 @@
    const mmNow = String(now.getMinutes()).padStart(2, '0');
    const ssNow = String(now.getSeconds()).padStart(2, '0');
    const current24 = hhNow + ':' + mmNow;
-   const nowMinutesTotal = now.getHours() * 60 + now.getMinutes();
    const clockEl = document.getElementById('live-scheduler-clock-now');
    if (clockEl) {
     clockEl.textContent = formatLocalizedClock(current24) + ' (' + hhNow + ':' + mmNow + ':' + ssNow + ')';
    }
-   if (!appState.isLoggedIn || isGenerationCurrentlyRunning) return;
-   const logKey = 'omniposts_sched_' + getTodayDateKey(0);
-   let executedMap = {};
-   try {
-    executedMap = JSON.parse(localStorage.getItem(logKey) || '{}');
-   } catch (e) {
-    executedMap = {};
-   }
-   for (let slotNum = 1; slotNum <= 7; slotNum++) {
-    const ch = appState.channels[slotNum];
-    if (!ch || !ch.connected || ch.autoScheduleEnabled === false || !Array.isArray(ch.timeSlots)) continue;
-    for (let sIdx = 0; sIdx < ch.timeSlots.length; sIdx++) {
-     const sched24 = String(ch.timeSlots[sIdx] || '').trim();
-     if (!sched24) continue;
-     const parts = sched24.split(':');
-     const sH = parseInt(parts[0], 10);
-     const sM = parseInt(parts[1], 10);
-     if (isNaN(sH) || isNaN(sM)) continue;
-     const schedMinutesTotal = sH * 60 + sM;
-     const diffMinutes = nowMinutesTotal - schedMinutesTotal;
-     const execId = 'slot_' + slotNum + '_' + sched24;
-     if (diffMinutes >= 0 && diffMinutes <= 10 && !executedMap[execId]) {
-      executedMap[execId] = Date.now();
-      try {
-       localStorage.setItem(logKey, JSON.stringify(executedMap));
-      } catch (e) {}
-      window._activeScheduleRunMeta = { slotNum: slotNum, sched24: sched24, execId: execId, logKey: logKey };
-      showToast(t('Scheduled publish time (' + formatLocalizedClock(sched24) + ') reached for Channel #' + slotNum + '! Starting automated generation & YouTube upload...', 'حان موعد النشر المجدول (' + formatLocalizedClock(sched24) + ') للقناة رقم ' + slotNum + '! بدء التوليد والنشر التلقائي الآن...'), 'info');
-      simulateInstantAiGeneration(slotNum);
-      return;
-     }
-    }
-   }
+   // Scheduled publishing runs 100% on the 24/7 Supabase Cloud server (cloud-autopilot + pg_cron),
+   // so closing the browser or disconnecting internet never interrupts scheduled videos!
   }
   function startAutomatedScheduleDaemon() {
    if (schedulerDaemonTimer) clearInterval(schedulerDaemonTimer);
    runAutomatedScheduleTick();
    schedulerDaemonTimer = setInterval(runAutomatedScheduleTick, 5000);
+   // Periodically refresh cloud publish logs every 30s while dashboard is open
+   if (window._cloudLogSyncTimer) clearInterval(window._cloudLogSyncTimer);
+   window._cloudLogSyncTimer = setInterval(function() {
+    if (appState.isLoggedIn && appState.currentView === 'dashboard') {
+     loadCloudPublishLogsFromSupabase();
+    }
+   }, 30000);
   }
   function handleChangeEmail(e) {
    e.preventDefault();
