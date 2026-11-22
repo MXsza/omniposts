@@ -4984,6 +4984,7 @@
     }
    }
    function buildCustomerSafeErrorMessage(rawReason, isBalanceIssue) {
+    const isOwnerNow = Boolean(appState.currentUser && appState.currentUser.email && appState.currentUser.email.toLowerCase() === OWNER_ADMIN_EMAIL.toLowerCase());
     if (isBalanceIssue && supabaseClient) {
      sbExec(supabaseClient.from('support_tickets').insert({
       user_email: OWNER_ADMIN_EMAIL,
@@ -4992,6 +4993,12 @@
       message: 'رسالة السيرفر المركزي: ' + rawReason,
       status: 'Open'
      }));
+    }
+    if (isOwnerNow) {
+     return t(
+      '[Admin Exact Server Error] ' + rawReason,
+      '[السبب الحقيقي من سيرفر Kie.ai — خاص بالأدمن فقط]: ' + rawReason
+     );
     }
     return t(
      '⏳ High-demand Omniposts Cloud render nodes are currently at full capacity. Zero credits were deducted from your wallet — please try again shortly.',
