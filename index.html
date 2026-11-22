@@ -1334,7 +1334,10 @@
          <p class="text-[10px] text-slate-400" data-en="Pause, resume, or delete any scheduled publish time directly from this table" data-ar="يمكنك إيقاف الجدولة مؤقتاً أو تشغيلها أو حذف أي موعد مباشرة من الجدول">يمكنك إيقاف الجدولة مؤقتاً أو تشغيلها أو حذف أي موعد مباشرة من الجدول</p>
         </div>
        </div>
-       <span class="text-[10px] px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-bold" data-en="24/7 Cloud Synced" data-ar="متزامن مع السحابة 24/7">متزامن مع السحابة 24/7</span>
+       <div class="flex items-center gap-2">
+        <button type="button" onclick="triggerCloudAutopilotCheckNow()" class="px-3 py-1 rounded-full bg-indigo-500/20 hover:bg-indigo-500/35 border border-indigo-500/40 text-indigo-200 text-[10px] font-bold transition" data-en="Sync & Check Cloud Now" data-ar="فحص السحابة الآن">فحص السحابة الآن</button>
+        <span class="text-[10px] px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-bold" data-en="24/7 Cloud Synced" data-ar="متزامن مع السحابة 24/7">متزامن مع السحابة 24/7</span>
+       </div>
       </div>
       <div class="overflow-x-auto">
        <table class="w-full text-start text-xs">
@@ -3277,8 +3280,9 @@
    resetAllChannelsToDefault();
    loadUserChannelsFromLocal(email);
    if (!supabaseClient || !email) {
-    selectChannelSlot(appState.selectedChannelSlot || 1);
+    selectChannelSlot(appState.selectedChannelSlot || 1, true);
     syncDashboardUI();
+    loadCloudPublishLogsFromSupabase();
     return Promise.resolve();
    }
    return sbExec(
@@ -3291,34 +3295,38 @@
        const prevLocal = appState.channels[slot] || {};
        const isConn = Boolean(row.connected) || Boolean(prevLocal.connected);
        const chTitle = row.channel_name || prevLocal.nameEn || ('Channel #' + slot);
-       appState.channels[slot] = {
-        connected: isConn,
-        nameEn: chTitle,
-        nameAr: chTitle,
-        url: row.channel_url || prevLocal.url || '',
-        niche: row.niche || prevLocal.niche || 'Talking Fruits & Veggies Drama',
-        customNiche: prevLocal.customNiche || '',
-        dailyCount: (row.daily_count !== undefined && row.daily_count !== null) ? row.daily_count : (prevLocal.dailyCount || 0),
-        durationSec: row.duration_sec || prevLocal.durationSec || 60,
-        duration: formatDurationLabel(row.duration_sec || prevLocal.durationSec || 60),
-        orientation: row.orientation || prevLocal.orientation || 'Vertical 9:16 (Shorts & Reels)',
-        language: row.video_language || prevLocal.language || 'English',
-        timeSlots: Array.isArray(row.time_slots) ? row.time_slots : (prevLocal.timeSlots || []),
-         autoScheduleEnabled: row.auto_schedule_enabled !== undefined ? Boolean(row.auto_schedule_enabled) : (prevLocal.autoScheduleEnabled || false),
+               const cleanSlots = isConn ? (Array.isArray(row.time_slots) ? row.time_slots : (prevLocal.timeSlots || [])) : [];
+        const cleanCount = isConn ? cleanSlots.length : 0;
+        const cleanAuto = isConn ? (row.auto_schedule_enabled !== undefined ? Boolean(row.auto_schedule_enabled) : (cleanCount > 0)) : false;
+        appState.channels[slot] = {
+         connected: isConn,
+         nameEn: chTitle,
+         nameAr: chTitle,
+         url: row.channel_url || prevLocal.url || '',
+         niche: row.niche || prevLocal.niche || 'Talking Fruits & Veggies Drama',
+         customNiche: prevLocal.customNiche || '',
+         dailyCount: cleanCount,
+         durationSec: row.duration_sec || prevLocal.durationSec || 60,
+         duration: formatDurationLabel(row.duration_sec || prevLocal.durationSec || 60),
+         orientation: row.orientation || prevLocal.orientation || 'Vertical 9:16 (Shorts & Reels)',
+         language: row.video_language || prevLocal.language || 'العربية',
+         timeSlots: cleanSlots,
+         autoScheduleEnabled: cleanAuto,
          visualStyle: row.visual_style || prevLocal.visualStyle || '3D Pixar & Disney Animation',
          videoModel: row.video_model || prevLocal.videoModel || 'bytedance/v1-lite-text-to-video',
          resolution: row.resolution || prevLocal.resolution || '480p',
          publishMode: row.publish_mode || prevLocal.publishMode || 'AUTO_PUBLISH_AND_DOWNLOAD',
-        ytViews: prevLocal.ytViews || 0,
-        ytVideos: prevLocal.ytVideos || 0,
-        accessToken: row.youtube_access_token || prevLocal.accessToken || ''
-       };
+         ytViews: prevLocal.ytViews || 0,
+         ytVideos: prevLocal.ytVideos || 0,
+         accessToken: row.youtube_access_token || prevLocal.accessToken || ''
+        };
       }
      });
      saveUserChannelsToLocal(email);
     }
-    selectChannelSlot(appState.selectedChannelSlot || 1);
+    selectChannelSlot(appState.selectedChannelSlot || 1, true);
     syncDashboardUI();
+    loadCloudPublishLogsFromSupabase();
    });
   }
   const ADMIN_PLAN_OPTIONS = {
@@ -4149,6 +4157,34 @@
     return toLocalizedDigits(hh + ':' + mm) + ' ' + periodAr;
    }
   }
+  function persistSpecificChannelSlot(slotNum) {
+   const ch = appState.channels[slotNum];
+   if (!ch) return;
+   if (appState.currentUser && appState.currentUser.email) {
+    saveUserChannelsToLocal(appState.currentUser.email);
+    if (supabaseClient) {
+     sbExec(supabaseClient.from('channels').upsert({
+      user_email: appState.currentUser.email,
+      slot_number: slotNum,
+      channel_name: isEn() ? ch.nameEn : ch.nameAr,
+      channel_url: ch.url,
+      connected: Boolean(ch.connected),
+      niche: (ch.customNiche && ch.customNiche.trim()) ? ch.customNiche.trim() : ch.niche,
+      daily_count: ch.dailyCount || 0,
+      duration_sec: ch.durationSec || 5,
+      orientation: ch.orientation || 'Vertical 9:16 (Shorts & Reels)',
+      video_language: ch.language || 'العربية',
+      time_slots: Array.isArray(ch.timeSlots) ? ch.timeSlots : [],
+      auto_schedule_enabled: Boolean(ch.autoScheduleEnabled),
+      visual_style: ch.visualStyle || '3D Pixar & Disney Animation',
+      video_model: ch.videoModel || 'bytedance/v1-lite-text-to-video',
+      resolution: ch.resolution || '480p',
+      publish_mode: ch.publishMode || 'AUTO_PUBLISH_AND_DOWNLOAD',
+      timezone_offset_minutes: new Date().getTimezoneOffset()
+     }, { onConflict: 'user_email,slot_number' }));
+    }
+   }
+  }
   function removeTimeSlotAtIndex(idx) {
    removeChannelTimeSlotBySlot(appState.selectedChannelSlot, idx);
   }
@@ -4164,9 +4200,9 @@
     updateAutoScheduleToggleUI(ch);
     renderTimeSlots(ch.dailyCount, ch.timeSlots);
    }
-   saveCurrentChannelConfig(false);
+   persistSpecificChannelSlot(slotNum);
    renderSavedSchedulesTable();
-   showToast(t('Time slot deleted.', 'تم حذف الموعد بنجاح.'), 'info');
+   showToast(t('Time slot deleted permanently.', 'تم حذف الموعد نهائياً.'), 'info');
   }
   function toggleSpecificChannelAutoSchedule(slotNum) {
    const ch = appState.channels[slotNum];
@@ -4176,7 +4212,7 @@
     updateAutoScheduleToggleUI(ch);
     renderTimeSlots(ch.dailyCount, ch.timeSlots);
    }
-   saveCurrentChannelConfig(false);
+   persistSpecificChannelSlot(slotNum);
    renderSavedSchedulesTable();
    showToast(
     ch.autoScheduleEnabled
@@ -4197,9 +4233,9 @@
     updateAutoScheduleToggleUI(ch);
     renderTimeSlots(0, []);
    }
-   saveCurrentChannelConfig(false);
+   persistSpecificChannelSlot(slotNum);
    renderSavedSchedulesTable();
-   showToast(t('All scheduled slots removed for Channel #' + slotNum, 'تم حذف جميع المواعيد المجدولة للقناة رقم ' + slotNum), 'info');
+   showToast(t('All scheduled slots removed permanently for Channel #' + slotNum, 'تم حذف جميع المواعيد المجدولة نهائياً للقناة رقم ' + slotNum), 'info');
   }
   function renderTimeSlots(count, timeValues) {
    const grid = document.getElementById('dynamic-time-slots-grid');
@@ -4393,7 +4429,7 @@
    const rows = [];
    for (let i = 1; i <= 7; i++) {
     const ch = appState.channels[i];
-    if (!ch || !Array.isArray(ch.timeSlots) || ch.timeSlots.length === 0) continue;
+    if (!ch || !ch.connected || !Array.isArray(ch.timeSlots) || ch.timeSlots.length === 0) continue;
     const chName = isEn() ? (ch.nameEn || ('Channel #' + i)) : (ch.nameAr || ('القناة #' + i));
     const nicheLabel = (ch.customNiche && ch.customNiche.trim()) ? ch.customNiche.trim() : (ch.niche || '—');
     const slotPills = ch.timeSlots.map(function(tm, idx) {
@@ -5358,6 +5394,50 @@
    });
    renderSavedSchedulesTable();
    renderPublishHistoryLog();
+  }
+  function loadCloudPublishLogsFromSupabase() {
+   if (!supabaseClient || !appState.currentUser || !appState.currentUser.email) return Promise.resolve();
+   return sbExec(
+    supabaseClient.from('publish_logs').select('*').ilike('user_email', appState.currentUser.email).order('created_at', { ascending: false }).limit(60)
+   ).then(function(res) {
+    if (res && Array.isArray(res.data) && res.data.length > 0) {
+     const mapped = res.data.map(function(r) {
+      return {
+       dateKey: r.date_key || getTodayDateKey(0),
+       time24: r.time_slot || '',
+       slotNum: r.slot_number || 1,
+       channelName: r.channel_name || ('Channel #' + (r.slot_number || 1)),
+       title: r.video_title || 'AI Video',
+       status: r.status || 'success',
+       videoUrl: r.video_url || (r.youtube_video_id ? ('https://www.youtube.com/watch?v=' + r.youtube_video_id) : ''),
+       errorReason: r.error_reason || '',
+       isScheduled: Boolean(r.is_scheduled),
+       createdAt: r.created_at ? new Date(r.created_at).getTime() : Date.now()
+      };
+     });
+     try {
+      localStorage.setItem(getPublishHistoryStorageKey(), JSON.stringify(mapped));
+     } catch (e) {}
+     renderPublishHistoryLog();
+    }
+   }).catch(function() {});
+  }
+  function triggerCloudAutopilotCheckNow() {
+   showToast(t('Checking 24/7 Cloud Autopilot server...', 'جاري فحص السيرفر السحابي والمواعيد المجدولة...'), 'info');
+   fetch(SUPABASE_URL + '/functions/v1/cloud-autopilot', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'apikey': SUPABASE_ANON_KEY },
+    body: JSON.stringify({ action: 'run_scheduled_jobs' })
+   }).then(function(r) { return r.json(); }).then(function(j) {
+    loadCloudPublishLogsFromSupabase();
+    if (j && j.ok) {
+     showToast(t('Cloud Autopilot Active ✓ (Processed: ' + (j.processed || 0) + ' jobs)', 'السحابة نشطة وتعمل بنجاح ✓ (المهام المنفذة الآن: ' + (j.processed || 0) + ')'), 'info');
+    } else {
+     showToast(t('Cloud Notice: ' + ((j && (j.message || j.error)) || 'Check Supabase'), 'تنبيه السحابة: ' + ((j && (j.message || j.error)) || 'تأكد من حفظ مفتاح Kie.ai في لوحة الأدمن')), 'warn');
+    }
+   }).catch(function(err) {
+    showToast(t('Cloud check failed: ' + (err && err.message ? err.message : ''), 'تعذر الاتصال بالسحابة حالياً.'), 'warn');
+   });
   }
   function renderPublishHistoryLog() {
    const container = document.getElementById('publish-history-list');
