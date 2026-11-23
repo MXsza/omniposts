@@ -6,12 +6,10 @@ Pipeline:
   2. Generate a real, gripping localized story script + mood + scene prompts + viral title/description
      via Runware Chat Completions (with rich dialect-matched fallback stories)
   3. Generate N scene images in parallel via Runware imageInference (runware:100@1 FLUX.1 schnell)
-     and push live preview image URLs to Supabase render_jobs
-  4. Synthesize natural voiceover in any world language/dialect (Male/Female) via Edge TTS
+     OR complete 5-30s native-audio AI video via Runware HeyGen Video 1.0 (heygen:video@1.0)
+  4. Synthesize natural voiceover in any world language/dialect (Male/Female) via Edge TTS (for Cinematic 1080p)
   5. Synthesize 100% copyright-free mood-matched cinematic background music & subtle transition whoosh SFX
-     (epic / mystery / sad / happy / calm)
-  6. Assemble Full HD 1080p MP4 with full-frame gentle Ken Burns motion (no edge cropping or dark vignette),
-     smooth xfade transitions, and sleek compact 1–2 line timed subtitles
+  6. Assemble Full HD 1080p MP4 with full-frame gentle Ken Burns motion, smooth xfade transitions, and sleek captions
   7. Upload MP4 to Supabase Storage (for instant download), upload to YouTube via OAuth 2.0,
      deduct exact minutes ONLY on success, and update render_jobs + publish_logs.
 """
@@ -324,7 +322,7 @@ def build_rich_fallback_story(niche: str, style: str, language: str, voice_local
                     "desc": "رحلة سريعة ومذهلة في أسرار الفضاء والكون! اكتشف ماذا يحدث للأرض في اللحظة التي تنطفئ فيها الشمس.\n\n#فضاء #علوم #معلومات #الكون",
                     "tags": ["فضاء", "علوم", "معلومات", "الكون"],
                     "beats": [
-                        ("تخيل لو الشمس اختفت فجأة... الغريب إننا مش هنحس بأي حاجة لمدة تمن دقايق!" if is_eg else "تخيل لو اختفت الشمس فجأة... الغريب أننا لن نشعر بشيء لمدة ثماني دقائق!", "Epic cinematic view of the Sun vanishing into darkness in deep space while Earth still glows brightly"),
+                        ("تخيل لو الشمس اختفت فجأة... الغريب إننا مش هنحس بأي حاجة لمدة تمن دقايق!" if is_eg else "تخيل لو الشمس اختفت فجأة... الغريب أننا لن نشعر بشيء لمدة ثماني دقائق!", "Epic cinematic view of the Sun vanishing into darkness in deep space while Earth still glows brightly"),
                         ("السبب إن الضوء والجاذبية بياخدوا تمن دقايق عشان يوصلوا من الشمس للأرض." if is_eg else "السبب أن الضوء والجاذبية يحتاجان ثماني دقائق للوصول من الشمس إلى الأرض.", "Glowing golden beam of light traveling across the dark cosmos from the Sun toward planet Earth"),
                         ("وبعد الدقيقة التامنة، السما هتتحول لضلمة كاحلة والنجوم هتظهر في عز الضهر!" if is_eg else "وبعد الدقيقة الثامنة، تتحول السماء إلى ظلام دامس وتظهر النجوم نهاراً!", "City skyline suddenly plunging into starry midnight darkness while street lights flicker on"),
                         ("وخلال أيام هتتجمد المحيطات، ووقتها بس هنعرف إن الشمس أعظم معجزة في الكون!" if is_eg else "وخلال أيام تتجمد المحيطات، لندرك أن الشمس هي أعظم معجزة تحفظ الحياة!", "Frozen glowing Earth drifting through a majestic purple nebula in space, ultra-detailed 8K"),
@@ -612,37 +610,68 @@ def generate_all_scenes(scenes: list, style: str, is_vertical: bool, work_dir: P
     return [p for p in paths if p is not None], urls
 
 
+# ==============================================================================
+# Step 2B: Native-Audio AI Video (Runware HeyGen Video 1.0 — heygen:video@1.0)
+# ==============================================================================
+def generate_heygen_video_clip(
+    niche: str,
+    style: str,
+    language: str,
+    voice_locale: str,
+    duration_sec: int,
+    is_vertical: bool,
+    story: dict,
+    out_mp4: Path,
+) -> str:
+    """
+    Generate a complete 5-30s AI video with synchronized native dialogue, lip-sync,
+    ambience, and sound effects in ONE pass using Runware HeyGen Video 1.0 (heygen:video@1.0).
+    Exact 480p dimensions per Runware docs: 480x832 (9:16), 832x480 (16:9).
+    """
+    w, h = (480, 832) if is_vertical else (832, 480)
+    dur = max(5, min(30, int(duration_sec or 15)))
+    scenes = story.get("scenes") or []
+    spoken_lines = " ".join(str(s.get("narration") or "").strip() for s in scenes[:3]).strip()
+    visual_desc = str(scenes[0].get("image_prompt") or niche) if scenes else niche
 
-# ==============================================================================
-# Step 2B: AI Character Motion Clips (Runware Seedance 1.0 Pro Fast — bytedance:2@2)
-# ==============================================================================
-def generate_single_motion_clip(prompt: str, is_vertical: bool, out_mp4: Path) -> str:
-    """Generate a 5s real AI-animated video clip via Runware Seedance 1.0 Pro Fast (480p -> upscaled to 1080p)."""
-    w, h = (480, 864) if is_vertical else (864, 480)
+    rich_prompt = (
+        f"{style}. Topic: {niche}. Visual scene: {visual_desc}. "
+        f"Expressive animated characters with natural facial expressions, smooth cinematic camera movement, "
+        f"vivid lighting, no on-screen text or watermarks. "
+        f"Audio & Synchronized Dialogue spoken clearly in {language} ({voice_locale}): "
+        f'"{spoken_lines[:420]}" with matching natural sound effects and atmospheric ambience.'
+    )[:3000]
+
     headers = {
         "Authorization": f"Bearer {RUNWARE_API_KEY}",
         "Content-Type": "application/json",
     }
-    last_err = "Unknown Seedance error"
+    last_err = "Unknown HeyGen Video 1.0 error"
     for attempt in range(2):
         task_uuid = str(uuid.uuid4())
         payload = [
             {
                 "taskType": "videoInference",
                 "taskUUID": task_uuid,
-                "model": "bytedance:2@2",
-                "positivePrompt": (prompt + ", expressive character motion, smooth cinematic camera movement, vivid lighting, no text")[:950],
+                "model": "heygen:video@1.0",
+                "positivePrompt": rich_prompt,
                 "width": w,
                 "height": h,
-                "duration": 5,
+                "duration": dur,
                 "numberResults": 1,
                 "outputType": "URL",
                 "outputFormat": "MP4",
                 "deliveryMethod": "async",
                 "includeCost": True,
+                "settings": {"promptEnhancement": "turbo"},
             }
         ]
         try:
+            update_job({
+                "status": "imaging",
+                "progress_pct": 35,
+                "step_label": f"جاري توليد الفيديو المتحرك بالصوت والحوار المدمج عبر HeyGen Video 1.0 ({dur} ثانية)...",
+            })
             r = requests.post("https://api.runware.ai/v1", headers=headers, json=payload, timeout=45)
             if not r.ok:
                 raise RuntimeError(f"Runware HTTP {r.status_code}: {r.text[:260]}")
@@ -652,13 +681,21 @@ def generate_single_motion_clip(prompt: str, is_vertical: bool, out_mp4: Path) -
                 raise RuntimeError(f"Runware init error: {err0.get('message', err0)}")
             for item in (init_body.get("data") or []):
                 if item.get("videoURL"):
-                    vid_bytes = requests.get(item["videoURL"], timeout=60).content
+                    vid_bytes = requests.get(item["videoURL"], timeout=90).content
                     out_mp4.write_bytes(vid_bytes)
                     return item["videoURL"]
 
             deadline = time.time() + 240
+            poll_step = 0
             while time.time() < deadline:
                 time.sleep(5)
+                poll_step += 1
+                if poll_step % 3 == 0:
+                    update_job({
+                        "status": "imaging",
+                        "progress_pct": min(75, 35 + poll_step * 4),
+                        "step_label": "جاري معالجة حركة الشخصيات ومزامنة الصوت والحوار بالذكاء الاصطناعي...",
+                    })
                 poll = requests.post(
                     "https://api.runware.ai/v1",
                     headers=headers,
@@ -666,7 +703,6 @@ def generate_single_motion_clip(prompt: str, is_vertical: bool, out_mp4: Path) -
                     timeout=30,
                 )
                 if not poll.ok:
-                    print(f"[WARN] Seedance poll HTTP {poll.status_code}: {poll.text[:160]}", flush=True)
                     continue
                 body = poll.json()
                 if body.get("errors"):
@@ -674,49 +710,21 @@ def generate_single_motion_clip(prompt: str, is_vertical: bool, out_mp4: Path) -
                     raise RuntimeError(f"Runware poll error: {err0.get('message', err0)}")
                 for item in (body.get("data") or []):
                     if item.get("status") == "error":
-                        raise RuntimeError(f"Seedance task failed: {item}")
+                        raise RuntimeError(f"HeyGen task failed: {item}")
                     vid_url = item.get("videoURL")
                     if vid_url:
-                        vid_bytes = requests.get(vid_url, timeout=60).content
+                        vid_bytes = requests.get(vid_url, timeout=90).content
                         if len(vid_bytes) < 5000:
-                            raise RuntimeError("Downloaded Seedance MP4 is empty/corrupt")
+                            raise RuntimeError("Downloaded HeyGen MP4 is empty/corrupt")
                         out_mp4.write_bytes(vid_bytes)
-                        print(f"[OK] Seedance AI Motion clip ready ({len(vid_bytes)//1024} KB)", flush=True)
+                        print(f"[OK] HeyGen Video 1.0 clip ready ({len(vid_bytes)//1024} KB)", flush=True)
                         return vid_url
-            raise RuntimeError("Seedance video generation timed out after 240s")
+            raise RuntimeError("HeyGen Video 1.0 timed out after 240s")
         except Exception as exc:
             last_err = str(exc)
-            print(f"[WARN] Seedance attempt {attempt+1} failed: {last_err}", flush=True)
+            print(f"[WARN] HeyGen Video 1.0 attempt {attempt+1} failed: {last_err}", flush=True)
             time.sleep(2)
-    raise RuntimeError(f"AI Motion (Seedance) failed: {last_err}")
-
-
-def generate_all_motion_scenes(scenes: list, style: str, is_vertical: bool, work_dir: Path) -> tuple[list[Path], list[str]]:
-    """Generate real animated MP4 clips in parallel. Never silently downgrades a 5x AI Motion video to static images."""
-    total = len(scenes)
-    paths: list[Path | None] = [None] * total
-
-    def _worker(i: int):
-        clip_p = work_dir / f"clip_{i:04d}.mp4"
-        prompt = f"{style}, {scenes[i]['image_prompt']}, expressive character animation, smooth cinematic motion, no text"
-        generate_single_motion_clip(prompt, is_vertical, clip_p)
-        return i, clip_p
-
-    completed = 0
-    with ThreadPoolExecutor(max_workers=3) as pool:
-        futs = [pool.submit(_worker, i) for i in range(total)]
-        for fut in as_completed(futs):
-            idx, path = fut.result()
-            paths[idx] = path
-            completed += 1
-            pct = 20 + int((completed / total) * 38)
-            update_job({
-                "status": "imaging",
-                "progress_pct": pct,
-                "step_label": f"جاري تحريك الشخصيات والمشاهد بالذكاء الاصطناعي ({completed} / {total})...",
-            })
-
-    return [p for p in paths if p is not None], []
+    raise RuntimeError(f"HeyGen Video 1.0 failed: {last_err}")
 
 
 # ==============================================================================
@@ -762,7 +770,6 @@ def generate_mood_soundtrack(mood: str, total_dur: float, transition_times: list
     sr = 22050
     n_samples = max(sr, int(math.ceil(total_dur * sr)))
 
-    # Chord progressions (Hz) tailored to each mood
     mood_chords = {
         "epic": [
             (73.42, 146.83, 220.00, 293.66, 349.23),   # Dm cinematic
@@ -804,7 +811,6 @@ def generate_mood_soundtrack(mood: str, total_dur: float, transition_times: list
     rng = random.Random(42)
     lp_noise = 0.0
 
-    # Precompute transition sample windows for subtle whoosh SFX
     trans_windows = [(int((t - 0.28) * sr), int((t + 0.18) * sr), int(t * sr)) for t in transition_times]
 
     buf = bytearray()
@@ -815,37 +821,30 @@ def generate_mood_soundtrack(mood: str, total_dur: float, transition_times: list
         local_t = t % chord_len
         chord = chords[c_idx]
 
-        # Smooth chord envelope to eliminate any clicks between chords
         c_env = 1.0
         if local_t < 0.25:
             c_env = local_t / 0.25
         elif local_t > chord_len - 0.25:
             c_env = (chord_len - local_t) / 0.25
 
-        # Warm breathing pad
         lfo = 0.82 + 0.18 * math.sin(two_pi * 0.22 * t)
         val = 0.0
         for idx_f, freq in enumerate(chord):
             w = 0.24 if idx_f == 0 else (0.19 if idx_f == 1 else 0.13)
             val += w * math.sin(two_pi * freq * t)
-            # Soft warm detuned overtone
             if idx_f >= 1:
                 val += (w * 0.28) * math.sin(two_pi * (freq * 1.003) * t)
 
-        # Mood-specific musical character
         if mood == "epic":
-            # Subtle rhythmic cinematic bass pulse
             beat_t = t % (1.0 / pulse_hz)
             pulse = math.exp(-beat_t * 7.5)
             val += 0.22 * pulse * math.sin(two_pi * chord[0] * t)
         elif mood == "happy":
-            # Gentle bright plucked melody notes
             step_t = t % 0.45
             note_idx = int(t / 0.45) % 4
             pluck = math.exp(-step_t * 9.0)
             val += 0.16 * pluck * math.sin(two_pi * (chord[1 + (note_idx % 3)] * 2.0) * t)
         elif mood == "sad":
-            # Soft slow piano-like arpeggio
             step_t = t % 0.95
             note_idx = int(t / 0.95) % 4
             pluck = math.exp(-step_t * 4.5)
@@ -853,7 +852,6 @@ def generate_mood_soundtrack(mood: str, total_dur: float, transition_times: list
 
         sample = val * c_env * lfo * 0.42
 
-        # Soft filtered pink-noise whoosh SFX on scene transitions
         for w_start, w_end, w_peak in trans_windows:
             if w_start <= i <= w_end:
                 white = rng.uniform(-1.0, 1.0)
@@ -863,7 +861,6 @@ def generate_mood_soundtrack(mood: str, total_dur: float, transition_times: list
                 sample += lp_noise * whoosh_env * 0.35
                 break
 
-        # Global smooth fade-in (1.0s) & fade-out (1.4s)
         if t < 1.0:
             sample *= t
         elif t > total_dur - 1.4:
@@ -878,7 +875,6 @@ def generate_mood_soundtrack(mood: str, total_dur: float, transition_times: list
         wf.setframerate(sr)
         wf.writeframes(bytes(buf))
 
-    # Apply studio warmth (lowpass + gentle spacious echo) and convert to 44100Hz stereo WAV
     subprocess.run(
         [
             "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
@@ -967,7 +963,6 @@ def render_subtitle_png(text: str, out_png: Path, width: int, height: int):
             raw_clean = re.sub(r"\s*[A-Za-z0-9_#\-]+\s*", " ", raw_clean).strip()
             has_lat = False
 
-    # Slim, crisp Shorts-style typography (compact so it never hides the artwork)
     font_size = 38 if width <= 1080 else 34
     font_path = find_font_path(has_arabic=has_ar, has_latin=has_lat)
     font = ImageFont.truetype(font_path, font_size) if font_path else ImageFont.load_default()
@@ -1000,7 +995,6 @@ def render_subtitle_png(text: str, out_png: Path, width: int, height: int):
     box_x = (width - box_w) // 2
     box_y = int(height * 0.84) - box_h // 2
 
-    # Sleek, subtle semi-transparent slim strip (zero bulky box!)
     draw.rounded_rectangle(
         [box_x, box_y, box_x + box_w, box_y + box_h],
         radius=15,
@@ -1034,22 +1028,18 @@ def get_ken_burns_expr(scene_idx: int, frames: int, W: int, H: int, fps: int) ->
     mode = scene_idx % 4
     f_den = max(1, frames)
     if mode == 0:
-        # Gentle slow zoom-in (1.00 -> 1.05)
         z = f"1.0+0.05*on/{f_den}"
         x = "iw/2-(iw/zoom/2)"
         y = "ih/2-(ih/zoom/2)"
     elif mode == 1:
-        # Gentle slow zoom-out (1.05 -> 1.00)
         z = f"1.05-0.05*on/{f_den}"
         x = "iw/2-(iw/zoom/2)"
         y = "ih/2-(ih/zoom/2)"
     elif mode == 2:
-        # Gentle pan left-to-right (minimal 5% zoom)
         z = "1.05"
         x = f"(iw-iw/zoom)*on/{f_den}"
         y = "ih/2-(ih/zoom/2)"
     else:
-        # Gentle pan right-to-left (minimal 5% zoom)
         z = "1.05"
         x = f"(iw-iw/zoom)*(1-on/{f_den})"
         y = "ih/2-(ih/zoom/2)"
@@ -1164,7 +1154,6 @@ def build_1080p_video(
         segment_files.append(seg_out)
         seg_durations.append(seg_dur)
 
-    # Assemble video + voice track first
     voice_video = work_dir / "assembled_voice.mp4"
     transition_times = []
     if use_xfade:
@@ -1216,7 +1205,6 @@ def build_1080p_video(
             check=True,
         )
 
-    # Mix mood-matched cinematic soundtrack + subtle transition whoosh SFX under voiceover
     final_mp4 = work_dir / "final_1080p.mp4"
     try:
         total_vid_dur = get_audio_duration(voice_video)
@@ -1370,7 +1358,9 @@ def main():
     show_subtitles = bool(job.get("show_subtitles", True))
     motion_mode = str(job.get("motion_mode") or channel.get("motion_mode") or "cinematic_1080p").strip().lower()
     is_ai_motion = motion_mode == "ai_motion"
-    scene_count = max(2, min(36, math.ceil(duration_sec / 5))) if is_ai_motion else compute_scene_count(duration_sec)
+    if is_ai_motion:
+        duration_sec = max(5, min(30, duration_sec))
+    scene_count = 2 if is_ai_motion else compute_scene_count(duration_sec)
 
     update_job({
         "status": "scripting",
@@ -1395,33 +1385,43 @@ def main():
         work_dir = Path(tmp)
 
         if is_ai_motion:
-            img_paths, _ = generate_all_motion_scenes(story["scenes"], style, is_vertical, work_dir)
+            final_mp4 = work_dir / "heygen_native_audio.mp4"
+            generate_heygen_video_clip(
+                niche=niche,
+                style=style,
+                language=language,
+                voice_locale=voice_locale,
+                duration_sec=duration_sec,
+                is_vertical=is_vertical,
+                story=story,
+                out_mp4=final_mp4,
+            )
         else:
             img_paths, _ = generate_all_scenes(story["scenes"], style, is_vertical, work_dir)
 
-        update_job({
-            "status": "voicing",
-            "progress_pct": 62,
-            "step_label": f"جاري تسجيل التعليق الصوتي والمؤثرات ({language})...",
-        })
-        voice_name = pick_voice(voice_locale, voice_gender)
-        audio_paths = []
-        durations = []
-        for idx, sc in enumerate(story["scenes"]):
-            mp3_p = work_dir / f"aud_{idx:04d}.mp3"
-            asyncio.run(synth_scene_audio(sc["narration"], voice_name, mp3_p))
-            audio_paths.append(mp3_p)
-            min_per_scene = max(3.5, duration_sec / max(1, len(story["scenes"])))
-            durations.append(max(min_per_scene, get_audio_duration(mp3_p) + 0.3))
+            update_job({
+                "status": "voicing",
+                "progress_pct": 62,
+                "step_label": f"جاري تسجيل التعليق الصوتي والمؤثرات ({language})...",
+            })
+            voice_name = pick_voice(voice_locale, voice_gender)
+            audio_paths = []
+            durations = []
+            for idx, sc in enumerate(story["scenes"]):
+                mp3_p = work_dir / f"aud_{idx:04d}.mp3"
+                asyncio.run(synth_scene_audio(sc["narration"], voice_name, mp3_p))
+                audio_paths.append(mp3_p)
+                min_per_scene = max(3.5, duration_sec / max(1, len(story["scenes"])))
+                durations.append(max(min_per_scene, get_audio_duration(mp3_p) + 0.3))
 
-        update_job({
-            "status": "rendering",
-            "progress_pct": 76,
-            "step_label": "جاري مونتاج الفيديو السينمائي 1080p مع الموسيقى والمؤثرات...",
-        })
-        final_mp4 = build_1080p_video(
-            story["scenes"], img_paths, audio_paths, durations, is_vertical, show_subtitles, mood, work_dir
-        )
+            update_job({
+                "status": "rendering",
+                "progress_pct": 76,
+                "step_label": "جاري مونتاج الفيديو السينمائي 1080p مع الموسيقى والمؤثرات...",
+            })
+            final_mp4 = build_1080p_video(
+                story["scenes"], img_paths, audio_paths, durations, is_vertical, show_subtitles, mood, work_dir
+            )
 
         update_job({
             "status": "uploading",
