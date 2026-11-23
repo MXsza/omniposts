@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """
-Omniposts.online — 24/7 1080p Cloud Video Worker (Studio Edition)
+Omniposts.online — 24/7 1080p Cloud Video Worker (Pro Cinema Edition)
 Pipeline:
   1. Load job & YouTube channel credentials from Supabase (render_jobs + channels)
-  2. Generate a real, gripping localized story script + scene prompts + viral title/description
+  2. Generate a real, gripping localized story script + mood + scene prompts + viral title/description
      via Runware Chat Completions (with rich dialect-matched fallback stories)
   3. Generate N scene images in parallel via Runware imageInference (runware:100@1 FLUX.1 schnell)
      and push live preview image URLs to Supabase render_jobs
   4. Synthesize natural voiceover in any world language/dialect (Male/Female) via Edge TTS
-  5. Assemble Full HD 1080p MP4 with varied Ken Burns camera motion, smooth xfade transitions,
-     cinematic color grading, and crystal-clear RTL/multilingual subtitles via FFmpeg
-  6. Upload MP4 to Supabase Storage (for instant download), upload to YouTube via OAuth 2.0,
+  5. Synthesize 100% copyright-free mood-matched cinematic background music & subtle transition whoosh SFX
+     (epic / mystery / sad / happy / calm)
+  6. Assemble Full HD 1080p MP4 with full-frame gentle Ken Burns motion (no edge cropping or dark vignette),
+     smooth xfade transitions, and sleek compact 1–2 line timed subtitles
+  7. Upload MP4 to Supabase Storage (for instant download), upload to YouTube via OAuth 2.0,
      deduct exact minutes ONLY on success, and update render_jobs + publish_logs.
 """
 
@@ -21,10 +23,12 @@ import math
 import os
 import random
 import re
+import struct
 import subprocess
 import sys
 import tempfile
 import uuid
+import wave
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
@@ -218,7 +222,7 @@ def deduct_user_minutes_and_log(job: dict, youtube_video_id: str, youtube_url: s
 
 
 # ==============================================================================
-# Step 1: Real Viral Story Script & Scene Prompt Generator
+# Step 1: Real Viral Story Script, Mood & Scene Prompt Generator
 # ==============================================================================
 def compute_scene_count(duration_sec: int) -> int:
     duration_sec = max(5, min(3600, int(duration_sec)))
@@ -231,6 +235,24 @@ def is_arabic_language(language: str, voice_locale: str = "") -> bool:
     lang_l = str(language or "").lower()
     loc_l = str(voice_locale or "").lower()
     return ("عرب" in lang_l) or ("arab" in lang_l) or loc_l.startswith("ar") or ("مصر" in lang_l) or ("سعود" in lang_l)
+
+
+def detect_story_mood(niche: str, title: str = "", raw_mood: str = "") -> str:
+    m = str(raw_mood or "").strip().lower()
+    if m in ("epic", "mystery", "sad", "happy", "calm"):
+        return m
+    text = f"{niche} {title}".lower()
+    if any(k in text for k in ["mystery", "suspense", "night", "horror", "space", "ocean", "غامض", "لغز", "تشويق", "رعب", "فضاء", "سر"]):
+        return "mystery"
+    if any(k in text for k in ["sad", "cry", "tears", "poor", "حزين", "أبكى", "دموع", "فقد", "فقير", "مؤثر"]):
+        return "sad"
+    if any(k in text for k in ["kids", "pixar", "fun", "comedy", "amazing", "wonder", "أطفال", "كوميدي", "ترفيه", "مضحك", "معلومة"]):
+        return "happy"
+    if any(k in text for k in ["success", "wealth", "sport", "football", "epic", "battle", "نجاح", "ثروة", "حماس", "رياض", "أسطورة", "مليونير"]):
+        return "epic"
+    if any(k in text for k in ["islam", "wisdom", "book", "calm", "stoic", "حكم", "تاريخ", "تأمل", "كتاب"]):
+        return "calm"
+    return "epic"
 
 
 def extract_json_object(raw_text: str) -> dict:
@@ -256,77 +278,97 @@ def build_rich_fallback_story(niche: str, style: str, language: str, voice_local
         ar_stories = {
             "islamic": [
                 {
+                    "mood": "sad",
                     "title": "سر التاجر الفقير الذي أبكى الخليفة في منتصف الليل!",
                     "desc": "قصة تاريخية مؤثرة عن الأمانة والفرج بعد الشدة. شاهد النهاية التي غيرت حياة رجل كامل في ليلة واحدة!\n\n#قصص #حكم #قصص_تاريخية #عبرة",
                     "tags": ["قصص", "حكم", "قصص تاريخية", "عبرة"],
                     "beats": [
-                        ("في ليلة شتوية قاسية، وقف تاجر فقير أمام باب المسجد وهو يحمل آخر رغيف خبز في بيته.", "Ancient Islamic market street at night, glowing lanterns, humble poor merchant holding bread, cinematic lighting"),
-                        ("وفجأة، مر أمامه غريب يرتجف من البرد والجوع، فآثره بالرغيف الوحيد دون تردد.", "Merchant kindly giving warm bread to a shivering traveler under a stone archway, warm golden lantern light"),
-                        ("في الصباح، طرق جنود الخليفة باب التاجر، وظن أن مصيبة كبرى قد حلت به.", "Royal guards knocking on a modest wooden door at dawn in an ancient Arabian city, dramatic sunrise shadows"),
-                        ("لكن المفاجأة أن الغريب كان الخليفة نفسه، وكافأه بمتجر كبير لأن قلبه كان أغنى من الكنوز!", "Grand palace courtyard, grateful merchant receiving a royal scroll from the Caliph, golden sunbeams, inspiring mood"),
+                        ("في ليلة شتوية قاسية، وقف تاجر فقير أمام المسجد وهو يحمل آخر رغيف خبز.", "Ancient Islamic market street at night, glowing lanterns, humble poor merchant holding warm bread, wide cinematic shot"),
+                        ("وفجأة مر غريب يرتجف من البرد والجوع، فأعطاه التاجر الرغيف دون تردد.", "Merchant kindly giving warm bread to a shivering traveler under a stone archway, warm golden lantern light, full frame"),
+                        ("في الصباح طرق جنود الخليفة باب التاجر، فظن أن مصيبة كبرى قد حلت به.", "Royal guards knocking on a modest wooden door at dawn in an ancient Arabian city, dramatic sunrise light"),
+                        ("لكن المفاجأة أن الغريب كان الخليفة نفسه، وكافأه بمتجر كبير لأمانة قلبه!", "Grand palace courtyard, grateful merchant receiving a royal scroll from the Caliph, golden sunbeams, inspiring mood"),
                     ],
                 },
                 {
+                    "mood": "calm",
                     "title": "الحكيم الذي أجاب بثلاث كلمات فقط فأذهل الملك!",
                     "desc": "حكمة خالدة من التراث العربي تعلمنا كيف نحول أصعب اللحظات إلى أعظم انتصار. اشترك للمزيد من القصص يومياً!\n\n#قصص #حكمة #تاريخ #تطوير_الذات",
                     "tags": ["قصص", "حكمة", "تراث", "تطوير الذات"],
                     "beats": [
-                        ("جمع الملك أعظم حكماء مملكته وسألهم عن جملة واحدة تفرح الحزين وتُهدئ المغرور.", "Grand ancient throne room with towering marble pillars, king addressing wise scholars, dramatic shafts of light"),
-                        ("سكت الجميع ساعات طويلة، حتى تقدم شيخ بسيط وكتب ثلاث كلمات على خاتم ذهبي.", "Elderly wise man engraving delicate Arabic calligraphy onto a glowing golden ring, close-up cinematic shot"),
+                        ("جمع الملك أعظم حكماء مملكته وسألهم عن جملة تفرح الحزين وتُهدئ المغرور.", "Grand ancient throne room with marble pillars, king addressing wise scholars, dramatic shafts of light, wide angle"),
+                        ("سكت الجميع ساعات طويلة، حتى تقدم شيخ بسيط وكتب ثلاث كلمات على خاتم ذهبي.", "Elderly wise man engraving delicate calligraphy onto a glowing golden ring, cinematic warm lighting"),
                         ("عندما قرأ الملك الكلمات، سالت دموعه وأمر بتعليق الخاتم في قصره للأبد.", "King looking down at the golden ring in awe, emotional expression, warm royal candlelight"),
-                        ("كانت الكلمات هي: هذا الوقت سيمضي... فلا تحزن على شدة، ولا تغتر بنعمة!", "Golden ring resting on velvet beside an hourglass with flowing sand, epic sunset glow through palace window"),
+                        ("كانت الكلمات: هذا الوقت سيمضي... فلا تحزن على شدة، ولا تغتر بنعمة!", "Golden ring resting on velvet beside an hourglass with flowing sand, epic sunset glow through palace window"),
                     ],
                 },
             ],
             "mystery": [
                 {
+                    "mood": "mystery",
                     "title": "سر الغرفة المغلقة التي لم يجرؤ أحد على فتحها منذ خمسين عاماً!",
                     "desc": "لغز غامض ومثير يخطف الأنفاس من اللحظة الأولى. ماذا وجد الشاب خلف الباب الحديدي القديم؟\n\n#قصص_غامضة #تشويق #ألغاز #حكايات",
                     "tags": ["قصص غامضة", "تشويق", "ألغاز", "حكايات"],
                     "beats": [
-                        ("في بيت جده القديم، وجد شاب مفتاحاً نحاسياً مخبأ خلف ساعة حائط توقفت منذ خمسين عاماً." if not is_eg else "في بيت جده القديم، لقى شاب مفتاح نحاس مستخبي ورا ساعة حائط واقفة من خمسين سنة.", "Mysterious dimly lit antique hallway, young man discovering a dusty brass key behind an old stopped pendulum clock"),
-                        ("مشى نحو الباب الحديدي في آخر الممر، وكان صوت خطواته هو الشيء الوحيد في الظلام." if not is_eg else "مشي ناحية الباب الحديد في آخر الممر، وقلبه بيدق بسرعة مع كل خطوة في الضلمة.", "Heavy rusty iron door at the end of a foggy dark corridor, flashlight beam cutting through dust"),
-                        ("أول ما فتح الباب، لقى رسالة مكتوبة بخط جده بتقول: اللي هتلاقيه جوه هيغير مستقبلك للأبد." if is_eg else "عندما فتح الباب، وجد رسالة قديمة تقول: ما ستجده هنا سيغير حياتك إلى الأبد.", "Inside a secret hidden study filled with glowing old maps and an open handwritten letter on a wooden desk"),
-                        ("كانت خريطة كنز عائلي قديم، لكن الكنز الحقيقي كان أسرار وتجارب جده اللي صنعت منه أسطورة!" if is_eg else "كانت خريطة لمشروع عمره، تركها له جده ليبدأ من حيث انتهى ويصنع مجداً جديداً!", "Dramatic glowing treasure chest and leather journals illuminated by moonlight through a tall window"),
+                        ("في بيت جده القديم، لقى شاب مفتاح نحاس مستخبي ورا ساعة واقفة من خمسين سنة." if is_eg else "في بيت جده القديم، وجد شاب مفتاحاً نحاسياً خلف ساعة توقفت منذ خمسين عاماً.", "Mysterious antique hallway, young man discovering a dusty brass key behind an old stopped pendulum clock, wide shot"),
+                        ("مشي ناحية الباب الحديد في آخر الممر، وقلبه بيدق بسرعة مع كل خطوة في الضلمة." if is_eg else "مشى نحو الباب الحديدي في آخر الممر، وكان صوت خطواته يملأ الظلام.", "Heavy rusty iron door at the end of a foggy dark corridor, flashlight beam cutting through dust"),
+                        ("أول ما فتح الباب، لقى رسالة من جده بتقول: اللي جوه هيغير مستقبلك للأبد." if is_eg else "عندما فتح الباب، وجد رسالة قديمة تقول: ما ستجده هنا سيغير حياتك للأبد.", "Inside a secret hidden study filled with glowing old maps and an open handwritten letter on a wooden desk"),
+                        ("كانت خريطة كنز عائلي قديم، لكن الكنز الحقيقي كان أسرار جده اللي صنعت منه أسطورة!" if is_eg else "كانت خريطة لمشروع عمره، تركها له جده ليبدأ من حيث انتهى ويصنع مجداً جديداً!", "Dramatic glowing treasure chest and leather journals illuminated by moonlight through a tall window"),
                     ],
                 },
             ],
             "space": [
                 {
+                    "mood": "mystery",
                     "title": "ماذا سيحدث لو اختفت الشمس لثماني دقائق فقط؟ الحقيقة صادمة!",
                     "desc": "رحلة سريعة ومذهلة في أسرار الفضاء والكون! اكتشف ماذا يحدث للأرض في اللحظة التي تنطفئ فيها الشمس.\n\n#فضاء #علوم #معلومات #الكون",
                     "tags": ["فضاء", "علوم", "معلومات", "الكون"],
                     "beats": [
-                        ("تخيل لو الشمس اختفت فجأة في اللحظة دي... الغريب إننا مش هنحس بأي حاجة لمدة تمن دقايق كاملة!" if is_eg else "تخيل لو اختفت الشمس فجأة... الغريب أننا لن نشعر بأي شيء لمدة ثماني دقائق كاملة!", "Epic cinematic view of the Sun vanishing into darkness in deep space while Earth still glows brightly"),
-                        ("السبب إن الضوء والجاذبية بياخدوا تمن دقايق عشان يوصلوا من الشمس لكوكب الأرض." if is_eg else "السبب أن الضوء والجاذبية يحتاجان ثماني دقائق كاملة للوصول من الشمس إلى الأرض.", "Glowing golden beam of light traveling across the dark cosmos from the Sun toward planet Earth"),
-                        ("وبعد الدقيقة التامنة، السما هتتحول لضلمة كاحلة والنجوم هتظهر في عز الضهر!" if is_eg else "وبعد الدقيقة الثامنة، تتحول السماء إلى ظلام دامس وتظهر النجوم في وضح النهار!", "City skyline suddenly plunging into starry midnight darkness while street lights flicker on"),
-                        ("وخلال أيام قليلة هتتجمد المحيطات، ووقتها بس هنعرف قد إيه الشمس أعظم معجزة في الكون!" if is_eg else "وخلال أيام ستتجمد المحيطات، لندرك أن الشمس هي أعظم معجزة تحفظ الحياة في الكون!", "Frozen glowing Earth drifting through a majestic purple nebula in space, ultra-detailed 8K"),
+                        ("تخيل لو الشمس اختفت فجأة... الغريب إننا مش هنحس بأي حاجة لمدة تمن دقايق!" if is_eg else "تخيل لو اختفت الشمس فجأة... الغريب أننا لن نشعر بشيء لمدة ثماني دقائق!", "Epic cinematic view of the Sun vanishing into darkness in deep space while Earth still glows brightly"),
+                        ("السبب إن الضوء والجاذبية بياخدوا تمن دقايق عشان يوصلوا من الشمس للأرض." if is_eg else "السبب أن الضوء والجاذبية يحتاجان ثماني دقائق للوصول من الشمس إلى الأرض.", "Glowing golden beam of light traveling across the dark cosmos from the Sun toward planet Earth"),
+                        ("وبعد الدقيقة التامنة، السما هتتحول لضلمة كاحلة والنجوم هتظهر في عز الضهر!" if is_eg else "وبعد الدقيقة الثامنة، تتحول السماء إلى ظلام دامس وتظهر النجوم نهاراً!", "City skyline suddenly plunging into starry midnight darkness while street lights flicker on"),
+                        ("وخلال أيام هتتجمد المحيطات، ووقتها بس هنعرف إن الشمس أعظم معجزة في الكون!" if is_eg else "وخلال أيام تتجمد المحيطات، لندرك أن الشمس هي أعظم معجزة تحفظ الحياة!", "Frozen glowing Earth drifting through a majestic purple nebula in space, ultra-detailed 8K"),
                     ],
                 },
             ],
             "success": [
                 {
+                    "mood": "epic",
                     "title": "القاعدة السرية التي حولت شاباً مفلساً إلى مليونير في ثلاث سنوات!",
                     "desc": "قصة ملهمة عن الانضباط والذكاء المالي ستغير طريقة تفكيرك في النجاح والثروة للأبد.\n\n#نجاح #تطوير_الذات #ثروة #تحفيز",
                     "tags": ["نجاح", "ثروة", "تطوير الذات", "تحفيز"],
                     "beats": [
-                        ("في سن الخامسة والعشرين، كان حسابه البنكي صفر، وكل الناس حواليه قالوله استسلم." if is_eg else "في سن الخامسة والعشرين، كان رصيده صفراً، ونصحه الجميع بالاستسلام.", "Young determined entrepreneur sitting at a modest desk late at night with a single warm lamp, city rain outside"),
-                        ("بدل ما يشتكي، قرر يطبق قاعدة بسيطة: ساعة كل يوم يتعلم فيها مهارة واحدة مطلوبة في العالم." if is_eg else "لكنه قرر تطبيق قاعدة واحدة: ساعة يومياً لإتقان مهارة عالية القيمة دون انقطاع.", "Close-up of focused hands writing strategic plans in a leather notebook beside a glowing laptop"),
-                        ("بعد سنة واحدة، المهارة دي فتحتله أبواب ما كانش يحلم بيها، وبدأ أول مشروع خاص بيه." if is_eg else "بعد عام واحد فقط، فتحت له تلك المهارة أبواباً لم يحلم بها وأطلق مشروعه الأول.", "Modern luxury glass office overlooking a golden city skyline at sunrise, confident silhouette"),
-                        ("الدرس الأهم: النجاح مش ضربة حظ... النجاح هو قرار صغير بتلتزم بيه كل يوم!" if is_eg else "الدرس الأهم: النجاح ليس ضربة حظ، بل قرار صغير تلتزم به كل يوم حتى يصنع الفارق!", "Cinematic wide shot of a person standing atop a mountain peak at golden hour sunrise, inspiring atmosphere"),
+                        ("في سن الخامسة والعشرين، كان رصيده صفر، وكل الناس حواليه قالوله استسلم." if is_eg else "في سن الخامسة والعشرين، كان رصيده صفراً، ونصحه الجميع بالاستسلام.", "Young determined entrepreneur sitting at a modest desk late at night with a single warm lamp, city rain outside"),
+                        ("لكنه طبق قاعدة بسيطة: ساعة كل يوم يتعلم فيها مهارة واحدة مطلوبة في العالم." if is_eg else "لكنه طبق قاعدة واحدة: ساعة يومياً لإتقان مهارة عالية القيمة دون انقطاع.", "Focused hands writing strategic plans in a leather notebook beside a glowing laptop"),
+                        ("بعد سنة واحدة، المهارة دي فتحتله أبواب ما كانش يحلم بيها وبدأ مشروعه الأول." if is_eg else "بعد عام واحد فقط، فتحت له تلك المهارة أبواباً لم يحلم بها وأطلق مشروعه.", "Modern luxury glass office overlooking a golden city skyline at sunrise, confident silhouette"),
+                        ("الدرس الأهم: النجاح مش ضربة حظ... النجاح قرار صغير بتلتزم بيه كل يوم!" if is_eg else "الدرس الأهم: النجاح ليس ضربة حظ، بل قرار صغير تلتزم به كل يوم!", "Cinematic wide shot of a person standing atop a mountain peak at golden hour sunrise, inspiring atmosphere"),
+                    ],
+                },
+            ],
+            "happy": [
+                {
+                    "mood": "happy",
+                    "title": "المغامرة المضحكة التي علّمت القرية كلها أجمل درس!",
+                    "desc": "قصة ترفيهية ممتعة ومليئة بالبهجة والمفاجآت الجميلة. شاهد النهاية الرائعة!\n\n#قصص_ممتعة #ترفيه #حكايات #مغامرة",
+                    "tags": ["قصص ممتعة", "ترفيه", "حكايات", "مغامرة"],
+                    "beats": [
+                        ("في صباح مشرق، قرر طفل ذكي يخترع آلة صغيرة تساعد كل جيرانه في القرية!" if is_eg else "في صباح مشرق، قرر طفل ذكي اختراع آلة صغيرة تساعد كل سكان قريته!", "Bright colorful 3D Pixar style sunny village square, cheerful kid inventor holding shiny gears, joyful warm daylight"),
+                        ("في أول تجربة، الآلة عملت فوضى مضحكة وخلت الكل يضحك من قلبه!" if is_eg else "في التجربة الأولى، أحدثت الآلة فوضى مضحكة جعلت الجميع يضحكون بشدة!", "Funny colorful animated workshop with floating soap bubbles and laughing friendly villagers, bright lighting"),
+                        ("لكنه ما استسلمش وعدّل ترس واحد صغير، وفجأة الآلة اشتغلت بأجمل شكل!" if is_eg else "لكنه لم يستسلم وعدّل قطعة صغيرة، فبدأت الآلة تعمل ببراعة أذهلت الجميع!", "Magical glowing little invention working smoothly in a sunny garden, amazed happy crowd smiling"),
+                        ("ومن يومها اتعلم الكل إن الفكرة البسيطة لما تتعمل بحب بتسعد الدنيا كلها!" if is_eg else "ومن يومها أدرك الجميع أن الفكرة البسيطة حين تُصنع بحب تسعد العالم كله!", "Festive village celebration under colorful lanterns at golden sunset, warm heartwarming atmosphere"),
                     ],
                 },
             ],
             "default": [
                 {
+                    "mood": "epic",
                     "title": "القصة التي أذهلت الملايين... شاهد النهاية غير المتوقعة!",
                     "desc": "حكاية مشوقة ومليئة بالمفاجآت تأخذك في رحلة لا تُنسى من أول ثانية حتى اللحظة الأخيرة.\n\n#قصص #حكايات #تشويق #عبرة",
                     "tags": ["قصص", "حكايات", "تشويق", "مفاجأة"],
                     "beats": [
-                        ("في يوم عادي جداً، حصل موقف صغير ما حدش كان يتوقع إنه هيقلب الموازين كلها!" if is_eg else "في يوم عادي تماماً، حدث موقف صغير لم يتوقع أحد أنه سيقلب الموازين كلها!", "Cinematic golden hour street with a dramatic lone figure noticing a mysterious glowing object"),
-                        ("الكل كان فاكر إن الحكاية خلصت هنا، لكن الحقيقة كانت لسه بتبدأ من اللحظة دي." if is_eg else "ظن الجميع أن القصة انتهت هنا، لكن الحقيقة المذهلة كانت تبدأ في تلك اللحظة بالذات.", "Dramatic close-up shot with moody blue and gold lighting, intense sense of discovery and wonder"),
-                        ("ومع كل خطوة، كانت التفاصيل بتتكشف بشكل يخلّي العقل يقف مش مصدق اللي بيحصل." if is_eg else "ومع كل خطوة، تتكشف تفاصيل مدهشة تجعل العقل عاجزاً عن تصديق ما يراه.", "Epic wide cinematic scene of a breathtaking hidden landscape illuminated by dramatic sunrays"),
-                        ("وفي النهاية، اللي صبر وكمل الطريق للنهاية هو الوحيد اللي عرف السر الحقيقي!" if is_eg else "وفي النهاية، وحده من امتلك الشجاعة لإكمال الطريق عرف السر الحقيقي وراء كل شيء!", "Triumphant cinematic finale under a majestic starlit sky with warm glowing horizon"),
+                        ("في يوم عادي جداً، حصل موقف صغير ما حدش كان يتوقع إنه هيقلب الموازين!" if is_eg else "في يوم عادي تماماً، حدث موقف صغير لم يتوقع أحد أنه سيقلب الموازين!", "Cinematic golden hour street with a dramatic lone figure noticing a mysterious glowing object, wide shot"),
+                        ("الكل كان فاكر إن الحكاية خلصت هنا، لكن الحقيقة كانت لسه بتبدأ دلوقتي." if is_eg else "ظن الجميع أن القصة انتهت هنا، لكن الحقيقة المذهلة كانت تبدأ في تلك اللحظة.", "Dramatic cinematic shot with rich blue and gold lighting, intense sense of discovery and wonder"),
+                        ("ومع كل خطوة، كانت التفاصيل بتتكشف بشكل يخلّي العقل مش مصدق اللي بيحصل." if is_eg else "ومع كل خطوة، تتكشف تفاصيل مدهشة تجعل العقل عاجزاً عن تصديق ما يراه.", "Epic wide cinematic scene of a breathtaking hidden landscape illuminated by dramatic sunrays"),
+                        ("وفي النهاية، اللي صبر وكمل الطريق للنهاية هو الوحيد اللي عرف السر الحقيقي!" if is_eg else "وفي النهاية، وحده من امتلك الشجاعة لإكمال الطريق عرف السر الحقيقي!", "Triumphant cinematic finale under a majestic starlit sky with warm glowing horizon"),
                     ],
                 },
             ],
@@ -340,6 +382,8 @@ def build_rich_fallback_story(niche: str, style: str, language: str, voice_local
             bucket = ar_stories["space"]
         elif any(k in nl for k in ["success", "wealth", "stoic", "book", "نجاح", "ثروة", "مال"]):
             bucket = ar_stories["success"]
+        elif any(k in nl for k in ["pixar", "kids", "moral", "fun", "أطفال", "ترفيه", "ممتع"]):
+            bucket = ar_stories["happy"]
         else:
             bucket = ar_stories["default"]
 
@@ -350,7 +394,7 @@ def build_rich_fallback_story(niche: str, style: str, language: str, voice_local
             nar, img_p = beats[idx % len(beats)]
             scenes.append({
                 "narration": nar,
-                "image_prompt": f"{style}, {img_p}, ultra detailed 8K, dramatic cinematic lighting, no text, no watermark",
+                "image_prompt": f"{style}, {img_p}, full frame wide composition, ultra detailed 8K, cinematic lighting, no text, no watermark",
             })
         title = picked["title"]
         if short_tag and "#shorts" not in title.lower():
@@ -359,14 +403,15 @@ def build_rich_fallback_story(niche: str, style: str, language: str, voice_local
             "title": title,
             "description": picked["desc"],
             "tags": picked["tags"],
+            "mood": picked.get("mood") or detect_story_mood(niche, title),
             "scenes": scenes,
         }
 
     # English fallback
     en_beats = [
-        ("On an ordinary evening, a quiet discovery changed everything nobody thought was possible.", "Dramatic golden hour street, lone figure discovering a mysterious glowing artifact, cinematic 8K"),
-        ("Everyone assumed the story ended right there—until one hidden clue rewrote the entire truth.", "Moody cinematic close-up with rich shadows and amber light, intense sense of mystery and wonder"),
-        ("Step by step, a breathtaking secret unfolded that defied every expectation.", "Breathtaking hidden monumental chamber illuminated by dramatic shafts of sunlight, ultra detailed"),
+        ("On an ordinary evening, one quiet discovery changed everything nobody thought possible.", "Dramatic golden hour street, lone figure discovering a mysterious glowing artifact, wide cinematic shot"),
+        ("Everyone assumed the story ended there—until a hidden clue rewrote the whole truth.", "Moody cinematic scene with rich shadows and amber light, intense sense of mystery and wonder"),
+        ("Step by step, a breathtaking secret unfolded that defied every expectation.", "Breathtaking hidden monumental chamber illuminated by dramatic shafts of sunlight, full frame"),
         ("In the end, only the one who dared to keep going uncovered the real secret.", "Triumphant cinematic silhouette against a glowing sunrise horizon, epic film look"),
     ]
     scenes = []
@@ -378,7 +423,7 @@ def build_rich_fallback_story(niche: str, style: str, language: str, voice_local
         })
     title = f"The Untold Secret That Changed Everything{short_tag}"[:95]
     desc = f"A gripping short story you won't forget. Subscribe for new cinematic stories every day!{short_tag} #Storytime #Viral"
-    return {"title": title, "description": desc, "tags": ["Storytime", "Viral", "Shorts"], "scenes": scenes}
+    return {"title": title, "description": desc, "tags": ["Storytime", "Viral", "Shorts"], "mood": detect_story_mood(niche, title), "scenes": scenes}
 
 
 def generate_story_package(
@@ -419,19 +464,20 @@ def generate_story_package(
         f"Language & Dialect: '{language}' ({voice_locale}).\n"
         f"Target duration: {duration_sec} seconds (~{approx_words} words total across all scenes).\n"
         f"Divide the story into EXACTLY {scene_count} sequential scenes that flow smoothly as ONE continuous story.\n"
-        f"Keep each scene's narration concise (8 to 16 words per scene for short videos) so subtitles look crisp and punchy.\n"
+        f"Keep each scene's narration punchy (8 to 15 words per scene) so subtitles stay clean and compact.\n"
+        'Also classify the emotional soundtrack mood as ONE of: "epic", "mystery", "sad", "happy", or "calm".\n'
         "Return strict JSON matching this exact schema:\n"
         "{\n"
         '  "title": "Catchy viral YouTube title strictly in the requested language (max 82 chars)",\n'
         '  "description": "Engaging YouTube description strictly in the requested language with 4 relevant hashtags",\n'
         '  "tags": ["tag1", "tag2", "tag3", "tag4"],\n'
+        '  "mood": "epic | mystery | sad | happy | calm",\n'
         '  "scenes": [\n'
-        '    {"narration": "Spoken story line strictly in the requested language/dialect", "image_prompt": "Rich detailed English visual prompt matching the style, cinematic lighting, no text in image"}\n'
+        '    {"narration": "Spoken story line strictly in the requested language/dialect", "image_prompt": "Rich detailed English visual prompt matching the style, centered full-frame composition, no text in image"}\n'
         "  ]\n"
         "}"
     )
 
-    # Verified active Runware OpenAI-compatible models
     llm_models = [
         "minimax:m3@0",
         "anthropic:claude@haiku-5.5",
@@ -465,23 +511,23 @@ def generate_story_package(
             parsed = extract_json_object(raw)
             scenes = parsed.get("scenes") or []
             if len(scenes) >= 2:
-                # Pad or trim cleanly
                 while len(scenes) < scene_count:
                     scenes.append(scenes[-1])
                 scenes = scenes[:scene_count]
                 title = str(parsed.get("title") or "").strip()[:90]
                 desc = str(parsed.get("description") or title).strip()
-                # Guard against English title leak when Arabic was requested
                 if is_ar and not re.search(r"[\u0600-\u06FF]", title):
                     print(f"[WARN] LLM {model_id} returned non-Arabic title, trying next model...", flush=True)
                     continue
                 if short_tag and "#shorts" not in title.lower():
                     title = f"{title}{short_tag}"[:95]
-                print(f"[OK] Generated story via Runware LLM ({model_id}): {title}", flush=True)
+                mood = detect_story_mood(niche, title, parsed.get("mood") or "")
+                print(f"[OK] Generated story via Runware LLM ({model_id}) [mood={mood}]: {title}", flush=True)
                 return {
                     "title": title,
                     "description": desc,
                     "tags": parsed.get("tags") or (["قصص", "حكايات", "شورتس"] if is_ar else ["Storytime", "Shorts"]),
+                    "mood": mood,
                     "scenes": scenes,
                 }
         except Exception as exc:
@@ -541,7 +587,7 @@ def generate_all_scenes(scenes: list, style: str, is_vertical: bool, work_dir: P
 
     def _worker(i: int):
         p = work_dir / f"scene_{i:04d}.jpg"
-        prompt = f"{style}, {scenes[i]['image_prompt']}, cinematic 8K lighting, vivid composition, no text, no watermark"
+        prompt = f"{style}, {scenes[i]['image_prompt']}, cinematic 8K lighting, vivid balanced framing, no text, no watermark"
         url = generate_single_image(prompt, w, h, p)
         return i, p, url
 
@@ -597,10 +643,150 @@ def get_audio_duration(audio_path: Path) -> float:
 
 
 # ==============================================================================
-# Step 4: Crystal-Clear RTL/Multilingual Subtitles + Pro 1080p FFmpeg Montage
+# Step 3.5: 100% Copyright-Free Mood Soundtrack + Transition Whoosh SFX Engine
+# ==============================================================================
+def generate_mood_soundtrack(mood: str, total_dur: float, transition_times: list[float], out_wav: Path):
+    """
+    Synthesizes a warm, lush, 100% copyright-free cinematic background score matched to the story mood
+    (epic, mystery, sad, happy, calm) PLUS subtle soft whoosh SFX on scene transitions.
+    Uses warm multi-harmonic pads, slow LFO swells, soft plucked notes, and FFmpeg studio reverb/lowpass.
+    """
+    sr = 22050
+    n_samples = max(sr, int(math.ceil(total_dur * sr)))
+
+    # Chord progressions (Hz) tailored to each mood
+    mood_chords = {
+        "epic": [
+            (73.42, 146.83, 220.00, 293.66, 349.23),   # Dm cinematic
+            (58.27, 116.54, 174.61, 233.08, 293.66),   # Bbmaj7
+            (65.41, 130.81, 196.00, 261.63, 329.63),   # Csus2
+            (55.00, 110.00, 164.81, 220.00, 277.18),   # A major lift
+        ],
+        "mystery": [
+            (55.00, 110.00, 164.81, 220.00, 261.63),   # Am dark pad
+            (51.91, 103.83, 155.56, 207.65, 246.94),   # Ab/G# tension
+            (65.41, 130.81, 196.00, 246.94, 293.66),   # Cmaj9 eerie
+            (61.74, 123.47, 164.81, 220.00, 246.94),   # Bm7b5 suspense
+        ],
+        "sad": [
+            (65.41, 130.81, 155.56, 196.00, 261.63),   # Cm warm melancholic
+            (51.91, 103.83, 155.56, 196.00, 233.08),   # Abmaj7
+            (77.78, 155.56, 196.00, 233.08, 293.66),   # Ebmaj7
+            (58.27, 116.54, 146.83, 174.61, 233.08),   # Bb warm resolve
+        ],
+        "happy": [
+            (98.00, 196.00, 246.94, 293.66, 392.00),   # G major bright
+            (73.42, 146.83, 220.00, 293.66, 369.99),   # D major
+            (82.41, 164.81, 196.00, 246.94, 329.63),   # Em7 uplifting
+            (65.41, 130.81, 196.00, 246.94, 329.63),   # Cmaj7
+        ],
+        "calm": [
+            (87.31, 174.61, 220.00, 261.63, 329.63),   # Fmaj7 peaceful
+            (73.42, 146.83, 220.00, 261.63, 329.63),   # Dm9
+            (58.27, 116.54, 174.61, 220.00, 293.66),   # Bbmaj7
+            (65.41, 130.81, 196.00, 261.63, 329.63),   # C warm
+        ],
+    }
+
+    chords = mood_chords.get(mood, mood_chords["epic"])
+    chord_len = 4.0 if mood in ("calm", "sad", "mystery") else 3.2
+    pulse_hz = 2.0 if mood == "epic" else (2.4 if mood == "happy" else 0.5)
+
+    raw_wav = out_wav.with_suffix(".raw.wav")
+    rng = random.Random(42)
+    lp_noise = 0.0
+
+    # Precompute transition sample windows for subtle whoosh SFX
+    trans_windows = [(int((t - 0.28) * sr), int((t + 0.18) * sr), int(t * sr)) for t in transition_times]
+
+    buf = bytearray()
+    two_pi = 2.0 * math.pi
+    for i in range(n_samples):
+        t = i / sr
+        c_idx = int(t / chord_len) % len(chords)
+        local_t = t % chord_len
+        chord = chords[c_idx]
+
+        # Smooth chord envelope to eliminate any clicks between chords
+        c_env = 1.0
+        if local_t < 0.25:
+            c_env = local_t / 0.25
+        elif local_t > chord_len - 0.25:
+            c_env = (chord_len - local_t) / 0.25
+
+        # Warm breathing pad
+        lfo = 0.82 + 0.18 * math.sin(two_pi * 0.22 * t)
+        val = 0.0
+        for idx_f, freq in enumerate(chord):
+            w = 0.24 if idx_f == 0 else (0.19 if idx_f == 1 else 0.13)
+            val += w * math.sin(two_pi * freq * t)
+            # Soft warm detuned overtone
+            if idx_f >= 1:
+                val += (w * 0.28) * math.sin(two_pi * (freq * 1.003) * t)
+
+        # Mood-specific musical character
+        if mood == "epic":
+            # Subtle rhythmic cinematic bass pulse
+            beat_t = t % (1.0 / pulse_hz)
+            pulse = math.exp(-beat_t * 7.5)
+            val += 0.22 * pulse * math.sin(two_pi * chord[0] * t)
+        elif mood == "happy":
+            # Gentle bright plucked melody notes
+            step_t = t % 0.45
+            note_idx = int(t / 0.45) % 4
+            pluck = math.exp(-step_t * 9.0)
+            val += 0.16 * pluck * math.sin(two_pi * (chord[1 + (note_idx % 3)] * 2.0) * t)
+        elif mood == "sad":
+            # Soft slow piano-like arpeggio
+            step_t = t % 0.95
+            note_idx = int(t / 0.95) % 4
+            pluck = math.exp(-step_t * 4.5)
+            val += 0.15 * pluck * math.sin(two_pi * (chord[1 + (note_idx % 3)] * 2.0) * t)
+
+        sample = val * c_env * lfo * 0.42
+
+        # Soft filtered pink-noise whoosh SFX on scene transitions
+        for w_start, w_end, w_peak in trans_windows:
+            if w_start <= i <= w_end:
+                white = rng.uniform(-1.0, 1.0)
+                lp_noise = 0.86 * lp_noise + 0.14 * white
+                dist = abs(i - w_peak) / max(1, (w_end - w_start) * 0.5)
+                whoosh_env = max(0.0, 1.0 - dist) ** 2
+                sample += lp_noise * whoosh_env * 0.35
+                break
+
+        # Global smooth fade-in (1.0s) & fade-out (1.4s)
+        if t < 1.0:
+            sample *= t
+        elif t > total_dur - 1.4:
+            sample *= max(0.0, (total_dur - t) / 1.4)
+
+        sample = max(-0.92, min(0.92, sample))
+        buf.extend(struct.pack("<h", int(sample * 32767)))
+
+    with wave.open(str(raw_wav), "wb") as wf:
+        wf.setnchannels(1)
+        wf.setsampwidth(2)
+        wf.setframerate(sr)
+        wf.writeframes(bytes(buf))
+
+    # Apply studio warmth (lowpass + gentle spacious echo) and convert to 44100Hz stereo WAV
+    subprocess.run(
+        [
+            "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+            "-i", str(raw_wav),
+            "-af", "lowpass=f=2400,aecho=0.8:0.7:60|120:0.25|0.15,aresample=44100",
+            "-ac", "2", "-ar", "44100",
+            str(out_wav),
+        ],
+        check=True,
+    )
+
+
+# ==============================================================================
+# Step 4: Compact Sleek Subtitles (1–2 Lines, Timed Chunks) + Full-Frame Montage
 # ==============================================================================
 def find_font_path(has_arabic: bool = True, has_latin: bool = False) -> str:
-    # If text mixes Arabic + Latin, DejaVuSans-Bold has BOTH Arabic and Latin glyphs (no □□□ boxes!)
     if has_arabic and has_latin:
         for c in [
             "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
@@ -635,13 +821,6 @@ def find_font_path(has_arabic: bool = True, has_latin: bool = False) -> str:
 
 
 def prepare_caption_line(line: str, is_rtl: bool) -> tuple[str, dict]:
-    """
-    CRITICAL FIX:
-    - When Pillow is built with libraqm (Ubuntu / GitHub Actions), Pillow natively shapes & reorders RTL.
-      Passing arabic_reshaper + get_display into libraqm DOUBLE-REVERSES Arabic!
-      So when HAS_RAQM is True, pass raw logical Unicode text with direction='rtl'.
-    - When HAS_RAQM is False, apply arabic_reshaper + get_display and omit direction='rtl'.
-    """
     cleaned = re.sub(r"[\U00010000-\U0010ffff\u2600-\u27BF]", "", str(line or "")).strip()
     if is_rtl:
         if HAS_RAQM:
@@ -650,7 +829,22 @@ def prepare_caption_line(line: str, is_rtl: bool) -> tuple[str, dict]:
     return cleaned, {}
 
 
+def split_caption_into_chunks(text: str, is_vertical: bool) -> list[str]:
+    """
+    Split narration into 1–2 short timed chunks so the on-screen subtitle is ALWAYS a compact
+    1–2 line strip (never a huge 3–4 line box covering the scene, and never cuts off any words).
+    """
+    cleaned = re.sub(r"[\U00010000-\U0010ffff\u2600-\u27BF]", "", str(text or "")).strip()
+    words = cleaned.split()
+    max_words_per_chunk = 8 if is_vertical else 12
+    if len(words) <= max_words_per_chunk:
+        return [cleaned] if cleaned else []
+    mid = math.ceil(len(words) / 2)
+    return [" ".join(words[:mid]), " ".join(words[mid:])]
+
+
 def render_subtitle_png(text: str, out_png: Path, width: int, height: int):
+    """Renders a sleek, compact, slim subtitle strip at the lower edge so 90%+ of the image stays visible."""
     img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 
@@ -658,7 +852,6 @@ def render_subtitle_png(text: str, out_png: Path, width: int, height: int):
     has_ar = bool(re.search(r"[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]", raw_clean))
     has_lat = bool(re.search(r"[A-Za-z]", raw_clean))
 
-    # Strip stray Latin words if the caption is predominantly Arabic so NotoSansArabic never shows □□□
     if has_ar and has_lat:
         ar_chars = len(re.findall(r"[\u0600-\u06FF]", raw_clean))
         lat_chars = len(re.findall(r"[A-Za-z]", raw_clean))
@@ -666,14 +859,15 @@ def render_subtitle_png(text: str, out_png: Path, width: int, height: int):
             raw_clean = re.sub(r"\s*[A-Za-z0-9_#\-]+\s*", " ", raw_clean).strip()
             has_lat = False
 
-    font_size = 56 if width <= 1080 else 48
+    # Slim, crisp Shorts-style typography (compact so it never hides the artwork)
+    font_size = 38 if width <= 1080 else 34
     font_path = find_font_path(has_arabic=has_ar, has_latin=has_lat)
     font = ImageFont.truetype(font_path, font_size) if font_path else ImageFont.load_default()
 
     words = raw_clean.split()
     lines = []
     cur = []
-    max_chars = 24 if width <= 1080 else 44
+    max_chars = 30 if width <= 1080 else 56
     for w in words:
         if sum(len(x) + 1 for x in cur) + len(w) > max_chars and cur:
             lines.append(" ".join(cur))
@@ -682,29 +876,29 @@ def render_subtitle_png(text: str, out_png: Path, width: int, height: int):
             cur.append(w)
     if cur:
         lines.append(" ".join(cur))
-    lines = lines[:3]
+    lines = lines[:2]
 
     prepared = [prepare_caption_line(ln, is_rtl=has_ar) for ln in lines]
     metrics = []
     for txt_ln, kwargs in prepared:
-        bbox = draw.textbbox((0, 0), txt_ln, font=font, stroke_width=3, **kwargs)
+        bbox = draw.textbbox((0, 0), txt_ln, font=font, stroke_width=2, **kwargs)
         metrics.append((bbox[2] - bbox[0], bbox[3] - bbox[1], bbox[0], bbox[1]))
 
-    pad_x, pad_y = 34, 22
-    gap = 16
-    max_lw = max((m[0] for m in metrics), default=200)
-    box_w = min(width - 70, max_lw + pad_x * 2)
+    pad_x, pad_y = 24, 11
+    gap = 8
+    max_lw = max((m[0] for m in metrics), default=160)
+    box_w = min(width - 64, max_lw + pad_x * 2)
     box_h = sum(m[1] for m in metrics) + gap * max(0, len(prepared) - 1) + pad_y * 2
     box_x = (width - box_w) // 2
-    box_y = int(height * 0.77) - box_h // 2
+    box_y = int(height * 0.84) - box_h // 2
 
-    # Modern dark cinema subtitle pill
+    # Sleek, subtle semi-transparent slim strip (zero bulky box!)
     draw.rounded_rectangle(
         [box_x, box_y, box_x + box_w, box_y + box_h],
-        radius=26,
-        fill=(6, 10, 22, 205),
-        outline=(250, 204, 21, 185),
-        width=3,
+        radius=15,
+        fill=(6, 10, 20, 155),
+        outline=(255, 255, 255, 45),
+        width=1,
     )
 
     y = box_y + pad_y
@@ -715,8 +909,8 @@ def render_subtitle_png(text: str, out_png: Path, width: int, height: int):
             txt_ln,
             font=font,
             fill=(255, 255, 255, 255),
-            stroke_width=3,
-            stroke_fill=(0, 0, 0, 245),
+            stroke_width=2,
+            stroke_fill=(0, 0, 0, 235),
             **kwargs,
         )
         y += lh + gap
@@ -725,35 +919,38 @@ def render_subtitle_png(text: str, out_png: Path, width: int, height: int):
 
 
 def get_ken_burns_expr(scene_idx: int, frames: int, W: int, H: int, fps: int) -> str:
-    """Varied smooth cinematic camera motions: Zoom-In, Zoom-Out, Pan-Right, Pan-Left."""
+    """
+    Full-frame gentle cinematic camera motions (max 5% zoom, NO dark vignette, NO heavy edge cropping)
+    so the entire artwork stays crisp and visible from edge to edge.
+    """
     mode = scene_idx % 4
+    f_den = max(1, frames)
     if mode == 0:
-        # Smooth slow zoom-in centered
-        z = "min(1.0+0.0009*on,1.15)"
+        # Gentle slow zoom-in (1.00 -> 1.05)
+        z = f"1.0+0.05*on/{f_den}"
         x = "iw/2-(iw/zoom/2)"
         y = "ih/2-(ih/zoom/2)"
     elif mode == 1:
-        # Smooth slow zoom-out centered
-        z = "max(1.15-0.0009*on,1.0)"
+        # Gentle slow zoom-out (1.05 -> 1.00)
+        z = f"1.05-0.05*on/{f_den}"
         x = "iw/2-(iw/zoom/2)"
         y = "ih/2-(ih/zoom/2)"
     elif mode == 2:
-        # Cinematic pan left-to-right with gentle zoom
-        z = "1.12"
-        x = f"(iw-iw/zoom)*on/{max(1, frames)}"
+        # Gentle pan left-to-right (minimal 5% zoom)
+        z = "1.05"
+        x = f"(iw-iw/zoom)*on/{f_den}"
         y = "ih/2-(ih/zoom/2)"
     else:
-        # Cinematic pan right-to-left with gentle zoom
-        z = "1.12"
-        x = f"(iw-iw/zoom)*(1-on/{max(1, frames)})"
+        # Gentle pan right-to-left (minimal 5% zoom)
+        z = "1.05"
+        x = f"(iw-iw/zoom)*(1-on/{f_den})"
         y = "ih/2-(ih/zoom/2)"
 
     return (
         f"scale={W*2}:{H*2}:force_original_aspect_ratio=increase,"
         f"crop={W*2}:{H*2},"
         f"zoompan=z='{z}':x='{x}':y='{y}':d={frames}:s={W}x{H}:fps={fps},"
-        f"eq=contrast=1.06:saturation=1.14:brightness=0.01,"
-        f"vignette=PI/6,"
+        f"eq=contrast=1.04:saturation=1.10:brightness=0.01,"
         f"setsar=1"
     )
 
@@ -765,6 +962,7 @@ def build_1080p_video(
     durations: list[float],
     is_vertical: bool,
     show_subtitles: bool,
+    mood: str,
     work_dir: Path,
 ) -> Path:
     W, H = (1080, 1920) if is_vertical else (1920, 1080)
@@ -776,12 +974,10 @@ def build_1080p_video(
 
     for i, (scene, img_p, aud_p, dur) in enumerate(zip(scenes, img_paths, audio_paths, durations)):
         seg_out = work_dir / f"seg_{i:04d}.mp4"
-        # Add small tail buffer for crossfade overlap on all scenes except last
         seg_dur = max(3.2, float(dur)) + (trans_dur if (use_xfade and i < len(scenes) - 1) else 0.0)
         frames = max(96, int(math.ceil(seg_dur * fps)))
         vf_base = get_ken_burns_expr(i, frames, W, H, fps)
 
-        # Gentle fade-in on first scene, fade-out on last scene
         fade_parts = []
         if i == 0:
             fade_parts.append("fade=t=in:st=0:d=0.35")
@@ -789,9 +985,35 @@ def build_1080p_video(
             fade_parts.append(f"fade=t=out:st={max(0.5, seg_dur - 0.45):.2f}:d=0.45")
         fade_str = ("," + ",".join(fade_parts)) if fade_parts else ""
 
-        if show_subtitles and scene.get("narration"):
+        chunks = split_caption_into_chunks(scene.get("narration") or "", is_vertical) if show_subtitles else []
+
+        if len(chunks) == 2:
+            sub1 = work_dir / f"sub_{i:04d}_a.png"
+            sub2 = work_dir / f"sub_{i:04d}_b.png"
+            render_subtitle_png(chunks[0], sub1, W, H)
+            render_subtitle_png(chunks[1], sub2, W, H)
+            mid_t = seg_dur * 0.5
+            cmd = [
+                "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+                "-i", str(img_p),
+                "-loop", "1", "-t", f"{seg_dur:.2f}", "-i", str(sub1),
+                "-loop", "1", "-t", f"{seg_dur:.2f}", "-i", str(sub2),
+                "-i", str(aud_p),
+                "-filter_complex",
+                f"[0:v]{vf_base}[bg];"
+                f"[bg][1:v]overlay=0:0:eof_action=repeat:enable='lt(t,{mid_t:.2f})'[v1];"
+                f"[v1][2:v]overlay=0:0:eof_action=repeat:enable='gte(t,{mid_t:.2f})'{fade_str},format=yuv420p[v];"
+                f"[3:a]apad=whole_dur={seg_dur:.2f}[a]",
+                "-map", "[v]", "-map", "[a]",
+                "-c:v", "libx264", "-profile:v", "high", "-level", "4.1", "-pix_fmt", "yuv420p",
+                "-preset", "veryfast", "-crf", "21", "-r", str(fps),
+                "-c:a", "aac", "-b:a", "128k", "-ac", "2", "-ar", "44100",
+                "-t", f"{seg_dur:.2f}",
+                str(seg_out),
+            ]
+        elif len(chunks) == 1:
             sub_png = work_dir / f"sub_{i:04d}.png"
-            render_subtitle_png(scene["narration"], sub_png, W, H)
+            render_subtitle_png(chunks[0], sub_png, W, H)
             cmd = [
                 "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
                 "-i", str(img_p),
@@ -825,9 +1047,9 @@ def build_1080p_video(
         segment_files.append(seg_out)
         seg_durations.append(seg_dur)
 
-    final_mp4 = work_dir / "final_1080p.mp4"
-
-    # Smooth cinematic xfade transitions between scenes (for 2..24 scenes)
+    # Assemble video + voice track first
+    voice_video = work_dir / "assembled_voice.mp4"
+    transition_times = []
     if use_xfade:
         transitions = ["fade", "smoothleft", "dissolve", "smoothright", "wipeleft", "fadeblack"]
         cmd = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error"]
@@ -840,6 +1062,7 @@ def build_1080p_video(
         prev_v = "0:v"
         prev_a = "0:a"
         for idx in range(1, len(segment_files)):
+            transition_times.append(max(0.2, offset + trans_dur * 0.5))
             tr = transitions[(idx - 1) % len(transitions)]
             out_v = f"v{idx}"
             out_a = f"a{idx}"
@@ -856,25 +1079,58 @@ def build_1080p_video(
             "-c:v", "libx264", "-profile:v", "high", "-level", "4.1", "-pix_fmt", "yuv420p",
             "-preset", "veryfast", "-crf", "21", "-r", str(fps),
             "-c:a", "aac", "-b:a", "128k", "-ac", "2", "-ar", "44100",
-            "-movflags", "+faststart",
-            str(final_mp4),
+            str(voice_video),
         ])
         subprocess.run(cmd, check=True)
-        return final_mp4
+    else:
+        t_acc = 0.0
+        for sd in seg_durations[:-1]:
+            t_acc += sd
+            transition_times.append(t_acc)
+        concat_list = work_dir / "concat.txt"
+        concat_list.write_text("\n".join(f"file '{p}'" for p in segment_files), encoding="utf-8")
+        subprocess.run(
+            [
+                "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+                "-f", "concat", "-safe", "0", "-i", str(concat_list),
+                "-c", "copy",
+                str(voice_video),
+            ],
+            check=True,
+        )
 
-    # Fast zero-overhead concat for 1-scene or long-form (>24 scenes) videos
-    concat_list = work_dir / "concat.txt"
-    concat_list.write_text("\n".join(f"file '{p}'" for p in segment_files), encoding="utf-8")
-    subprocess.run(
-        [
-            "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
-            "-f", "concat", "-safe", "0", "-i", str(concat_list),
-            "-c", "copy", "-movflags", "+faststart",
-            str(final_mp4),
-        ],
-        check=True,
-    )
-    return final_mp4
+    # Mix mood-matched cinematic soundtrack + subtle transition whoosh SFX under voiceover
+    final_mp4 = work_dir / "final_1080p.mp4"
+    try:
+        total_vid_dur = get_audio_duration(voice_video)
+        bgm_wav = work_dir / "mood_bgm.wav"
+        generate_mood_soundtrack(mood, total_vid_dur, transition_times, bgm_wav)
+        subprocess.run(
+            [
+                "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+                "-i", str(voice_video),
+                "-i", str(bgm_wav),
+                "-filter_complex",
+                "[0:a]volume=1.08[v_a];[1:a]volume=0.14[bg_a];[v_a][bg_a]amix=inputs=2:duration=first:dropout_transition=2:normalize=0[aout]",
+                "-map", "0:v", "-map", "[aout]",
+                "-c:v", "copy",
+                "-c:a", "aac", "-b:a", "160k", "-ac", "2", "-ar", "44100",
+                "-movflags", "+faststart",
+                str(final_mp4),
+            ],
+            check=True,
+        )
+        return final_mp4
+    except Exception as exc:
+        print(f"[WARN] Mood soundtrack mix skipped, using clean voice track: {exc}", flush=True)
+        subprocess.run(
+            [
+                "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+                "-i", str(voice_video), "-c", "copy", "-movflags", "+faststart", str(final_mp4),
+            ],
+            check=True,
+        )
+        return final_mp4
 
 
 # ==============================================================================
@@ -1006,6 +1262,8 @@ def main():
 
     story = generate_story_package(niche, style, language, voice_locale, duration_sec, scene_count, is_vertical)
     job["video_title"] = story["title"]
+    mood = story.get("mood") or detect_story_mood(niche, story["title"])
+
     update_job({
         "status": "imaging",
         "progress_pct": 20,
@@ -1022,7 +1280,7 @@ def main():
         update_job({
             "status": "voicing",
             "progress_pct": 62,
-            "step_label": f"جاري تسجيل التعليق الصوتي ({language})...",
+            "step_label": f"جاري تسجيل التعليق الصوتي والمؤثرات ({language})...",
         })
         voice_name = pick_voice(voice_locale, voice_gender)
         audio_paths = []
@@ -1037,10 +1295,10 @@ def main():
         update_job({
             "status": "rendering",
             "progress_pct": 76,
-            "step_label": "جاري مونتاج الفيديو السينمائي 1080p والانتقالات...",
+            "step_label": "جاري مونتاج الفيديو السينمائي 1080p مع الموسيقى والمؤثرات...",
         })
         final_mp4 = build_1080p_video(
-            story["scenes"], img_paths, audio_paths, durations, is_vertical, show_subtitles, work_dir
+            story["scenes"], img_paths, audio_paths, durations, is_vertical, show_subtitles, mood, work_dir
         )
 
         update_job({
