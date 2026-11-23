@@ -4886,6 +4886,7 @@
      if (!res || !res.ok || !res.job) return;
      renderLivePreviewJobState(res.job);
      if (res.job.status === 'completed' || res.job.status === 'failed') {
+      try { localStorage.removeItem('omniposts_active_render_job_id'); } catch(e) {}
       clearInterval(activeLivePollTimer);
       activeLivePollTimer = null;
       isGenerationCurrentlyRunning = false;
@@ -4972,6 +4973,7 @@
     }).then(function(r) { return r.json(); }).then(function(res) {
      if (res && res.ok && res.job_id) {
       showToast(t('🚀 Cloud 1080p Worker Started! Watch live scenes below or close browser safely.', '🚀 بدأ التوليد السحابي 1080p! شاهد المشاهد لايف بالأسفل أو أغلق المتصفح بأمان.'), 'info');
+      try { localStorage.setItem('omniposts_active_render_job_id', res.job_id); } catch(e) {}
       startLiveJobPolling(res.job_id);
      } else {
       isGenerationCurrentlyRunning = false;
@@ -5988,6 +5990,13 @@
     });
    } else if (appState.isLoggedIn && appState.currentUser.email) {
     loadUserChannelsFromSupabase(appState.currentUser.email);
+    try {
+     const savedJobId = localStorage.getItem('omniposts_active_render_job_id');
+     if (savedJobId && appState.isLoggedIn) {
+      renderLivePreviewJobState({ status: 'rendering', progress_pct: 15, step_label: t('Reconnecting to live 1080p cloud render...', 'جاري استكمال متابعة التوليد السحابي لايف...') });
+      startLiveJobPolling(savedJobId);
+     }
+    } catch (e) {}
    }
   });
   window.addEventListener('pageshow', function() {
