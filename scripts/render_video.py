@@ -6,7 +6,6 @@ Pipeline:
   2. Generate a real, gripping localized story script + mood + scene prompts + viral title/description
      via Runware Chat Completions (with rich dialect-matched fallback stories)
   3. Generate N scene images in parallel via Runware imageInference (runware:100@1 FLUX.1 schnell)
-     OR real AI character motion clips via Seedance 1.0 Pro Fast (bytedance:2@2)
      and push live preview image URLs to Supabase render_jobs
   4. Synthesize natural voiceover in any world language/dialect (Male/Female) via Edge TTS
   5. Synthesize 100% copyright-free mood-matched cinematic background music & subtle transition whoosh SFX
@@ -325,7 +324,7 @@ def build_rich_fallback_story(niche: str, style: str, language: str, voice_local
                     "desc": "رحلة سريعة ومذهلة في أسرار الفضاء والكون! اكتشف ماذا يحدث للأرض في اللحظة التي تنطفئ فيها الشمس.\n\n#فضاء #علوم #معلومات #الكون",
                     "tags": ["فضاء", "علوم", "معلومات", "الكون"],
                     "beats": [
-                        ("تخيل لو الشمس اختفت فجأة... الغريب إننا مش هنحس بأي حاجة لمدة تمن دقايق!" if is_eg else "تخيل لو الشمس اختفت فجأة... الغريب أننا لن نشعر بشيء لمدة ثماني دقائق!", "Epic cinematic view of the Sun vanishing into darkness in deep space while Earth still glows brightly"),
+                        ("تخيل لو الشمس اختفت فجأة... الغريب إننا مش هنحس بأي حاجة لمدة تمن دقايق!" if is_eg else "تخيل لو اختفت الشمس فجأة... الغريب أننا لن نشعر بشيء لمدة ثماني دقائق!", "Epic cinematic view of the Sun vanishing into darkness in deep space while Earth still glows brightly"),
                         ("السبب إن الضوء والجاذبية بياخدوا تمن دقايق عشان يوصلوا من الشمس للأرض." if is_eg else "السبب أن الضوء والجاذبية يحتاجان ثماني دقائق للوصول من الشمس إلى الأرض.", "Glowing golden beam of light traveling across the dark cosmos from the Sun toward planet Earth"),
                         ("وبعد الدقيقة التامنة، السما هتتحول لضلمة كاحلة والنجوم هتظهر في عز الضهر!" if is_eg else "وبعد الدقيقة الثامنة، تتحول السماء إلى ظلام دامس وتظهر النجوم نهاراً!", "City skyline suddenly plunging into starry midnight darkness while street lights flicker on"),
                         ("وخلال أيام هتتجمد المحيطات، ووقتها بس هنعرف إن الشمس أعظم معجزة في الكون!" if is_eg else "وخلال أيام تتجمد المحيطات، لندرك أن الشمس هي أعظم معجزة تحفظ الحياة!", "Frozen glowing Earth drifting through a majestic purple nebula in space, ultra-detailed 8K"),
@@ -613,99 +612,111 @@ def generate_all_scenes(scenes: list, style: str, is_vertical: bool, work_dir: P
     return [p for p in paths if p is not None], urls
 
 
+
 # ==============================================================================
 # Step 2B: AI Character Motion Clips (Runware Seedance 1.0 Pro Fast — bytedance:2@2)
 # ==============================================================================
 def generate_single_motion_clip(prompt: str, is_vertical: bool, out_mp4: Path) -> str:
     """Generate a 5s real AI-animated video clip via Runware Seedance 1.0 Pro Fast (480p -> upscaled to 1080p)."""
     w, h = (480, 864) if is_vertical else (864, 480)
-    task_uuid = str(uuid.uuid4())
-    payload = [
-        {
-            "taskType": "videoInference",
-            "taskUUID": task_uuid,
-            "model": "bytedance:2@2",
-            "positivePrompt": (prompt + ", smooth expressive character motion, cinematic camera movement, vivid lighting, no text")[:950],
-            "width": w,
-            "height": h,
-            "duration": 5,
-            "outputType": "URL",
-            "outputFormat": "MP4",
-            "deliveryMethod": "async",
-            "includeCost": True,
-        }
-    ]
     headers = {
         "Authorization": f"Bearer {RUNWARE_API_KEY}",
         "Content-Type": "application/json",
     }
-    r = requests.post("https://api.runware.ai/v1", headers=headers, json=payload, timeout=45)
-    r.raise_for_status()
+    last_err = "Unknown Seedance error"
+    for attempt in range(2):
+        task_uuid = str(uuid.uuid4())
+        payload = [
+            {
+                "taskType": "videoInference",
+                "taskUUID": task_uuid,
+                "model": "bytedance:2@2",
+                "positivePrompt": (prompt + ", expressive character motion, smooth cinematic camera movement, vivid lighting, no text")[:950],
+                "width": w,
+                "height": h,
+                "duration": 5,
+                "numberResults": 1,
+                "outputType": "URL",
+                "outputFormat": "MP4",
+                "deliveryMethod": "async",
+                "includeCost": True,
+            }
+        ]
+        try:
+            r = requests.post("https://api.runware.ai/v1", headers=headers, json=payload, timeout=45)
+            if not r.ok:
+                raise RuntimeError(f"Runware HTTP {r.status_code}: {r.text[:260]}")
+            init_body = r.json()
+            if init_body.get("errors"):
+                err0 = init_body["errors"][0]
+                raise RuntimeError(f"Runware init error: {err0.get('message', err0)}")
+            for item in (init_body.get("data") or []):
+                if item.get("videoURL"):
+                    vid_bytes = requests.get(item["videoURL"], timeout=60).content
+                    out_mp4.write_bytes(vid_bytes)
+                    return item["videoURL"]
 
-    # Poll getResponse up to 180 seconds
-    deadline = time.time() + 180
-    while time.time() < deadline:
-        time.sleep(5)
-        poll = requests.post(
-            "https://api.runware.ai/v1",
-            headers=headers,
-            json=[{"taskType": "getResponse", "taskUUID": task_uuid}],
-            timeout=30,
-        )
-        if not poll.ok:
-            continue
-        body = poll.json()
-        if body.get("errors"):
-            raise RuntimeError(f"Seedance error: {body['errors'][0].get('message', body['errors'][0])}")
-        items = body.get("data") or []
-        for item in items:
-            if item.get("status") == "error":
-                raise RuntimeError(f"Seedance task failed: {item}")
-            vid_url = item.get("videoURL")
-            if vid_url:
-                vid_bytes = requests.get(vid_url, timeout=60).content
-                out_mp4.write_bytes(vid_bytes)
-                return vid_url
-    raise RuntimeError("Seedance video generation timed out after 180s")
+            deadline = time.time() + 240
+            while time.time() < deadline:
+                time.sleep(5)
+                poll = requests.post(
+                    "https://api.runware.ai/v1",
+                    headers=headers,
+                    json=[{"taskType": "getResponse", "taskUUID": task_uuid}],
+                    timeout=30,
+                )
+                if not poll.ok:
+                    print(f"[WARN] Seedance poll HTTP {poll.status_code}: {poll.text[:160]}", flush=True)
+                    continue
+                body = poll.json()
+                if body.get("errors"):
+                    err0 = body["errors"][0]
+                    raise RuntimeError(f"Runware poll error: {err0.get('message', err0)}")
+                for item in (body.get("data") or []):
+                    if item.get("status") == "error":
+                        raise RuntimeError(f"Seedance task failed: {item}")
+                    vid_url = item.get("videoURL")
+                    if vid_url:
+                        vid_bytes = requests.get(vid_url, timeout=60).content
+                        if len(vid_bytes) < 5000:
+                            raise RuntimeError("Downloaded Seedance MP4 is empty/corrupt")
+                        out_mp4.write_bytes(vid_bytes)
+                        print(f"[OK] Seedance AI Motion clip ready ({len(vid_bytes)//1024} KB)", flush=True)
+                        return vid_url
+            raise RuntimeError("Seedance video generation timed out after 240s")
+        except Exception as exc:
+            last_err = str(exc)
+            print(f"[WARN] Seedance attempt {attempt+1} failed: {last_err}", flush=True)
+            time.sleep(2)
+    raise RuntimeError(f"AI Motion (Seedance) failed: {last_err}")
 
 
 def generate_all_motion_scenes(scenes: list, style: str, is_vertical: bool, work_dir: Path) -> tuple[list[Path], list[str]]:
-    """Generate real animated MP4 clips in parallel (falls back to FLUX image if a single clip fails)."""
+    """Generate real animated MP4 clips in parallel. Never silently downgrades a 5x AI Motion video to static images."""
     total = len(scenes)
     paths: list[Path | None] = [None] * total
-    preview_urls: list[str] = []
 
     def _worker(i: int):
         clip_p = work_dir / f"clip_{i:04d}.mp4"
         prompt = f"{style}, {scenes[i]['image_prompt']}, expressive character animation, smooth cinematic motion, no text"
-        try:
-            generate_single_motion_clip(prompt, is_vertical, clip_p)
-            return i, clip_p, ""
-        except Exception as exc:
-            print(f"[WARN] AI Motion clip {i+1} fallback to FLUX image: {exc}", flush=True)
-            img_p = work_dir / f"scene_{i:04d}.jpg"
-            w, h = (768, 1344) if is_vertical else (1344, 768)
-            url = generate_single_image(prompt, w, h, img_p)
-            return i, img_p, url
+        generate_single_motion_clip(prompt, is_vertical, clip_p)
+        return i, clip_p
 
     completed = 0
-    with ThreadPoolExecutor(max_workers=4) as pool:
+    with ThreadPoolExecutor(max_workers=3) as pool:
         futs = [pool.submit(_worker, i) for i in range(total)]
         for fut in as_completed(futs):
-            idx, path, url = fut.result()
+            idx, path = fut.result()
             paths[idx] = path
-            if url:
-                preview_urls.append(url)
             completed += 1
             pct = 20 + int((completed / total) * 38)
             update_job({
                 "status": "imaging",
                 "progress_pct": pct,
                 "step_label": f"جاري تحريك الشخصيات والمشاهد بالذكاء الاصطناعي ({completed} / {total})...",
-                "preview_images": preview_urls[:12],
             })
 
-    return [p for p in paths if p is not None], preview_urls
+    return [p for p in paths if p is not None], []
 
 
 # ==============================================================================
@@ -751,6 +762,7 @@ def generate_mood_soundtrack(mood: str, total_dur: float, transition_times: list
     sr = 22050
     n_samples = max(sr, int(math.ceil(total_dur * sr)))
 
+    # Chord progressions (Hz) tailored to each mood
     mood_chords = {
         "epic": [
             (73.42, 146.83, 220.00, 293.66, 349.23),   # Dm cinematic
@@ -792,6 +804,7 @@ def generate_mood_soundtrack(mood: str, total_dur: float, transition_times: list
     rng = random.Random(42)
     lp_noise = 0.0
 
+    # Precompute transition sample windows for subtle whoosh SFX
     trans_windows = [(int((t - 0.28) * sr), int((t + 0.18) * sr), int(t * sr)) for t in transition_times]
 
     buf = bytearray()
@@ -802,30 +815,37 @@ def generate_mood_soundtrack(mood: str, total_dur: float, transition_times: list
         local_t = t % chord_len
         chord = chords[c_idx]
 
+        # Smooth chord envelope to eliminate any clicks between chords
         c_env = 1.0
         if local_t < 0.25:
             c_env = local_t / 0.25
         elif local_t > chord_len - 0.25:
             c_env = (chord_len - local_t) / 0.25
 
+        # Warm breathing pad
         lfo = 0.82 + 0.18 * math.sin(two_pi * 0.22 * t)
         val = 0.0
         for idx_f, freq in enumerate(chord):
             w = 0.24 if idx_f == 0 else (0.19 if idx_f == 1 else 0.13)
             val += w * math.sin(two_pi * freq * t)
+            # Soft warm detuned overtone
             if idx_f >= 1:
                 val += (w * 0.28) * math.sin(two_pi * (freq * 1.003) * t)
 
+        # Mood-specific musical character
         if mood == "epic":
+            # Subtle rhythmic cinematic bass pulse
             beat_t = t % (1.0 / pulse_hz)
             pulse = math.exp(-beat_t * 7.5)
             val += 0.22 * pulse * math.sin(two_pi * chord[0] * t)
         elif mood == "happy":
+            # Gentle bright plucked melody notes
             step_t = t % 0.45
             note_idx = int(t / 0.45) % 4
             pluck = math.exp(-step_t * 9.0)
             val += 0.16 * pluck * math.sin(two_pi * (chord[1 + (note_idx % 3)] * 2.0) * t)
         elif mood == "sad":
+            # Soft slow piano-like arpeggio
             step_t = t % 0.95
             note_idx = int(t / 0.95) % 4
             pluck = math.exp(-step_t * 4.5)
@@ -833,6 +853,7 @@ def generate_mood_soundtrack(mood: str, total_dur: float, transition_times: list
 
         sample = val * c_env * lfo * 0.42
 
+        # Soft filtered pink-noise whoosh SFX on scene transitions
         for w_start, w_end, w_peak in trans_windows:
             if w_start <= i <= w_end:
                 white = rng.uniform(-1.0, 1.0)
@@ -842,6 +863,7 @@ def generate_mood_soundtrack(mood: str, total_dur: float, transition_times: list
                 sample += lp_noise * whoosh_env * 0.35
                 break
 
+        # Global smooth fade-in (1.0s) & fade-out (1.4s)
         if t < 1.0:
             sample *= t
         elif t > total_dur - 1.4:
@@ -856,6 +878,7 @@ def generate_mood_soundtrack(mood: str, total_dur: float, transition_times: list
         wf.setframerate(sr)
         wf.writeframes(bytes(buf))
 
+    # Apply studio warmth (lowpass + gentle spacious echo) and convert to 44100Hz stereo WAV
     subprocess.run(
         [
             "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
@@ -944,6 +967,7 @@ def render_subtitle_png(text: str, out_png: Path, width: int, height: int):
             raw_clean = re.sub(r"\s*[A-Za-z0-9_#\-]+\s*", " ", raw_clean).strip()
             has_lat = False
 
+    # Slim, crisp Shorts-style typography (compact so it never hides the artwork)
     font_size = 38 if width <= 1080 else 34
     font_path = find_font_path(has_arabic=has_ar, has_latin=has_lat)
     font = ImageFont.truetype(font_path, font_size) if font_path else ImageFont.load_default()
@@ -976,6 +1000,7 @@ def render_subtitle_png(text: str, out_png: Path, width: int, height: int):
     box_x = (width - box_w) // 2
     box_y = int(height * 0.84) - box_h // 2
 
+    # Sleek, subtle semi-transparent slim strip (zero bulky box!)
     draw.rounded_rectangle(
         [box_x, box_y, box_x + box_w, box_y + box_h],
         radius=15,
@@ -1009,18 +1034,22 @@ def get_ken_burns_expr(scene_idx: int, frames: int, W: int, H: int, fps: int) ->
     mode = scene_idx % 4
     f_den = max(1, frames)
     if mode == 0:
+        # Gentle slow zoom-in (1.00 -> 1.05)
         z = f"1.0+0.05*on/{f_den}"
         x = "iw/2-(iw/zoom/2)"
         y = "ih/2-(ih/zoom/2)"
     elif mode == 1:
+        # Gentle slow zoom-out (1.05 -> 1.00)
         z = f"1.05-0.05*on/{f_den}"
         x = "iw/2-(iw/zoom/2)"
         y = "ih/2-(ih/zoom/2)"
     elif mode == 2:
+        # Gentle pan left-to-right (minimal 5% zoom)
         z = "1.05"
         x = f"(iw-iw/zoom)*on/{f_den}"
         y = "ih/2-(ih/zoom/2)"
     else:
+        # Gentle pan right-to-left (minimal 5% zoom)
         z = "1.05"
         x = f"(iw-iw/zoom)*(1-on/{f_den})"
         y = "ih/2-(ih/zoom/2)"
@@ -1135,6 +1164,7 @@ def build_1080p_video(
         segment_files.append(seg_out)
         seg_durations.append(seg_dur)
 
+    # Assemble video + voice track first
     voice_video = work_dir / "assembled_voice.mp4"
     transition_times = []
     if use_xfade:
@@ -1186,6 +1216,7 @@ def build_1080p_video(
             check=True,
         )
 
+    # Mix mood-matched cinematic soundtrack + subtle transition whoosh SFX under voiceover
     final_mp4 = work_dir / "final_1080p.mp4"
     try:
         total_vid_dur = get_audio_duration(voice_video)
