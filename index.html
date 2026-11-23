@@ -2102,7 +2102,7 @@
     <div class="p-3.5 rounded-xl bg-black/50 border border-white/10 text-xs text-zinc-300 flex flex-wrap items-center justify-between gap-2">
      <div>
       <span class="font-bold text-emerald-400" data-en="🔗 Webhook / Return URL to paste in Whop Developer -> Webhooks:" data-ar="🔗 رابط الـ Webhook والعودة التلقائية لوضعه في Whop (قسم Developer -> Webhooks):">🔗 رابط الـ Webhook والعودة التلقائية لوضعه في Whop (قسم Developer -> Webhooks):</span>
-      <code class="ms-2 px-2.5 py-1 rounded bg-white/10 text-blue-300 font-mono select-all" dir="ltr">https://omniposts.online/?whop_webhook=1</code>
+      <code class="ms-2 px-2.5 py-1 rounded bg-white/10 text-blue-300 font-mono select-all" dir="ltr">https://kljpelpjdzoagpxwdsnr.supabase.co/functions/v1/whop-payments</code>
      </div>
      <span class="text-[11px] text-zinc-400" data-en="Events: payment.succeeded & membership.activated | 🇪🇬 Egypt Gateway tab is preserved in Pricing view for future setup" data-ar="الأحداث: payment.succeeded و membership.activated | 🇪🇬 تبويب البوابة المصرية محفوظ وجاهز للربط لاحقاً">Events: payment.succeeded & membership.activated | 🇪🇬 Egypt Gateway tab is preserved in Pricing view for future setup</span>
     </div>
@@ -3174,95 +3174,97 @@
    const extLink = document.getElementById('whop-external-checkout-link');
    const iframe = document.getElementById('gumroad-inline-iframe');
    const uEmail = (appState.currentUser && appState.currentUser.email) ? appState.currentUser.email : '';
-   const returnUrl = 'https://omniposts.online/?whop_paid=1&credits=' + encodeURIComponent(String(creditsAmount)) + '&plan=' + encodeURIComponent(planName);
+   const days = (appState.selectedCheckoutPlan && appState.selectedCheckoutPlan.days) ? appState.selectedCheckoutPlan.days : 30;
+
+   if (!uEmail) {
+    showToast(t('Please log in first before completing payment.', 'يرجى تسجيل الدخول أولاً قبل إتمام الدفع.'), 'warn');
+    navigateView('login');
+    return Promise.resolve(null);
+   }
    if (statusTxt) {
     statusTxt.textContent = t(
-     '⏳ Generating Global USD Checkout for $' + cleanUsd.toFixed(2) + ' USD (' + creditsAmount + ' Credits)...',
-     '⏳ جاري تجهيز صفحة الدفع العالمي بالدولار بمبلغ $' + cleanUsd.toFixed(2) + ' USD (' + creditsAmount + ' كريدت)...'
+     '⏳ Creating secure Global USD Checkout for $' + cleanUsd.toFixed(2) + ' USD (' + creditsAmount + ' Min)...',
+     '⏳ جاري تجهيز رابط الدفع الآمن بالدولار بمبلغ $' + cleanUsd.toFixed(2) + ' USD (' + creditsAmount + ' دقيقة)...'
     );
    }
-   function applyFallbackWhopUrl() {
-    if (platformWhopConfig.fallbackUrl) {
-     const fb = platformWhopConfig.fallbackUrl;
-     const fbWithParams = fb + (fb.indexOf('?') === -1 ? '?' : '&') + 'd=true' + (uEmail ? '&email=' + encodeURIComponent(uEmail) : '');
-     if (iframe) iframe.src = fbWithParams;
-     if (extLink) extLink.href = fb;
+   return fetch(SUPABASE_URL + '/functions/v1/whop-payments', {
+    method: 'POST',
+    headers: {
+     'Content-Type': 'application/json',
+     'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+     'apikey': SUPABASE_ANON_KEY
+    },
+    body: JSON.stringify({
+     action: 'create_checkout',
+     user_email: uEmail,
+     usd_price: cleanUsd,
+     credits: creditsAmount,
+     days: days,
+     plan_name: planName
+    })
+   }).then(function(r) { return r.json(); }).then(function(res) {
+    if (res && res.ok && res.purchase_url) {
+     platformWhopConfig.activePurchaseUrl = res.purchase_url;
+     platformWhopConfig.activeCheckoutId = res.checkout_id || '';
+     if (extLink) extLink.href = res.purchase_url;
+     if (iframe) iframe.src = res.purchase_url;
      if (statusTxt) {
       statusTxt.textContent = t(
-       '✅ Global USD Checkout Ready: $' + cleanUsd.toFixed(2) + ' USD (' + creditsAmount + ' Credits)',
-       '✅ صفحة الدفع العالمي بالدولار جاهزة الآن: $' + cleanUsd.toFixed(2) + ' USD (' + creditsAmount + ' كريدت)'
+       '✅ Secure USD Checkout Ready: $' + cleanUsd.toFixed(2) + ' USD (' + creditsAmount + ' Min) — Auto-activates instantly!',
+       '✅ رابط الدفع العالمي جاهز الآن: $' + cleanUsd.toFixed(2) + ' USD (' + creditsAmount + ' دقيقة) — يتفعّل حسابك تلقائياً فور الدفع!'
       );
+     }
+     return res.purchase_url;
+    }
+    if (platformWhopConfig.fallbackUrl) {
+     const fb = platformWhopConfig.fallbackUrl;
+     if (extLink) extLink.href = fb;
+     if (iframe) iframe.src = fb;
+     if (statusTxt) {
+      statusTxt.textContent = t('✅ Global USD Checkout Ready ($' + cleanUsd.toFixed(2) + ' USD)', '✅ صفحة الدفع العالمي جاهزة الآن ($' + cleanUsd.toFixed(2) + ' USD)');
      }
      return fb;
     }
     if (statusTxt) {
-     statusTxt.textContent = t(
-      '🔒 Whop USD Checkout ($' + cleanUsd.toFixed(2) + ' USD — ' + creditsAmount + ' Credits)',
-      '🔒 بوابة دفع Whop ($' + cleanUsd.toFixed(2) + ' USD — ' + creditsAmount + ' كريدت)'
-     );
+     statusTxt.textContent = t('⚠️ Payment gateway is being configured. Please try again shortly.', '⚠️ جاري إتمام تفعيل بوابة الدفع — يرجى المحاولة بعد قليل.');
     }
     return null;
-   }
-   if (!platformWhopConfig.apiKey || !window.fetch) {
-    return Promise.resolve(applyFallbackWhopUrl());
-   }
-   const reqBody = {
-    plan: {
-     plan_type: 'one_time',
-     release_method: 'buy_now',
-     initial_price: cleanUsd,
-     currency: 'usd'
-    },
-    metadata: {
-     user_email: uEmail,
-     credits: String(creditsAmount),
-     plan_name: planName,
-     currency: 'USD'
-    },
-    redirect_url: returnUrl
-   };
-   if (platformWhopConfig.productId) reqBody.plan.product_id = platformWhopConfig.productId;
-   if (platformWhopConfig.companyId) reqBody.plan.company_id = platformWhopConfig.companyId;
-   return window.fetch('https://api.whop.com/api/v2/checkout_configurations', {
-    method: 'POST',
-    headers: {
-     'Authorization': 'Bearer ' + platformWhopConfig.apiKey,
-     'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(reqBody)
-   }).then(function(r) {
-    return r.json().catch(function() { return null; });
-   }).then(function(resJson) {
-    const purchaseUrl = (resJson && (resJson.purchase_url || (resJson.data && resJson.data.purchase_url))) || '';
-    const sessionId = (resJson && (resJson.id || (resJson.data && resJson.data.id))) || '';
-    if (purchaseUrl) {
-     platformWhopConfig.activeCheckoutId = sessionId;
-     platformWhopConfig.activePurchaseUrl = purchaseUrl;
-     const finalUrl = purchaseUrl + (purchaseUrl.indexOf('?') === -1 ? '?' : '&') + 'd=true' + (uEmail ? '&email=' + encodeURIComponent(uEmail) : '');
-     if (iframe) iframe.src = finalUrl;
-     if (extLink) extLink.href = purchaseUrl;
-     if (statusTxt) {
-      statusTxt.textContent = t(
-       '✅ Whop USD Session Ready: $' + cleanUsd.toFixed(2) + ' USD (' + creditsAmount + ' دقيقة 1080p ⏱️)',
-       '✅ فاتورة Whop جاهزة الآن: $' + cleanUsd.toFixed(2) + ' USD (' + creditsAmount + ' دقيقة 1080p ⏱️)'
-      );
-     }
-     return purchaseUrl;
-    }
-    return applyFallbackWhopUrl();
    }).catch(function() {
-    return applyFallbackWhopUrl();
+    if (platformWhopConfig.fallbackUrl && extLink) {
+     extLink.href = platformWhopConfig.fallbackUrl;
+     return platformWhopConfig.fallbackUrl;
+    }
+    if (statusTxt) {
+     statusTxt.textContent = t('⚠️ Could not reach payment server. Please retry.', '⚠️ تعذّر الاتصال بسيرفر الدفع — يرجى المحاولة مرة أخرى.');
+    }
+    return null;
    });
   }
   function checkWhopReturnUrlCallback() {
    try {
     const params = new URLSearchParams(window.location.search || '');
-    if (params.get('whop_paid') === '1' && appState.isLoggedIn && appState.currentUser.email) {
-     const addCr = parseInt(params.get('credits') || '1000', 10) || 1000;
-     const pName = params.get('plan') || ('Whop Package (' + addCr + ' Credits)');
-     appState.selectedCheckoutPlan = { nameEn: pName, nameAr: pName, usdPrice: 9.99, days: 30, credits: addCr };
+    if (params.get('whop_paid') === '1') {
      window.history.replaceState({}, document.title, window.location.pathname);
-     activateVerifiedSubscriptionFromGumroad();
+     showToast(t('🎉 Payment received! Syncing your activated plan & minutes...', '🎉 تم استلام دفعتك بنجاح! جاري تحديث باقتك ودقائقك تلقائياً...'), 'info');
+     if (supabaseClient && appState.currentUser && appState.currentUser.email) {
+      setTimeout(function() {
+       sbExec(supabaseClient.from('profiles').select('*').ilike('email', appState.currentUser.email).maybeSingle()).then(function(res) {
+        if (res && res.data) {
+         const row = res.data;
+         const decoded = decodeUserCreditsMeta(row.ai_provider, row.subscribed);
+         appState.currentUser.subscribed = Boolean(row.subscribed);
+         appState.currentUser.credits = decoded.credits;
+         appState.currentUser.paidUsd = decoded.paidUsd;
+         appState.currentUser.remainingDays = row.remaining_days || 30;
+         if (row.plan_name) { appState.currentUser.planNameEn = row.plan_name; appState.currentUser.planNameAr = row.plan_name; }
+         persistCurrentUserEverywhere();
+         syncDashboardUI();
+         navigateView('dashboard');
+         showToast(t('✅ Plan activated! Your new balance: ' + decoded.credits + ' Min.', '✅ تم تفعيل باقتك بنجاح! رصيدك الحالي: ' + decoded.credits + ' دقيقة.'), 'info');
+        }
+       });
+      }, 2200);
+     }
     }
    } catch (e) {}
   }
