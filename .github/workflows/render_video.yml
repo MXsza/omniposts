@@ -21,10 +21,26 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install FFmpeg & Multilingual Fonts (Arabic + World Languages)
+      - name: Cache Python Packages & Arabic Font
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.local/share/fonts
+          key: omniposts-worker-v2-${{ runner.os }}
+
+      - name: Fast Setup FFmpeg & Arabic Font (~2s)
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg fonts-noto-core fonts-dejavu-core
+          mkdir -p ~/.local/share/fonts
+          if [ ! -f ~/.local/share/fonts/NotoSansArabic-Bold.ttf ]; then
+            curl -fsSL -o ~/.local/share/fonts/NotoSansArabic-Bold.ttf \
+              "https://raw.githubusercontent.com/notofonts/arabic/main/fonts/NotoSansArabic/full/ttf/NotoSansArabic-Bold.ttf" \
+              || true
+          fi
+          fc-cache -f ~/.local/share/fonts || true
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends ffmpeg
+          fi
 
       - name: Install Python Dependencies
         run: |
