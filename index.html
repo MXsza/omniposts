@@ -1155,10 +1155,10 @@
         <div class="space-y-1.5">
          <div class="flex items-center gap-1" dir="ltr">
           <button type="button" onclick="stepChannelDuration(-15)" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold text-xs">−</button>
-          <input type="number" id="channel-duration-manual" min="5" max="3600" step="5" value="30" oninput="handleManualDurationInput()" class="apple-input flex-1 px-2 py-1 text-xs font-bold text-center text-sky-300" />
+          <input type="number" id="channel-duration-manual" min="0" max="3600" step="5" value="0" oninput="handleManualDurationInput()" class="apple-input flex-1 px-2 py-1 text-xs font-bold text-center text-sky-300" />
           <button type="button" onclick="stepChannelDuration(15)" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold text-xs">+</button>
          </div>
-         <input type="range" id="channel-duration-select" min="5" max="3600" step="5" value="30" oninput="handleDurationSliderInput()" class="w-full accent-indigo-500 cursor-pointer h-1 bg-slate-700 rounded-lg" />
+         <input type="range" id="channel-duration-select" min="0" max="3600" step="5" value="0" oninput="handleDurationSliderInput()" class="w-full accent-indigo-500 cursor-pointer h-1 bg-slate-700 rounded-lg" />
          <div class="grid grid-cols-5 gap-1">
           <button type="button" onclick="setExactChannelDuration(30)" class="py-0.5 rounded bg-white/5 hover:bg-indigo-600/30 text-[10px] text-slate-200 font-semibold">30s</button>
           <button type="button" onclick="setExactChannelDuration(60)" class="py-0.5 rounded bg-white/5 hover:bg-indigo-600/30 text-[10px] text-slate-200 font-semibold">1m</button>
@@ -2197,16 +2197,16 @@
    },
    selectedChannelSlot: 1,
    channels: {
-    1: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #1 (Not Connected Yet)', nameAr: 'القناة رقم 1 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #1', niche: 'Islamic & Historical Wisdom Stories', customNiche: '', visualStyle: '3D Pixar & Disney Animation', voiceLocale: 'ar-EG', voiceGender: 'male', showSubtitles: true, dailyCount: 0, durationSec: 30, duration: '30 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية — مصري', timeSlots: [] },
-    2: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #2 (Not Connected Yet)', nameAr: 'القناة رقم 2 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #2', niche: 'Ancient History & Lost Civilizations', customNiche: '', visualStyle: 'Hyper-Realistic 8K Cinema', voiceLocale: 'ar-SA', voiceGender: 'male', showSubtitles: true, dailyCount: 0, durationSec: 30, duration: '30 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية — سعودي', timeSlots: [] },
-    3: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #3 (Not Connected Yet)', nameAr: 'القناة رقم 3 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #3', niche: 'Success, Wealth & Stoic Wisdom', customNiche: '', visualStyle: 'Dark Luxury & Moody Cinema', voiceLocale: 'ar-EG', voiceGender: 'male', showSubtitles: true, dailyCount: 0, durationSec: 30, duration: '30 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية — مصري', timeSlots: [] },
-    4: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #4 (Not Connected Yet)', nameAr: 'القناة رقم 4 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #4', niche: 'Space Mysteries & Cosmic Science', customNiche: '', visualStyle: 'Hyper-Realistic 8K Cinema', voiceLocale: 'en-US', voiceGender: 'male', showSubtitles: true, dailyCount: 0, durationSec: 30, duration: '30 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'English — US', timeSlots: [] },
-    5: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #5 (Not Connected Yet)', nameAr: 'القناة رقم 5 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #5', niche: 'Mystery, Suspense & Night Stories', customNiche: '', visualStyle: 'Dark Luxury & Moody Cinema', voiceLocale: 'ar-EG', voiceGender: 'male', showSubtitles: true, dailyCount: 0, durationSec: 30, duration: '30 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية — مصري', timeSlots: [] },
-    6: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #6 (Not Connected Yet)', nameAr: 'القناة رقم 6 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #6', niche: '3D Pixar Moral & Kids Stories', customNiche: '', visualStyle: '3D Pixar & Disney Animation', voiceLocale: 'ar-EG', voiceGender: 'female', showSubtitles: true, dailyCount: 0, durationSec: 30, duration: '30 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية — مصري', timeSlots: [] },
-    7: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #7 (Not Connected Yet)', nameAr: 'القناة رقم 7 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #7', niche: 'Amazing Facts & World Wonders', customNiche: '', visualStyle: 'Hyper-Realistic 8K Cinema', voiceLocale: 'ar-SA', voiceGender: 'male', showSubtitles: true, dailyCount: 0, durationSec: 30, duration: '30 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية — سعودي', timeSlots: [] },
-    8: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #8 (Not Connected Yet)', nameAr: 'القناة رقم 8 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #8', niche: 'Smart Book Summaries & Ideas', customNiche: '', visualStyle: 'Dark Luxury & Moody Cinema', voiceLocale: 'ar-EG', voiceGender: 'male', showSubtitles: true, dailyCount: 0, durationSec: 30, duration: '30 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية — مصري', timeSlots: [] },
-    9: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #9 (Not Connected Yet)', nameAr: 'القناة رقم 9 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #9', niche: 'Deep Ocean Mysteries & Nature', customNiche: '', visualStyle: 'Hyper-Realistic 8K Cinema', voiceLocale: 'en-US', voiceGender: 'female', showSubtitles: true, dailyCount: 0, durationSec: 30, duration: '30 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'English — US', timeSlots: [] },
-    10: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #10 (Not Connected Yet)', nameAr: 'القناة رقم 10 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #10', niche: 'Football Legends & Epic Sports Stories', customNiche: '', visualStyle: 'Anime & Studio Ghibli Style', voiceLocale: 'ar-EG', voiceGender: 'male', showSubtitles: true, dailyCount: 0, durationSec: 30, duration: '30 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية — مصري', timeSlots: [] }
+    1: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #1 (Not Connected Yet)', nameAr: 'القناة رقم 1 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #1', niche: 'Islamic & Historical Wisdom Stories', customNiche: '', visualStyle: '3D Pixar & Disney Animation', voiceLocale: 'ar-EG', voiceGender: 'male', showSubtitles: true, dailyCount: 0, durationSec: 0, duration: '0 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية — مصري', timeSlots: [] },
+    2: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #2 (Not Connected Yet)', nameAr: 'القناة رقم 2 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #2', niche: 'Ancient History & Lost Civilizations', customNiche: '', visualStyle: 'Hyper-Realistic 8K Cinema', voiceLocale: 'ar-SA', voiceGender: 'male', showSubtitles: true, dailyCount: 0, durationSec: 0, duration: '0 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية — سعودي', timeSlots: [] },
+    3: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #3 (Not Connected Yet)', nameAr: 'القناة رقم 3 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #3', niche: 'Success, Wealth & Stoic Wisdom', customNiche: '', visualStyle: 'Dark Luxury & Moody Cinema', voiceLocale: 'ar-EG', voiceGender: 'male', showSubtitles: true, dailyCount: 0, durationSec: 0, duration: '0 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية — مصري', timeSlots: [] },
+    4: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #4 (Not Connected Yet)', nameAr: 'القناة رقم 4 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #4', niche: 'Space Mysteries & Cosmic Science', customNiche: '', visualStyle: 'Hyper-Realistic 8K Cinema', voiceLocale: 'en-US', voiceGender: 'male', showSubtitles: true, dailyCount: 0, durationSec: 0, duration: '0 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'English — US', timeSlots: [] },
+    5: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #5 (Not Connected Yet)', nameAr: 'القناة رقم 5 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #5', niche: 'Mystery, Suspense & Night Stories', customNiche: '', visualStyle: 'Dark Luxury & Moody Cinema', voiceLocale: 'ar-EG', voiceGender: 'male', showSubtitles: true, dailyCount: 0, durationSec: 0, duration: '0 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية — مصري', timeSlots: [] },
+    6: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #6 (Not Connected Yet)', nameAr: 'القناة رقم 6 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #6', niche: '3D Pixar Moral & Kids Stories', customNiche: '', visualStyle: '3D Pixar & Disney Animation', voiceLocale: 'ar-EG', voiceGender: 'female', showSubtitles: true, dailyCount: 0, durationSec: 0, duration: '0 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية — مصري', timeSlots: [] },
+    7: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #7 (Not Connected Yet)', nameAr: 'القناة رقم 7 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #7', niche: 'Amazing Facts & World Wonders', customNiche: '', visualStyle: 'Hyper-Realistic 8K Cinema', voiceLocale: 'ar-SA', voiceGender: 'male', showSubtitles: true, dailyCount: 0, durationSec: 0, duration: '0 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية — سعودي', timeSlots: [] },
+    8: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #8 (Not Connected Yet)', nameAr: 'القناة رقم 8 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #8', niche: 'Smart Book Summaries & Ideas', customNiche: '', visualStyle: 'Dark Luxury & Moody Cinema', voiceLocale: 'ar-EG', voiceGender: 'male', showSubtitles: true, dailyCount: 0, durationSec: 0, duration: '0 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية — مصري', timeSlots: [] },
+    9: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #9 (Not Connected Yet)', nameAr: 'القناة رقم 9 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #9', niche: 'Deep Ocean Mysteries & Nature', customNiche: '', visualStyle: 'Hyper-Realistic 8K Cinema', voiceLocale: 'en-US', voiceGender: 'female', showSubtitles: true, dailyCount: 0, durationSec: 0, duration: '0 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'English — US', timeSlots: [] },
+    10: { connected: false, autoScheduleEnabled: false, nameEn: 'Channel #10 (Not Connected Yet)', nameAr: 'القناة رقم 10 (غير مربوطة بعد)', url: 'Click Link to connect YouTube channel #10', niche: 'Football Legends & Epic Sports Stories', customNiche: '', visualStyle: 'Anime & Studio Ghibli Style', voiceLocale: 'ar-EG', voiceGender: 'male', showSubtitles: true, dailyCount: 0, durationSec: 0, duration: '0 seconds', orientation: 'Vertical 9:16 (Shorts & Reels)', language: 'العربية — مصري', timeSlots: [] }
    },
    selectedCheckoutPlan: {
     nameEn: '1 Year Plan (20% OFF)',
@@ -3260,7 +3260,7 @@
      videoModel: 'runware-1080p-studio',
      resolution: '1080p',
      dailyCount: 0,
-     durationSec: 30,
+     durationSec: 0,
      duration: '30 seconds',
      orientation: 'Vertical 9:16 (Shorts & Reels)',
      language: 'العربية',
@@ -3956,7 +3956,7 @@
    
    
    document.getElementById('channel-daily-count').value = String(ch.dailyCount);
-   const durSec = Math.max(1, Math.min(3600, parseInt(ch.durationSec, 10) || 60));
+   const durSec = Math.max(0, Math.min(3600, parseInt(ch.durationSec, 10) || 0));
    document.getElementById('channel-duration-select').value = String(durSec);
    const manualEl = document.getElementById('channel-duration-manual');
    if (manualEl) manualEl.value = String(durSec);
@@ -4026,34 +4026,51 @@
    }
   }
   function formatDurationLabel(sec) {
-   const sVal = Math.max(5, Math.min(3600, parseInt(sec, 10) || 5));
+   const parsed = parseInt(sec, 10);
+   if (isNaN(parsed) || parsed <= 0) {
+    return isEn() ? '0s (Choose duration)' : '0 ثانية (اختر المدة)';
+   }
+   const sVal = Math.max(5, Math.min(3600, parsed));
    if (sVal < 60) {
-    return isEn() ? (sVal + ' seconds') : (toLocalizedDigits(sVal) + (sVal <= 10 ? ' ثوانٍ' : ' ثانية'));
+    return isEn() ? (sVal + 's') : (sVal + (sVal <= 10 ? ' ثوانٍ' : ' ثانية'));
    }
    const mins = Math.floor(sVal / 60);
    const remSec = sVal % 60;
    if (mins === 60 && remSec === 0) {
-    return isEn() ? '60 mins (1 Full Hour 🎬)' : '٦٠ دقيقة (ساعة كاملة 🎬)';
+    return isEn() ? '60 mins (1 Full Hour 🎬)' : '60 دقيقة (ساعة كاملة 🎬)';
    }
    if (remSec === 0) {
-    return isEn() ? (mins + (mins === 1 ? ' min (' + sVal + 's)' : ' mins (' + sVal + 's)')) : (toLocalizedDigits(mins) + (mins <= 10 ? ' دقائق' : ' دقيقة'));
+    return isEn() ? (mins + (mins === 1 ? ' min' : ' mins')) : (mins + (mins === 1 ? ' دقيقة' : (mins <= 10 ? ' دقائق' : ' دقيقة')));
    }
-   return isEn() ? (mins + 'm ' + remSec + 's') : (toLocalizedDigits(mins) + ' د و ' + toLocalizedDigits(remSec) + ' ث');
+   return isEn() ? (mins + 'm ' + remSec + 's') : (mins + ' د و ' + remSec + ' ث');
   }
   function updateDurationDisplayLabel(sec) {
-   const clamped = Math.max(5, Math.min(3600, parseInt(sec, 10) || 5));
-   const creditCost = calculateVideoCreditCost(clamped);
+   const rawParsed = parseInt(sec, 10);
+   const isZero = isNaN(rawParsed) || rawParsed <= 0;
+   const clamped = isZero ? 0 : Math.max(5, Math.min(3600, rawParsed));
    const disp = document.getElementById('channel-duration-display');
-   if (disp) {
-    disp.textContent = formatDurationLabel(clamped) + ' • ' + t('Video Cost: ' + creditCost + ' دقيقة 1080p ⏱️', 'تكلفة هذا الفيديو: ' + creditCost + ' دقيقة 1080p ⏱️');
-   }
    const costBadge = document.getElementById('duration-credit-cost-badge');
-   if (costBadge) {
-    const scCnt = computeVideoSceneCount(sec); const durNiceAr = sec < 60 ? (sec + ' ثانية') : (sec % 60 === 0 ? ((sec / 60) + ' دقيقة') : (Math.floor(sec / 60) + ' د ' + (sec % 60) + ' ث')); const durNiceEn = sec < 60 ? (sec + 's') : (sec % 60 === 0 ? ((sec / 60) + ' min') : (Math.floor(sec / 60) + 'm ' + (sec % 60) + 's')); costBadge.textContent = t('Deducts ' + durNiceEn + ' • ' + scCnt + ' scenes 1080p', 'يخصم ' + durNiceAr + ' • ' + scCnt + ' مشهد 1080p');
-   }
    const genBtn = document.getElementById('btn-generate-publish-now');
-   if (genBtn && !genBtn.disabled) {
-    genBtn.textContent = t('🚀 Generate & Publish Now (' + creditCost + ' دقيقة 1080p ⏱️)', '🚀 توليد ونشر الفيديو الآن (' + creditCost + ' دقيقة 1080p ⏱️)');
+
+   if (isZero) {
+    if (disp) disp.textContent = t('0s — Choose duration first', '0 ثانية — اختر مدة الفيديو أولاً');
+    if (costBadge) costBadge.textContent = t('Select duration (5s – 60m)', 'اختر المدة (من 5 ثوانٍ حتى 60 دقيقة)');
+    if (genBtn && !genBtn.disabled) {
+     genBtn.textContent = t('🚀 Generate & Publish Now (Select Duration First)', '🚀 توليد ونشر الفيديو الآن (اختر المدة أولاً)');
+    }
+   } else {
+    const scCnt = computeVideoSceneCount(clamped);
+    const durNiceAr = clamped < 60 ? (clamped + (clamped <= 10 ? ' ثوانٍ' : ' ثانية')) : (clamped % 60 === 0 ? ((clamped / 60) + (clamped === 60 ? ' دقيقة' : (clamped / 60 <= 10 ? ' دقائق' : ' دقيقة'))) : (Math.floor(clamped / 60) + ' د ' + (clamped % 60) + ' ث'));
+    const durNiceEn = clamped < 60 ? (clamped + 's') : (clamped % 60 === 0 ? ((clamped / 60) + ' min') : (Math.floor(clamped / 60) + 'm ' + (clamped % 60) + 's'));
+    if (disp) {
+     disp.textContent = formatDurationLabel(clamped) + ' • ' + t('Cost: ' + durNiceEn + ' (1080p ⏱️)', 'التكلفة: ' + durNiceAr + ' (1080p ⏱️)');
+    }
+    if (costBadge) {
+     costBadge.textContent = t('Deducts ' + durNiceEn + ' • ' + scCnt + ' scenes 1080p', 'يخصم ' + durNiceAr + ' • ' + scCnt + ' مشهد 1080p');
+    }
+    if (genBtn && !genBtn.disabled) {
+     genBtn.textContent = t('🚀 Generate & Publish Now (' + durNiceEn + ' • 1080p ⏱️)', '🚀 توليد ونشر الفيديو الآن (' + durNiceAr + ' • 1080p ⏱️)');
+    }
    }
    const manualEl = document.getElementById('channel-duration-manual');
    if (manualEl && document.activeElement !== manualEl) {
@@ -4075,7 +4092,7 @@
   }
   function handleDurationSliderInput() {
    const slider = document.getElementById('channel-duration-select');
-   const sec = Math.max(5, Math.min(3600, parseInt(slider.value, 10) || 5));
+   const rawS = parseInt(slider.value, 10); const sec = (isNaN(rawS) || rawS <= 0) ? 0 : Math.max(5, Math.min(3600, rawS));
    const manualEl = document.getElementById('channel-duration-manual');
    if (manualEl) manualEl.value = String(sec);
    updateDurationDisplayLabel(sec);
@@ -4086,7 +4103,7 @@
    if (!manualEl) return;
    const raw = parseInt(manualEl.value, 10);
    if (isNaN(raw)) return;
-   const sec = Math.max(5, Math.min(3600, raw));
+   const sec = raw <= 0 ? 0 : Math.max(5, Math.min(3600, raw));
    const slider = document.getElementById('channel-duration-select');
    if (slider) slider.value = String(sec);
    updateDurationDisplayLabel(sec);
@@ -4385,8 +4402,8 @@
    
    
    const parsedDc = parseInt(document.getElementById('channel-daily-count').value, 10); ch.dailyCount = isNaN(parsedDc) ? 0 : parsedDc;
-   const durSec = parseInt(document.getElementById('channel-duration-select').value, 10) || 60;
-   ch.durationSec = Math.max(1, Math.min(3600, durSec));
+   const durSec = parseInt(document.getElementById('channel-duration-select').value, 10) || 0;
+   ch.durationSec = Math.max(0, Math.min(3600, durSec));
    ch.duration = formatDurationLabel(ch.durationSec);
    updateDurationDisplayLabel(ch.durationSec);
    ch.orientation = document.getElementById('channel-orientation-select').value;
@@ -4413,7 +4430,7 @@
      connected: ch.connected,
      niche: (ch.customNiche && ch.customNiche.trim()) ? ch.customNiche.trim() : ch.niche,
      daily_count: ch.dailyCount,
-     duration_sec: ch.durationSec || 60,
+     duration_sec: (ch.durationSec && ch.durationSec >= 5) ? ch.durationSec : 30,
      orientation: ch.orientation,
      video_language: ch.language,
      time_slots: ch.timeSlots,
@@ -4891,6 +4908,19 @@
       activeLivePollTimer = null;
       isGenerationCurrentlyRunning = false;
       if (genBtn) genBtn.disabled = false;
+      if (res.job.status === 'completed' && typeof recordPublishHistoryEntry === 'function') {
+       recordPublishHistoryEntry({
+        dateKey: getTodayDateKey(0),
+        time24: new Date().toTimeString().slice(0, 5),
+        slotNum: res.job.slot_number || 1,
+        channelName: res.job.channel_name || ('Channel #' + (res.job.slot_number || 1)),
+        title: res.job.video_title || res.job.niche || 'AI Video',
+        status: 'success',
+        videoUrl: res.job.youtube_url || (res.job.youtube_video_id ? ('https://www.youtube.com/watch?v=' + res.job.youtube_video_id) : ''),
+        downloadUrl: res.job.download_url || '',
+        isScheduled: res.job.trigger_source === 'cron'
+       });
+      }
       if (typeof loadCloudPublishLogsFromSupabase === 'function') loadCloudPublishLogsFromSupabase();
       if (res.job.status === 'completed') {
        showToast(t('🎉 1080p Video Published to YouTube!', '🎉 تم توليد ونشر الفيديو بدقة 1080p على قناتك بنجاح!'), 'info');
@@ -4912,7 +4942,9 @@
    const slot = forcedSlotNum || appState.selectedChannelSlot;
    if (forcedSlotNum && forcedSlotNum !== appState.selectedChannelSlot) selectChannelSlot(forcedSlotNum);
    const ch = appState.channels[slot];
-   const durSec = Math.max(5, Math.min(3600, parseInt(ch ? ch.durationSec : 30, 10) || 30));
+   const rawDurSec = parseInt(document.getElementById('channel-duration-manual') ? document.getElementById('channel-duration-manual').value : (ch ? ch.durationSec : 0), 10) || 0;
+   if (rawDurSec < 5) { showToast(t('⚠️ Please select a video duration first (e.g., 10s or 30s).', '⚠️ يرجى اختيار مدة الفيديو أولاً (مثلاً 10 أو 30 ثانية) قبل الضغط على التوليد.'), 'warn'); return; }
+   const durSec = Math.max(5, Math.min(3600, rawDurSec));
    const requiredMin = calculateVideoCreditCost(durSec);
    const curMin = isOwner ? 999999 : (parseFloat(u && u.credits) || 0);
    if (!isOwner && (!u.subscribed && curMin <= 0)) {
@@ -5015,7 +5047,7 @@
   }
 
   let schedulerDaemonTimer = null;
-  let currentPublishHistoryFilter = 'today';
+  let currentPublishHistoryFilter = 'all';
   function getTodayDateKey(offsetDays) {
    const d = new Date(Date.now() + ((offsetDays || 0) * 86400000));
    const yyyy = d.getFullYear();
@@ -5059,7 +5091,7 @@
    } catch (e) {}
   }
   function setPublishHistoryFilter(mode) {
-   currentPublishHistoryFilter = mode || 'today';
+   currentPublishHistoryFilter = mode || 'all';
    ['today', 'yesterday', 'all'].forEach(function(m) {
     const btn = document.getElementById('hist-filter-' + m);
     if (!btn) return;
@@ -5070,31 +5102,76 @@
    renderSavedSchedulesTable();
    renderPublishHistoryLog();
   }
+  function formatLocalDateKeyFromIso(isoStr) {
+   try {
+    const d = isoStr ? new Date(isoStr) : new Date();
+    if (isNaN(d.getTime())) return getTodayDateKey(0);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+   } catch (e) { return getTodayDateKey(0); }
+  }
   function loadCloudPublishLogsFromSupabase() {
    if (!supabaseClient || !appState.currentUser || !appState.currentUser.email) return Promise.resolve();
-   return sbExec(
-    supabaseClient.from('publish_logs').select('*').ilike('user_email', appState.currentUser.email).order('created_at', { ascending: false }).limit(60)
-   ).then(function(res) {
-    if (res && Array.isArray(res.data) && res.data.length > 0) {
-     const mapped = res.data.map(function(r) {
-      return {
-       dateKey: r.date_key || getTodayDateKey(0),
-       time24: r.time_slot || '',
+   const em = appState.currentUser.email;
+   return Promise.all([
+    sbExec(supabaseClient.from('render_jobs').select('*').ilike('user_email', em).in('status', ['completed', 'failed']).order('created_at', { ascending: false }).limit(60)),
+    sbExec(supabaseClient.from('publish_logs').select('*').ilike('user_email', em).order('created_at', { ascending: false }).limit(60))
+   ]).then(function(results) {
+    const jobsRes = results[0];
+    const logsRes = results[1];
+    const byKey = {};
+    const merged = [];
+    if (jobsRes && Array.isArray(jobsRes.data)) {
+     jobsRes.data.forEach(function(j) {
+      const ytUrl = j.youtube_url || (j.youtube_video_id ? ('https://www.youtube.com/watch?v=' + j.youtube_video_id) : '');
+      const k = j.youtube_video_id || ('job_' + j.id);
+      const dObj = j.created_at ? new Date(j.created_at) : new Date();
+      const timeStr = (j.time_slot && j.time_slot !== 'Instant') ? j.time_slot : (String(dObj.getHours()).padStart(2, '0') + ':' + String(dObj.getMinutes()).padStart(2, '0'));
+      const entry = {
+       dateKey: formatLocalDateKeyFromIso(j.created_at),
+       time24: timeStr,
+       slotNum: j.slot_number || 1,
+       channelName: j.channel_name || ('Channel #' + (j.slot_number || 1)),
+       title: j.video_title || j.niche || 'AI Video',
+       status: j.status === 'completed' ? 'success' : 'failed',
+       videoUrl: ytUrl,
+       downloadUrl: j.download_url || '',
+       errorReason: j.error_message || '',
+       isScheduled: j.trigger_source === 'cron',
+       createdAt: dObj.getTime()
+      };
+      byKey[k] = entry;
+      merged.push(entry);
+     });
+    }
+    if (logsRes && Array.isArray(logsRes.data)) {
+     logsRes.data.forEach(function(r) {
+      const k = r.youtube_video_id || ('log_' + (r.id || r.created_at));
+      if (byKey[k]) return;
+      const dObj = r.created_at ? new Date(r.created_at) : new Date();
+      const entry = {
+       dateKey: r.created_at ? formatLocalDateKeyFromIso(r.created_at) : (r.date_key || getTodayDateKey(0)),
+       time24: (r.time_slot && r.time_slot !== 'Instant') ? r.time_slot : (String(dObj.getHours()).padStart(2, '0') + ':' + String(dObj.getMinutes()).padStart(2, '0')),
        slotNum: r.slot_number || 1,
        channelName: r.channel_name || ('Channel #' + (r.slot_number || 1)),
        title: r.video_title || 'AI Video',
        status: r.status || 'success',
        videoUrl: r.video_url || (r.youtube_video_id ? ('https://www.youtube.com/watch?v=' + r.youtube_video_id) : ''),
+       downloadUrl: '',
        errorReason: r.error_reason || '',
        isScheduled: Boolean(r.is_scheduled),
-       createdAt: r.created_at ? new Date(r.created_at).getTime() : Date.now()
+       createdAt: dObj.getTime()
       };
+      byKey[k] = entry;
+      merged.push(entry);
      });
-     try {
-      localStorage.setItem(getPublishHistoryStorageKey(), JSON.stringify(mapped));
-     } catch (e) {}
-     renderPublishHistoryLog();
     }
+    merged.sort(function(a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
+    if (merged.length > 0) {
+     try {
+      localStorage.setItem(getPublishHistoryStorageKey(), JSON.stringify(merged.slice(0, 80)));
+     } catch (e) {}
+    }
+    renderPublishHistoryLog();
    }).catch(function() {});
   }
   function triggerCloudAutopilotCheckNow() {
@@ -5141,8 +5218,14 @@
     const typeTag = item.isScheduled
      ? '<span class="text-[10px] text-indigo-300 font-semibold">' + t('Scheduled', 'مجدول') + '</span>'
      : '<span class="text-[10px] text-sky-300 font-semibold">' + t('Manual', 'يدوي') + '</span>';
-    const linkHtml = item.videoUrl
-     ? '<a href="' + item.videoUrl + '" target="_blank" rel="noopener noreferrer" class="text-[10px] text-sky-400 underline font-semibold">' + t('Watch on YouTube', 'مشاهدة على يوتيوب') + '</a>'
+    const ytBtn = item.videoUrl
+     ? '<a href="' + item.videoUrl + '" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-[10px] text-red-200 font-bold transition">' + t('▶ YouTube', '▶ مشاهدة على يوتيوب') + '</a>'
+     : '';
+    const dlBtn = (isOk && item.downloadUrl)
+     ? '<a href="' + item.downloadUrl + '" target="_blank" rel="noopener noreferrer" download class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-[10px] text-emerald-200 font-bold transition">' + t('⬇️ Download MP4', '⬇️ تحميل MP4') + '</a>'
+     : '';
+    const linkHtml = (ytBtn || dlBtn)
+     ? '<div class="flex flex-wrap items-center gap-1.5">' + ytBtn + dlBtn + '</div>'
      : (item.errorReason ? '<span class="text-[10px] text-amber-300 truncate max-w-[200px]">' + item.errorReason + '</span>' : '');
     return '<div class="p-2.5 rounded-xl bg-white/5 border border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs">' +
      '<div class="min-w-0 flex-1">' +
@@ -5854,7 +5937,7 @@
      connected: true,
      niche: ch.niche || 'Islamic & Historical Wisdom Stories',
      daily_count: ch.dailyCount || 0,
-     duration_sec: ch.durationSec || 60,
+     duration_sec: (ch.durationSec && ch.durationSec >= 5) ? ch.durationSec : 30,
      orientation: ch.orientation || 'Vertical 9:16 (Shorts & Reels)',
      video_language: ch.language || 'English',
      time_slots: Array.isArray(ch.timeSlots) ? ch.timeSlots : []
