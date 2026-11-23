@@ -1,4 +1,3 @@
-```python
 #!/usr/bin/env python3
 """
 Omniposts.online — 24/7 1080p Cloud Video Worker
