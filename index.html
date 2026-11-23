@@ -1715,81 +1715,54 @@
      </div>
     </div>
    
-    <div id="checkout-panel" class="hidden mt-10 apple-bento p-7 border-2 border-emerald-500/50">
-    <div class="flex items-center justify-between pb-4 border-b border-white/10">
-     <div>
-      <span class="text-xs text-emerald-400 font-bold uppercase" data-en="Complete Checkout & Instant Auto-Activation" data-ar="إتمام الدفع والتفعيل الأوتوماتيكي الفوري">Complete Checkout & Instant Auto-Activation</span>
-      <h3 id="checkout-plan-title" class="text-xl font-bold text-white mt-0.5">Subscribing to: Starter Plan</h3>
-     </div>
-     <button type="button" onclick="closeCheckoutModal()" class="w-8 h-8 rounded-full bg-white/10 text-zinc-300 hover:text-white">✕</button>
-    </div>
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-5">
-     <div class="lg:col-span-7 space-y-4">
-      <div id="egypt-gateway-methods" class="hidden space-y-3">
-       <div class="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-xs text-blue-200" data-en="Pay in Egyptian Pound (EGP — Vodafone Cash / InstaPay / Meeza):" data-ar="دفع بالجنيه المصري (فودافون كاش / إنستاباي / بطاقات ميزة):">
-        دفع بالجنيه المصري (فودافون كاش / إنستاباي / بطاقات ميزة):
+    <div id="checkout-panel" class="hidden fixed inset-0 z-[9999] bg-zinc-950 flex flex-col w-screen h-[100dvh] overflow-hidden">
+     <div class="flex-none px-4 py-3 bg-zinc-900/95 border-b border-white/10 flex items-center justify-between gap-3">
+      <div class="min-w-0 flex-1">
+       <div class="flex items-center gap-2 flex-wrap">
+        <h3 id="checkout-plan-title" class="text-sm sm:text-base font-bold text-white truncate">الاشتراك في: Starter Plan</h3>
+        <span id="summary-total-amount" class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-extrabold whitespace-nowrap">$19.99 USD</span>
        </div>
-       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-        <label class="p-3.5 rounded-xl bg-white/5 border border-blue-500/40 flex items-center gap-2.5 cursor-pointer">
-         <input type="radio" name="pay_method" checked class="accent-blue-500" />
-         <span data-en="Vodafone Cash / Mobile Wallets (Orange, Etisalat, WE)" data-ar="فودافون كاش / محافظ الهاتف (اتصالات، أورانج، وي)">Vodafone Cash / Mobile Wallets (Orange, Etisalat, WE)</span>
-        </label>
-        <label class="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-center gap-2.5 cursor-pointer">
-         <input type="radio" name="pay_method" class="accent-blue-500" />
-         <span data-en="InstaPay Egypt (Instant Bank Transfer)" data-ar="إنستا باي (InstaPay Egypt) تحويل لحظي">InstaPay Egypt (Instant Bank Transfer)</span>
-        </label>
-        <label class="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-center gap-2.5 cursor-pointer">
-         <input type="radio" name="pay_method" class="accent-blue-500" />
-         <span data-en="Meeza / Local Egyptian Visa & Mastercard" data-ar="بطاقات ميزة / فيزا / ماستركارد المحلية">Meeza / Local Egyptian Visa & Mastercard</span>
-        </label>
-        <label class="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-center gap-2.5 cursor-pointer">
-         <input type="radio" name="pay_method" class="accent-blue-500" />
-         <span data-en="Fawry Pay Reference Code" data-ar="كود فوري (Fawry Pay)">Fawry Pay Reference Code</span>
-        </label>
-       </div>
+       <p id="whop-session-status-text" class="text-[11px] text-emerald-300/90 mt-0.5 truncate" data-en="🔒 Secure Payment — Auto-activates your plan immediately upon completion" data-ar="🔒 دفع آمن — يتفعّل حسابك وتُضاف دقائقك تلقائياً فور إتمام الدفع">🔒 دفع آمن — يتفعّل حسابك وتُضاف دقائقك تلقائياً فور إتمام الدفع</p>
       </div>
-      <div id="intl-gateway-methods" class="space-y-3">
-       <div class="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex flex-wrap items-center justify-between gap-2 text-xs text-emerald-200">
-        <span id="whop-session-status-text" data-en="Global USD Checkout: Generating your secure checkout session..." data-ar="الدفع العالمي بالدولار: جاري تجهيز جلسة الدفع الآمنة...">الدفع العالمي بالدولار: جاري تجهيز جلسة الدفع الآمنة...</span>
-        <a id="whop-external-checkout-link" href="https://whop.com/checkout" target="_blank" rel="noopener noreferrer" class="px-3 py-1 rounded-full bg-emerald-500 text-black font-extrabold text-[11px] hover:bg-emerald-400 transition" data-en="↗ Open Checkout in New Tab" data-ar="↗ فتح صفحة الدفع في نافذة مستقلة">↗ فتح صفحة الدفع في نافذة مستقلة</a>
-       </div>
-       <div class="rounded-2xl overflow-hidden border border-white/15 bg-zinc-950 shadow-2xl">
-        <iframe id="gumroad-inline-iframe" src="about:blank" class="w-full border-0" style="height: 540px; min-height: 480px;" allow="payment *"></iframe>
-       </div>
+      <div class="flex items-center gap-2 flex-none">
+       <a id="whop-external-checkout-link" href="https://whop.com/checkout" target="_blank" rel="noopener noreferrer" class="hidden"></a>
+       <span id="summary-plan-name" class="hidden"></span>
+       <span id="summary-plan-days" class="hidden"></span>
+       <span id="summary-gateway-name" class="hidden"></span>
+       <button type="button" onclick="closeCheckoutModal()" class="px-3.5 py-2 rounded-full bg-white/10 hover:bg-white/20 text-zinc-200 hover:text-white text-xs font-bold transition flex items-center gap-1" data-en="✕ Close" data-ar="✕ رجوع">✕ رجوع</button>
+      </div>
+     </div>
+     <div id="intl-gateway-methods" class="flex-1 w-full h-full flex flex-col overflow-hidden bg-white">
+      <iframe id="gumroad-inline-iframe" src="about:blank" class="flex-1 w-full h-full border-0 bg-white" style="width:100%;height:100%;min-height:0;" allow="payment *; clipboard-write"></iframe>
+     </div>
+     <div id="egypt-gateway-methods" class="hidden flex-1 overflow-y-auto p-6 max-w-2xl mx-auto w-full space-y-4">
+      <div class="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-sm text-blue-200" data-en="Pay in Egyptian Pound (EGP — Vodafone Cash / InstaPay / Meeza):" data-ar="دفع بالجنيه المصري (فودافون كاش / إنستاباي / بطاقات ميزة):">
+       دفع بالجنيه المصري (فودافون كاش / إنستاباي / بطاقات ميزة):
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+       <label class="p-3.5 rounded-xl bg-white/5 border border-blue-500/40 flex items-center gap-2.5 cursor-pointer">
+        <input type="radio" name="pay_method" checked class="accent-blue-500" />
+        <span data-en="Vodafone Cash / Mobile Wallets (Orange, Etisalat, WE)" data-ar="فودافون كاش / محافظ الهاتف (اتصالات، أورانج، وي)">فودافون كاش / محافظ الهاتف (اتصالات، أورانج، وي)</span>
+       </label>
+       <label class="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-center gap-2.5 cursor-pointer">
+        <input type="radio" name="pay_method" class="accent-blue-500" />
+        <span data-en="InstaPay Egypt (Instant Bank Transfer)" data-ar="إنستا باي (InstaPay Egypt) تحويل لحظي">إنستا باي (InstaPay Egypt) تحويل لحظي</span>
+       </label>
+       <label class="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-center gap-2.5 cursor-pointer">
+        <input type="radio" name="pay_method" class="accent-blue-500" />
+        <span data-en="Meeza / Local Egyptian Visa & Mastercard" data-ar="بطاقات ميزة / فيزا / ماستركارد المحلية">بطاقات ميزة / فيزا / ماستركارد المحلية</span>
+       </label>
+       <label class="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-center gap-2.5 cursor-pointer">
+        <input type="radio" name="pay_method" class="accent-blue-500" />
+        <span data-en="Fawry Pay Reference Code" data-ar="كود فوري (Fawry Pay)">كود فوري (Fawry Pay)</span>
+       </label>
       </div>
       <div id="egypt-Manual-Fields" class="hidden grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
        <input type="text" id="checkout-payer-info" placeholder="Wallet / InstaPay Reference" data-ph-en="Wallet / InstaPay Reference" data-ph-ar="رقم المحفظة أو حساب إنستاباي" value="" class="apple-input px-4 py-2.5 text-sm" dir="ltr" />
        <input type="text" id="checkout-payer-name" placeholder="Account Holder Name" data-ph-en="Account Holder Name" data-ph-ar="اسم صاحب الحساب" value="" class="apple-input px-4 py-2.5 text-sm" />
       </div>
      </div>
-     <div class="lg:col-span-5 p-5 rounded-2xl bg-black/60 border border-white/10 flex flex-col justify-between">
-      <div class="space-y-2.5 text-sm">
-       <div class="flex justify-between text-zinc-400">
-        <span data-en="Selected Plan:" data-ar="الباقة المختارة:">Selected Plan:</span>
-        <strong id="summary-plan-name" class="text-white">Starter Plan (60 دقيقة 1080p)</strong>
-       </div>
-       <div class="flex justify-between text-zinc-400">
-        <span data-en="Credits & Validity:" data-ar="الرصيد والصلاحية:">Credits & Validity:</span>
-        <strong id="summary-plan-days" class="text-emerald-400">60 دقيقة 1080p (لا تنتهي أبداً)</strong>
-       </div>
-       <div class="flex justify-between text-zinc-400">
-        <span data-en="Payment Gateway:" data-ar="بوابة الدفع:">Payment Gateway:</span>
-        <strong id="summary-gateway-name" class="text-blue-400">دفع دولي بالدولار (USD $)</strong>
-       </div>
-       <div class="pt-3 border-t border-white/10 flex justify-between items-baseline">
-        <span class="font-bold text-white" data-en="Total Due:" data-ar="الإجمالي المطلوب دفعه:">Total Due:</span>
-        <strong id="summary-total-amount" class="text-2xl font-extrabold text-emerald-400">$19.99 USD (≈ 1,077 EGP)</strong>
-       </div>
-      </div>
-      <div class="mt-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-200 leading-relaxed" data-en="Complete your payment inside the embedded checkout window. Once paid, your account unlocks automatically, or click below to verify your payment status from the database." data-ar="أتمم عملية الدفع من داخل نافذة الدفع المدمجة، وبمجرد إتمام الدفع الفعلي سيتم تفعيل حسابك وإضافة الكريدت تلقائياً أو اضغط الزر بالأسفل للتحقق الفوري.">
-       Complete your payment inside the embedded checkout window. Once paid, your account unlocks automatically, or click below to verify your payment status from the database.
-      </div>
-      <button type="button" onclick="completeSubscriptionPayment()" id="verify-payment-status-btn" class="mt-3 w-full apple-btn-primary py-3.5 text-sm font-bold shadow-lg shadow-blue-600/30" data-en="Verify Completed Payment Status" data-ar="التحقق من إتمام الدفع وتفعيل الحساب">
-       Verify Completed Payment Status
-      </button>
-     </div>
     </div>
-   </div>
    </div>
   </section>
  <section id="view-policies" class="hidden flex-1 py-10 px-4 sm:px-6 overflow-x-hidden max-w-full">
@@ -5744,6 +5717,53 @@
    updateCheckoutSummary();
    updateCustomPlanSlider();
   }
+  let whopAutoPollTimer = null;
+  function stopWhopAutoActivationWatcher() {
+   if (whopAutoPollTimer) {
+    clearInterval(whopAutoPollTimer);
+    whopAutoPollTimer = null;
+   }
+  }
+  function startWhopAutoActivationWatcher() {
+   stopWhopAutoActivationWatcher();
+   if (!supabaseClient || !appState.currentUser || !appState.currentUser.email) return;
+   const uEmail = appState.currentUser.email;
+   const baseCredits = parseFloat(appState.currentUser.credits) || 0;
+   const basePaidUsd = parseFloat(appState.currentUser.paidUsd) || 0;
+   const wasSubscribed = Boolean(appState.currentUser.subscribed);
+   let pollCount = 0;
+   whopAutoPollTimer = setInterval(function() {
+    pollCount++;
+    if (pollCount > 200) { stopWhopAutoActivationWatcher(); return; }
+    const panel = document.getElementById('checkout-panel');
+    if (!panel || panel.classList.contains('hidden')) { stopWhopAutoActivationWatcher(); return; }
+    sbExec(
+     supabaseClient.from('profiles').select('subscribed,plan_name,remaining_days,ai_provider').ilike('email', uEmail).maybeSingle()
+    ).then(function(res) {
+     if (!res || !res.data) return;
+     const row = res.data;
+     const meta = decodeUserCreditsMeta(row.ai_provider, row.subscribed);
+     const creditedNow = (meta.credits > baseCredits + 0.01) || (meta.paidUsd > basePaidUsd + 0.01) || (!wasSubscribed && row.subscribed === true);
+     if (creditedNow) {
+      stopWhopAutoActivationWatcher();
+      appState.currentUser.subscribed = true;
+      appState.currentUser.credits = meta.credits;
+      appState.currentUser.paidUsd = meta.paidUsd;
+      appState.currentUser.claimedRewardTier = meta.rewardTier;
+      appState.currentUser.remainingDays = row.remaining_days || 30;
+      if (row.plan_name) {
+       appState.currentUser.planNameEn = row.plan_name;
+       appState.currentUser.planNameAr = row.plan_name;
+      }
+      persistCurrentUserEverywhere();
+      closeCheckoutModal();
+      syncDashboardUI();
+      navigateView('dashboard');
+      showToast(t('🎉 Payment completed! Your plan & ' + meta.credits + ' minutes are now active!', '🎉 تم الدفع بنجاح! تم تفعيل باقتك وإضافة رصيدك (' + meta.credits + ' دقيقة) تلقائياً!'), 'info');
+     }
+    }).catch(function() {});
+   }, 3000);
+  }
   function openCheckoutModal(planName, usdPrice, days, creditsAmount) {
    const cr = parseInt(creditsAmount, 10) || 1000;
    appState.selectedCheckoutPlan = {
@@ -5754,13 +5774,18 @@
     credits: cr
    };
    const panel = document.getElementById('checkout-panel');
+   const iframe = document.getElementById('gumroad-inline-iframe');
+   if (iframe) iframe.src = 'about:blank';
    panel.classList.remove('hidden');
+   document.body.style.overflow = 'hidden';
    updateCheckoutSummary();
-   panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
    createWhopDynamicCheckoutSession(planName, usdPrice, cr);
+   startWhopAutoActivationWatcher();
   }
   function closeCheckoutModal() {
+   stopWhopAutoActivationWatcher();
    const _cpEl = document.getElementById('checkout-panel'); if (_cpEl) _cpEl.classList.add('hidden');
+   document.body.style.overflow = '';
   }
   function updateCheckoutSummary() {
    const p = appState.selectedCheckoutPlan;
@@ -5776,7 +5801,7 @@
     document.getElementById('summary-total-amount').textContent = egpEquivalent + (isEn() ? ' EGP ($' : ' ج.م ($') + Number(p.usdPrice).toFixed(2) + ' USD)';
    } else {
     document.getElementById('summary-gateway-name').textContent = t('Global Payment in USD ($)', 'دفع دولي بالدولار (USD $)');
-    document.getElementById('summary-total-amount').textContent = '$' + Number(p.usdPrice).toFixed(2) + ' USD (≈ ' + egpEquivalent + (isEn() ? ' EGP)' : ' ج.م)');
+    document.getElementById('summary-total-amount').textContent = '$' + Number(p.usdPrice).toFixed(2) + ' USD';
    }
   }
   function activateVerifiedSubscriptionFromGumroad() {
