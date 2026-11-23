@@ -1,17 +1,4 @@
 #!/usr/bin/env python3
-"""
-Omniposts.online — 24/7 1080p Cloud Video Worker
-Pipeline:
-  1. Load job & YouTube channel credentials from Supabase (render_jobs + channels)
-  2. Generate localized viral story script + scene prompts + title/description via Runware Chat Completions
-  3. Generate N scene images in parallel via Runware imageInference (runware:100@1 FLUX.1 schnell)
-     and push live preview image URLs to Supabase render_jobs so the user watches scenes appear live!
-  4. Synthesize natural voiceover in any world language/dialect (Male/Female) via Edge TTS (free)
-  5. Assemble Full HD 1080p MP4 with smooth Ken Burns zoom/pan + crisp multilingual/RTL subtitles via FFmpeg
-  6. Upload to YouTube via OAuth 2.0 Resumable Upload, deduct exact minutes from profiles.ai_provider ONLY on success,
-     and update render_jobs + publish_logs.
-"""
-
 import asyncio
 import datetime
 import json
@@ -31,9 +18,6 @@ import requests
 from bidi.algorithm import get_display
 from PIL import Image, ImageDraw, ImageFont
 
-# ==============================================================================
-# Environment & Configuration
-# ==============================================================================
 OWNER_ADMIN_EMAIL = "ma1979368@gmail.com"
 JOB_ID = os.environ.get("JOB_ID", "").strip()
 RUNWARE_API_KEY = os.environ.get("RUNWARE_API_KEY", "").strip()
@@ -52,11 +36,7 @@ SB_HEADERS = {
     "Prefer": "return=representation",
 }
 
-# ==============================================================================
-# Comprehensive World Languages & Dialects Voice Map (Edge TTS — Male & Female)
-# ==============================================================================
 VOICE_MAP = {
-    # Arabic Dialects (15 dialects)
     "ar-EG": {"male": "ar-EG-ShakirNeural", "female": "ar-EG-SalmaNeural"},
     "ar-SA": {"male": "ar-SA-HamedNeural", "female": "ar-SA-ZariyahNeural"},
     "ar-AE": {"male": "ar-AE-HamdanNeural", "female": "ar-AE-FatimaNeural"},
@@ -72,13 +52,11 @@ VOICE_MAP = {
     "ar-LY": {"male": "ar-LY-OmarNeural", "female": "ar-LY-ImanNeural"},
     "ar-YE": {"male": "ar-YE-SalehNeural", "female": "ar-YE-MaryamNeural"},
     "ar-OM": {"male": "ar-OM-AbdullahNeural", "female": "ar-OM-AyshaNeural"},
-    # English Dialects
     "en-US": {"male": "en-US-AndrewNeural", "female": "en-US-AvaNeural"},
     "en-GB": {"male": "en-GB-RyanNeural", "female": "en-GB-SoniaNeural"},
     "en-AU": {"male": "en-AU-WilliamNeural", "female": "en-AU-NatashaNeural"},
     "en-CA": {"male": "en-CA-LiamNeural", "female": "en-CA-ClaraNeural"},
     "en-IN": {"male": "en-IN-PrabhatNeural", "female": "en-IN-NeerjaNeural"},
-    # European Languages
     "fr-FR": {"male": "fr-FR-HenriNeural", "female": "fr-FR-DeniseNeural"},
     "fr-CA": {"male": "fr-CA-AntoineNeural", "female": "fr-CA-SylvieNeural"},
     "es-ES": {"male": "es-ES-AlvaroNeural", "female": "es-ES-ElviraNeural"},
@@ -94,7 +72,6 @@ VOICE_MAP = {
     "sv-SE": {"male": "sv-SE-MattiasNeural", "female": "sv-SE-SofieNeural"},
     "el-GR": {"male": "el-GR-NestorasNeural", "female": "el-GR-AthinaNeural"},
     "uk-UA": {"male": "uk-UA-OstapNeural", "female": "uk-UA-PolinaNeural"},
-    # Middle East, Asian & African Languages
     "tr-TR": {"male": "tr-TR-AhmetNeural", "female": "tr-TR-EmelNeural"},
     "fa-IR": {"male": "fa-IR-FaridNeural", "female": "fa-IR-DilaraNeural"},
     "ur-PK": {"male": "ur-PK-AsadNeural", "female": "ur-PK-UzmaNeural"},
@@ -112,9 +89,6 @@ VOICE_MAP = {
 }
 
 
-# ==============================================================================
-# Supabase Helpers (Exact Live Schema Match)
-# ==============================================================================
 def update_job(fields: dict):
     if not JOB_ID or not SUPABASE_KEY:
         return
@@ -170,7 +144,6 @@ def deduct_user_minutes_and_log(job: dict, youtube_video_id: str, youtube_url: s
     email = str(job["user_email"] or "").strip()
     cost_min = float(job.get("cost_minutes") or 0.5)
 
-    # Deduct minutes from profiles.ai_provider (skipped for owner admin)
     if email.lower() != OWNER_ADMIN_EMAIL.lower():
         pr = requests.get(
             f"{SUPABASE_URL}/rest/v1/profiles?email=ilike.{requests.utils.quote(email)}&select=ai_provider",
@@ -189,7 +162,6 @@ def deduct_user_minutes_and_log(job: dict, youtube_video_id: str, youtube_url: s
                 timeout=20,
             )
 
-    # Log to public.publish_logs using exact live columns
     date_key = job.get("date_key") or datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
     try:
         requests.post(
@@ -214,9 +186,6 @@ def deduct_user_minutes_and_log(job: dict, youtube_video_id: str, youtube_url: s
         print(f"[WARN] publish_logs insert skipped: {exc}", flush=True)
 
 
-# ==============================================================================
-# Step 1: Story Script & Scene Prompt Generator (Runware Chat Completions)
-# ==============================================================================
 def compute_scene_count(duration_sec: int) -> int:
     duration_sec = max(5, min(3600, int(duration_sec)))
     if duration_sec <= 60:
@@ -311,9 +280,6 @@ def generate_story_package(niche: str, style: str, language: str, duration_sec: 
     return {"title": title, "description": desc, "tags": [niche[:25], "Story"], "scenes": scenes}
 
 
-# ==============================================================================
-# Step 2: Parallel Scene Image Generation (Runware FLUX.1 schnell)
-# ==============================================================================
 def generate_single_image(prompt: str, width: int, height: int, out_path: Path) -> str:
     payload = [
         {
@@ -385,9 +351,6 @@ def generate_all_scenes(scenes: list, style: str, is_vertical: bool, work_dir: P
     return [p for p in paths if p is not None], urls
 
 
-# ==============================================================================
-# Step 3: Multilingual / Multi-Dialect Edge TTS Voiceover (100% Free)
-# ==============================================================================
 def pick_voice(voice_locale: str, voice_gender: str) -> str:
     g = "female" if str(voice_gender or "").lower().startswith("f") else "male"
     entry = VOICE_MAP.get(voice_locale)
@@ -416,12 +379,24 @@ def get_audio_duration(audio_path: Path) -> float:
     return max(1.5, float(out or 4.0))
 
 
-# ==============================================================================
-# Step 4: Crisp RTL/Multilingual Subtitle Overlay + FFmpeg 1080p Ken Burns
-# ==============================================================================
-def find_font_path() -> str:
+def find_font_path(is_rtl: bool = True) -> str:
+    if is_rtl:
+        try:
+            out = subprocess.check_output(["fc-list", ":lang=ar", "file"], text=True, stderr=subprocess.DEVNULL)
+            files = [ln.split(":")[0].strip() for ln in out.splitlines() if ":" in ln]
+            for pref in ["NotoSansArabic-Bold", "NotoNaskhArabic-Bold", "NotoSansArabic-Regular", "Amiri-Bold", "DejaVuSans-Bold"]:
+                for f in files:
+                    if pref in f and os.path.exists(f):
+                        return f
+            for f in files:
+                if f.endswith(".ttf") and os.path.exists(f):
+                    return f
+        except Exception:
+            pass
     candidates = [
         "/usr/share/fonts/truetype/noto/NotoSansArabic-Bold.ttf",
+        "/usr/share/fonts/truetype/noto/NotoSansArabic-Regular.ttf",
+        "/usr/share/fonts/truetype/noto/NotoNaskhArabic-Bold.ttf",
         "/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf",
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
     ]
@@ -432,9 +407,10 @@ def find_font_path() -> str:
 
 
 def shape_caption_text(text: str) -> str:
-    if re.search(r"[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]", text):
-        return get_display(arabic_reshaper.reshape(text))
-    return text
+    cleaned = re.sub(r"[\U00010000-\U0010ffff\u2600-\u27BF]", "", str(text or "")).strip()
+    if re.search(r"[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]", cleaned):
+        return get_display(arabic_reshaper.reshape(cleaned))
+    return cleaned
 
 
 def render_subtitle_png(text: str, out_png: Path, width: int, height: int):
@@ -506,14 +482,15 @@ def build_1080p_video(
 
     for i, (scene, img_p, aud_p, dur) in enumerate(zip(scenes, img_paths, audio_paths, durations)):
         seg_out = work_dir / f"seg_{i:04d}.mp4"
-        frames = max(30, int(math.ceil(dur * fps)))
+        seg_dur = max(3.0, float(dur))
+        frames = max(90, int(math.ceil(seg_dur * fps)))
         z_expr = "min(zoom+0.0008,1.12)" if i % 2 == 0 else "if(lte(zoom,1.0),1.12,max(1.0,zoom-0.0008))"
 
         vf_base = (
             f"scale={W*2}:{H*2}:force_original_aspect_ratio=increase,"
             f"crop={W*2}:{H*2},"
             f"zoompan=z='{z_expr}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={frames}:s={W}x{H}:fps={fps},"
-            f"format=yuv420p"
+            f"setsar=1"
         )
 
         if show_subtitles and scene.get("narration"):
@@ -521,25 +498,30 @@ def build_1080p_video(
             render_subtitle_png(scene["narration"], sub_png, W, H)
             cmd = [
                 "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
-                "-loop", "1", "-i", str(img_p),
-                "-i", str(sub_png),
+                "-i", str(img_p),
+                "-loop", "1", "-t", f"{seg_dur:.2f}", "-i", str(sub_png),
                 "-i", str(aud_p),
-                "-filter_complex", f"[0:v]{vf_base}[bg];[bg][1:v]overlay=0:0:shortest=1,format=yuv420p[v]",
-                "-map", "[v]", "-map", "2:a",
-                "-c:v", "libx264", "-profile:v", "high", "-level", "4.1", "-pix_fmt", "yuv420p", "-preset", "veryfast", "-crf", "22", "-r", "30",
+                "-filter_complex",
+                f"[0:v]{vf_base}[bg];[bg][1:v]overlay=0:0:eof_action=repeat,format=yuv420p[v];[2:a]apad=whole_dur={seg_dur:.2f}[a]",
+                "-map", "[v]", "-map", "[a]",
+                "-c:v", "libx264", "-profile:v", "high", "-level", "4.1", "-pix_fmt", "yuv420p",
+                "-preset", "veryfast", "-crf", "22", "-r", str(fps),
                 "-c:a", "aac", "-b:a", "128k", "-ac", "2", "-ar", "44100",
-                "-t", f"{dur:.2f}", "-shortest",
+                "-t", f"{seg_dur:.2f}",
                 str(seg_out),
             ]
         else:
             cmd = [
                 "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
-                "-loop", "1", "-i", str(img_p),
+                "-i", str(img_p),
                 "-i", str(aud_p),
-                "-vf", vf_base,
-                "-c:v", "libx264", "-profile:v", "high", "-level", "4.1", "-pix_fmt", "yuv420p", "-preset", "veryfast", "-crf", "22", "-r", "30",
+                "-filter_complex",
+                f"[0:v]{vf_base},format=yuv420p[v];[1:a]apad=whole_dur={seg_dur:.2f}[a]",
+                "-map", "[v]", "-map", "[a]",
+                "-c:v", "libx264", "-profile:v", "high", "-level", "4.1", "-pix_fmt", "yuv420p",
+                "-preset", "veryfast", "-crf", "22", "-r", str(fps),
                 "-c:a", "aac", "-b:a", "128k", "-ac", "2", "-ar", "44100",
-                "-t", f"{dur:.2f}", "-shortest",
+                "-t", f"{seg_dur:.2f}",
                 str(seg_out),
             ]
         subprocess.run(cmd, check=True)
@@ -560,14 +542,8 @@ def build_1080p_video(
     return final_mp4
 
 
-# ==============================================================================
-# Step 5: YouTube OAuth 2.0 Resumable Upload
-# ==============================================================================
-
 def upload_mp4_to_storage(mp4_path: Path, job_id: str) -> str:
-    """Upload rendered 1080p MP4 to Supabase Storage public bucket (videos) for direct client download."""
     try:
-        # Ensure public bucket exists (idempotent)
         requests.post(
             f"{SUPABASE_URL}/storage/v1/bucket",
             headers={"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}", "Content-Type": "application/json"},
@@ -592,6 +568,7 @@ def upload_mp4_to_storage(mp4_path: Path, job_id: str) -> str:
     except Exception as exc:
         print(f"[WARN] Storage MP4 upload skipped: {exc}", flush=True)
     return ""
+
 
 def refresh_youtube_access_token(refresh_token: str) -> str:
     r = requests.post(
@@ -654,9 +631,6 @@ def upload_to_youtube(mp4_path: Path, access_token: str, title: str, description
     return vid_id
 
 
-# ==============================================================================
-# Main Pipeline
-# ==============================================================================
 def main():
     if not JOB_ID:
         raise RuntimeError("Missing JOB_ID environment variable")
@@ -715,7 +689,8 @@ def main():
             mp3_p = work_dir / f"aud_{idx:04d}.mp3"
             asyncio.run(synth_scene_audio(sc["narration"], voice_name, mp3_p))
             audio_paths.append(mp3_p)
-            durations.append(get_audio_duration(mp3_p))
+            min_per_scene = max(3.5, duration_sec / max(1, len(story["scenes"])))
+            durations.append(max(min_per_scene, get_audio_duration(mp3_p) + 0.35))
 
         update_job({
             "status": "rendering",
