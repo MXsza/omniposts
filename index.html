@@ -1081,7 +1081,7 @@
            <span class="text-2xl">✨</span>
            <span class="px-2.5 py-0.5 rounded-full bg-fuchsia-500/25 text-fuchsia-200 border border-fuchsia-400/40 text-[11px] font-extrabold" data-en="12× Rate" data-ar="خصم ×12">خصم ×12</span>
           </div>
-          <div class="text-sm sm:text-base font-extrabold text-white" data-en="AI Video + Native Voice (HeyGen 1.0)" data-ar="فيديو متحرك بالصوت والحوار (HeyGen 1.0)">فيديو متحرك بالصوت والحوار (HeyGen 1.0)</div>
+          <div class="text-sm sm:text-base font-extrabold text-white" data-en="AI Video + Native Voice (Motion Pro)" data-ar="فيديو متحرك بالصوت والحوار (AI Motion Pro)">فيديو متحرك بالصوت والحوار (AI Motion Pro)</div>
           <p class="text-xs text-slate-300 leading-relaxed" data-en="Full AI character motion with built-in synchronized dialogue, lip-sync &amp; sound effects in one pass (5–30s)." data-ar="تحريك حقيقي للشخصيات مع حوار وصوت ومؤثرات مدمجة متزامنة مع حركة الشفاه تلقائياً (5 إلى 30 ثانية).">تحريك حقيقي للشخصيات مع حوار وصوت ومؤثرات مدمجة متزامنة مع حركة الشفاه تلقائياً (5 إلى 30 ثانية).</p>
          </div>
          <div class="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] font-bold text-fuchsia-300">
@@ -2050,7 +2050,7 @@
     <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/10">
      <div>
       <span class="text-xs font-extrabold text-fuchsia-300 uppercase" data-en="🎥 Owner Admin Only: Customer Sample Preview Videos" data-ar="🎥 خاص بمالك المنصة: روابط فيديوهات المعاينة للعملاء">🎥 خاص بمالك المنصة: روابط فيديوهات المعاينة للعملاء</span>
-      <h3 class="text-lg sm:text-xl font-bold text-white mt-0.5" data-en="Sample Videos for Cinematic Stories (1×) vs. AI Video + Native Voice (12×)" data-ar="روابط فيديوهات المقارنة (الوضع العادي ×1 مقابل تحريك الشخصيات HeyGen AI Video ×12)">روابط فيديوهات المقارنة (الوضع العادي ×1 مقابل تحريك الشخصيات HeyGen AI Video ×12)</h3>
+      <h3 class="text-lg sm:text-xl font-bold text-white mt-0.5" data-en="Sample Videos for Cinematic Stories (1×) vs. AI Video + Native Voice (12×)" data-ar="روابط فيديوهات المقارنة (الوضع العادي ×1 مقابل تحريك الشخصيات AI Video Pro ×12)">روابط فيديوهات المقارنة (الوضع العادي ×1 مقابل تحريك الشخصيات AI Video Pro ×12)</h3>
       <p class="text-xs text-zinc-300 mt-1" data-en="Paste any YouTube video/Shorts URL or direct MP4 link for each mode. Customers will immediately watch the matching sample when tapping either mode card in their Dashboard." data-ar="ضع رابط أي فيديو يوتيوب (عادي أو شورتس) أو رابط MP4 مباشر لكل وضع، وسيظهر للعملاء تلقائياً داخل لوحة التحكم عند الضغط على أي وضع لمعرفة الفرق بوضوح.">ضع رابط أي فيديو يوتيوب (عادي أو شورتس) أو رابط MP4 مباشر لكل وضع، وسيظهر للعملاء تلقائياً داخل لوحة التحكم عند الضغط على أي وضع لمعرفة الفرق بوضوح.</p>
      </div>
      <span id="admin-preview-urls-badge" class="px-3 py-1 rounded-full bg-fuchsia-500/20 text-fuchsia-200 border border-fuchsia-400/40 text-xs font-bold">جاهز للروابط 🎬</span>
@@ -2061,7 +2061,7 @@
       <input type="url" id="admin-preview-url-cinematic" placeholder="https://youtube.com/shorts/... أو https://youtu.be/..." class="apple-input w-full px-4 py-2.5 text-xs sm:text-sm font-mono text-white" dir="ltr" />
      </div>
      <div class="md:col-span-5">
-      <label for="admin-preview-url-aimotion" class="block text-xs text-zinc-200 mb-1.5 font-semibold" data-en="2. Sample Video URL — AI Video + Native Voice (12×):" data-ar="2. رابط فيديو نموذج تحريك الشخصيات (HeyGen AI Video ×12):">2. رابط فيديو نموذج تحريك الشخصيات (HeyGen AI Video ×12):</label>
+      <label for="admin-preview-url-aimotion" class="block text-xs text-zinc-200 mb-1.5 font-semibold" data-en="2. Sample Video URL — AI Video + Native Voice (12×):" data-ar="2. رابط فيديو نموذج تحريك الشخصيات (AI Video Pro ×12):">2. رابط فيديو نموذج تحريك الشخصيات (AI Video Pro ×12):</label>
       <input type="url" id="admin-preview-url-aimotion" placeholder="https://youtube.com/shorts/... أو https://youtu.be/..." class="apple-input w-full px-4 py-2.5 text-xs sm:text-sm font-mono text-white" dir="ltr" />
      </div>
      <div class="md:col-span-2">
@@ -2619,7 +2619,7 @@
     ? t('1. Scene & Dialogue Topic (Custom or Ready Niche):', '1. فكرة المشهد والحوار (مخصص أو نيتش جاهز):')
     : t('1. Video Content Topic:', '1. محتوى الفيديو (اختر أو اكتب فكرتك):');
    if (lblStyle) lblStyle.textContent = isAi
-    ? t('2. Cinematic Motion Style (HeyGen Video 1.0):', '2. ستايل التصوير والحركة (HeyGen Video 1.0):')
+    ? t('2. Cinematic Motion Style (AI Video Pro):', '2. ستايل التصوير والحركة (AI Video Pro):')
     : t('2. Visual Art Style (1080p):', '2. أسلوب الرسم والصورة (1080p):');
    if (lblLang) lblLang.textContent = isAi
     ? t('3. Built-In Video Dialogue Language:', '3. لغة الحوار والصوت المدمج في الفيديو:')
@@ -2842,7 +2842,7 @@
    if (pill) {
     if (isAi) {
      pill.className = 'px-3 py-1 rounded-full bg-fuchsia-500/20 border border-fuchsia-400/45 text-fuchsia-200 text-xs font-extrabold';
-     pill.textContent = t('✨ HeyGen AI Video • 12× Rate', '✨ فيديو HeyGen بالصوت • خصم ×12');
+     pill.textContent = t('✨ AI Video Pro • 12× Rate', '✨ فيديو AI بالصوت والحوار • خصم ×12');
     } else {
      pill.className = 'px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/35 text-emerald-300 text-xs font-extrabold';
      pill.textContent = t('🎬 Cinematic Stories • 1× Rate', '🎬 القصص السينمائية • خصم ×1');
@@ -2858,7 +2858,7 @@
    if (isAi && curSec > AI_MOTION_MAX_SEC) {
     curSec = AI_MOTION_MAX_SEC;
     if (shouldSave) {
-     showToast(t('HeyGen Video 1.0 supports 5 to 30 seconds per clip with built-in synchronized audio.', 'وضع HeyGen Video 1.0 يدعم من 5 إلى 30 ثانية للفيديو الواحد بصوت وحوار مدمج.'), 'info');
+     showToast(t('AI Video Pro supports 5 to 30 seconds per clip with built-in synchronized audio.', 'وضع الفيديو المتحرك بالصوت يدعم من 5 إلى 30 ثانية للفيديو الواحد.'), 'info');
     }
    }
    updateDurationDisplayLabel(curSec);
@@ -5290,7 +5290,13 @@
      if (dlBtn) { if (job.download_url) { dlBtn.href = job.download_url; dlBtn.classList.remove('hidden'); } else { dlBtn.classList.add('hidden'); } }
     }
    } else if (job.status === 'failed') {
-    if (detEl) detEl.textContent = job.error_message || t('Render could not complete — 0 minutes deducted.', 'تعذّر إكمال التوليد — لم يتم خصم أي دقيقة من رصيدك.');
+    if (detEl) {
+     const rawErr = String(job.error_message || "");
+     const isTechLeak = /runware|heygen|seedance|http\s*4\d\d|http\s*5\d\d|wallet|insufficientcredits|"code"/i.test(rawErr);
+     detEl.textContent = (!rawErr || isTechLeak)
+      ? t("Cloud render service is temporarily busy — 0 minutes deducted. Please try again shortly.", "الخدمة السحابية مشغولة مؤقتاً — لم يتم خصم أي رصيد من حسابك، يرجى المحاولة مرة أخرى بعد قليل.")
+      : rawErr;
+    }
    } else {
     if (detEl) detEl.textContent = t('Running 100% on Cloud 1080p Engine — you can watch scenes appear live or safely close your browser!', 'يعمل 100% على السحابة بدقة 1080p — يمكنك مشاهدة المشاهد وهي تُرسم لايف أو إغلاق المتصفح وسيكتمل النشر تلقائياً!');
    }
