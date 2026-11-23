@@ -1,0 +1,41 @@
+name: Omniposts 1080p Cloud Video Worker
+
+on:
+  workflow_dispatch:
+    inputs:
+      job_id:
+        description: "Supabase render_jobs UUID"
+        required: true
+        type: string
+
+jobs:
+  render-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install FFmpeg & Multilingual Fonts (Arabic + World Languages)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-noto-core fonts-dejavu-core
+
+      - name: Install Python Dependencies
+        run: |
+          pip install --quiet requests edge-tts Pillow arabic-reshaper python-bidi
+
+      - name: Run 1080p Video Render & YouTube Publisher
+        env:
+          JOB_ID: ${{ github.event.inputs.job_id }}
+          RUNWARE_API_KEY: ${{ secrets.RUNWARE_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: python3 scripts/render_video.py
