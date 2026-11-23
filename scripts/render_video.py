@@ -1,17 +1,6 @@
 #!/usr/bin/env python3
 """
 Omniposts.online — 24/7 1080p Cloud Video Worker (Pro Cinema Edition)
-Pipeline:
-  1. Load job & YouTube channel credentials from Supabase (render_jobs + channels)
-  2. Generate a real, gripping localized story script + mood + scene prompts + viral title/description
-     via Runware Chat Completions (with rich dialect-matched fallback stories)
-  3. Generate N scene images in parallel via Runware imageInference (runware:100@1 FLUX.1 schnell)
-     OR complete 5-30s native-audio AI video via Runware HeyGen Video 1.0 (heygen:video@1.0)
-  4. Synthesize natural voiceover in any world language/dialect (Male/Female) via Edge TTS (for Cinematic 1080p)
-  5. Synthesize 100% copyright-free mood-matched cinematic background music & subtle transition whoosh SFX
-  6. Assemble Full HD 1080p MP4 with full-frame gentle Ken Burns motion, smooth xfade transitions, and sleek captions
-  7. Upload MP4 to Supabase Storage (for instant download), upload to YouTube via OAuth 2.0,
-     deduct exact minutes ONLY on success, and update render_jobs + publish_logs.
 """
 
 import asyncio
@@ -37,9 +26,6 @@ import requests
 from bidi.algorithm import get_display
 from PIL import Image, ImageDraw, ImageFont, features
 
-# ==============================================================================
-# Environment & Configuration
-# ==============================================================================
 OWNER_ADMIN_EMAIL = "ma1979368@gmail.com"
 JOB_ID = os.environ.get("JOB_ID", "").strip()
 RUNWARE_API_KEY = os.environ.get("RUNWARE_API_KEY", "").strip()
@@ -60,11 +46,7 @@ SB_HEADERS = {
 
 HAS_RAQM = bool(features.check("raqm"))
 
-# ==============================================================================
-# Comprehensive World Languages & Dialects Voice Map (Edge TTS — Male & Female)
-# ==============================================================================
 VOICE_MAP = {
-    # Arabic Dialects (15 dialects)
     "ar-EG": {"male": "ar-EG-ShakirNeural", "female": "ar-EG-SalmaNeural"},
     "ar-SA": {"male": "ar-SA-HamedNeural", "female": "ar-SA-ZariyahNeural"},
     "ar-AE": {"male": "ar-AE-HamdanNeural", "female": "ar-AE-FatimaNeural"},
@@ -80,13 +62,11 @@ VOICE_MAP = {
     "ar-LY": {"male": "ar-LY-OmarNeural", "female": "ar-LY-ImanNeural"},
     "ar-YE": {"male": "ar-YE-SalehNeural", "female": "ar-YE-MaryamNeural"},
     "ar-OM": {"male": "ar-OM-AbdullahNeural", "female": "ar-OM-AyshaNeural"},
-    # English Dialects
     "en-US": {"male": "en-US-AndrewNeural", "female": "en-US-AvaNeural"},
     "en-GB": {"male": "en-GB-RyanNeural", "female": "en-GB-SoniaNeural"},
     "en-AU": {"male": "en-AU-WilliamNeural", "female": "en-AU-NatashaNeural"},
     "en-CA": {"male": "en-CA-LiamNeural", "female": "en-CA-ClaraNeural"},
     "en-IN": {"male": "en-IN-PrabhatNeural", "female": "en-IN-NeerjaNeural"},
-    # European Languages
     "fr-FR": {"male": "fr-FR-HenriNeural", "female": "fr-FR-DeniseNeural"},
     "fr-CA": {"male": "fr-CA-AntoineNeural", "female": "fr-CA-SylvieNeural"},
     "es-ES": {"male": "es-ES-AlvaroNeural", "female": "es-ES-ElviraNeural"},
@@ -102,7 +82,6 @@ VOICE_MAP = {
     "sv-SE": {"male": "sv-SE-MattiasNeural", "female": "sv-SE-SofieNeural"},
     "el-GR": {"male": "el-GR-NestorasNeural", "female": "el-GR-AthinaNeural"},
     "uk-UA": {"male": "uk-UA-OstapNeural", "female": "uk-UA-PolinaNeural"},
-    # Middle East, Asian & African Languages
     "tr-TR": {"male": "tr-TR-AhmetNeural", "female": "tr-TR-EmelNeural"},
     "fa-IR": {"male": "fa-IR-FaridNeural", "female": "fa-IR-DilaraNeural"},
     "ur-PK": {"male": "ur-PK-AsadNeural", "female": "ur-PK-UzmaNeural"},
@@ -120,9 +99,6 @@ VOICE_MAP = {
 }
 
 
-# ==============================================================================
-# Supabase Helpers (Exact Live Schema Match)
-# ==============================================================================
 def update_job(fields: dict):
     if not JOB_ID or not SUPABASE_KEY:
         return
@@ -220,9 +196,6 @@ def deduct_user_minutes_and_log(job: dict, youtube_video_id: str, youtube_url: s
         print(f"[WARN] publish_logs insert skipped: {exc}", flush=True)
 
 
-# ==============================================================================
-# Step 1: Real Viral Story Script, Mood & Scene Prompt Generator
-# ==============================================================================
 def compute_scene_count(duration_sec: int) -> int:
     duration_sec = max(5, min(3600, int(duration_sec)))
     if duration_sec <= 60:
@@ -268,7 +241,6 @@ def extract_json_object(raw_text: str) -> dict:
 
 
 def build_rich_fallback_story(niche: str, style: str, language: str, voice_locale: str, scene_count: int, short_tag: str) -> dict:
-    """Rich, genuine storytelling fallback bank (100% localized, zero dummy lines or English leaks in Arabic)."""
     is_ar = is_arabic_language(language, voice_locale)
     is_eg = ("مصر" in str(language or "")) or str(voice_locale or "").lower() == "ar-eg"
     nl = str(niche or "").lower()
@@ -406,7 +378,6 @@ def build_rich_fallback_story(niche: str, style: str, language: str, voice_local
             "scenes": scenes,
         }
 
-    # English fallback
     en_beats = [
         ("On an ordinary evening, one quiet discovery changed everything nobody thought possible.", "Dramatic golden hour street, lone figure discovering a mysterious glowing artifact, wide cinematic shot"),
         ("Everyone assumed the story ended there—until a hidden clue rewrote the whole truth.", "Moody cinematic scene with rich shadows and amber light, intense sense of mystery and wonder"),
@@ -536,9 +507,6 @@ def generate_story_package(
     return build_rich_fallback_story(niche, style, language, voice_locale, scene_count, short_tag)
 
 
-# ==============================================================================
-# Step 2: Parallel Scene Image Generation (Runware FLUX.1 schnell)
-# ==============================================================================
 def generate_single_image(prompt: str, width: int, height: int, out_path: Path) -> str:
     payload = [
         {
@@ -610,9 +578,6 @@ def generate_all_scenes(scenes: list, style: str, is_vertical: bool, work_dir: P
     return [p for p in paths if p is not None], urls
 
 
-# ==============================================================================
-# Step 2B: Native-Audio AI Video (Runware HeyGen Video 1.0 — heygen:video@1.0)
-# ==============================================================================
 def generate_heygen_video_clip(
     niche: str,
     style: str,
@@ -623,11 +588,6 @@ def generate_heygen_video_clip(
     story: dict,
     out_mp4: Path,
 ) -> str:
-    """
-    Generate a complete 5-30s AI video with synchronized native dialogue, lip-sync,
-    ambience, and sound effects in ONE pass using Runware HeyGen Video 1.0 (heygen:video@1.0).
-    Exact 480p dimensions per Runware docs: 480x832 (9:16), 832x480 (16:9).
-    """
     w, h = (480, 832) if is_vertical else (832, 480)
     dur = max(5, min(30, int(duration_sec or 15)))
     scenes = story.get("scenes") or []
@@ -646,7 +606,7 @@ def generate_heygen_video_clip(
         "Authorization": f"Bearer {RUNWARE_API_KEY}",
         "Content-Type": "application/json",
     }
-    last_err = "Unknown HeyGen Video 1.0 error"
+    last_err = "Unknown AI Video error"
     for attempt in range(2):
         task_uuid = str(uuid.uuid4())
         payload = [
@@ -670,7 +630,7 @@ def generate_heygen_video_clip(
             update_job({
                 "status": "imaging",
                 "progress_pct": 35,
-                "step_label": f"جاري توليد الفيديو المتحرك بالصوت والحوار المدمج عبر HeyGen Video 1.0 ({dur} ثانية)...",
+                "step_label": f"جاري توليد الفيديو المتحرك بالصوت والحوار المدمج بالذكاء الاصطناعي ({dur} ثانية)...",
             })
             r = requests.post("https://api.runware.ai/v1", headers=headers, json=payload, timeout=45)
             if not r.ok:
@@ -710,26 +670,23 @@ def generate_heygen_video_clip(
                     raise RuntimeError(f"Runware poll error: {err0.get('message', err0)}")
                 for item in (body.get("data") or []):
                     if item.get("status") == "error":
-                        raise RuntimeError(f"HeyGen task failed: {item}")
+                        raise RuntimeError(f"AI Video task failed: {item}")
                     vid_url = item.get("videoURL")
                     if vid_url:
                         vid_bytes = requests.get(vid_url, timeout=90).content
                         if len(vid_bytes) < 5000:
-                            raise RuntimeError("Downloaded HeyGen MP4 is empty/corrupt")
+                            raise RuntimeError("Downloaded MP4 is empty/corrupt")
                         out_mp4.write_bytes(vid_bytes)
-                        print(f"[OK] HeyGen Video 1.0 clip ready ({len(vid_bytes)//1024} KB)", flush=True)
+                        print(f"[OK] AI Video clip ready ({len(vid_bytes)//1024} KB)", flush=True)
                         return vid_url
-            raise RuntimeError("HeyGen Video 1.0 timed out after 240s")
+            raise RuntimeError("AI Video timed out after 240s")
         except Exception as exc:
             last_err = str(exc)
-            print(f"[WARN] HeyGen Video 1.0 attempt {attempt+1} failed: {last_err}", flush=True)
+            print(f"[WARN] AI Video attempt {attempt+1} failed: {last_err}", flush=True)
             time.sleep(2)
-    raise RuntimeError(f"HeyGen Video 1.0 failed: {last_err}")
+    raise RuntimeError(f"AI Video failed: {last_err}")
 
 
-# ==============================================================================
-# Step 3: Multilingual / Multi-Dialect Edge TTS Voiceover (100% Free)
-# ==============================================================================
 def pick_voice(voice_locale: str, voice_gender: str) -> str:
     g = "female" if str(voice_gender or "").lower().startswith("f") else "male"
     entry = VOICE_MAP.get(voice_locale)
@@ -758,48 +715,40 @@ def get_audio_duration(audio_path: Path) -> float:
     return max(1.8, float(out or 4.0))
 
 
-# ==============================================================================
-# Step 3.5: 100% Copyright-Free Mood Soundtrack + Transition Whoosh SFX Engine
-# ==============================================================================
 def generate_mood_soundtrack(mood: str, total_dur: float, transition_times: list[float], out_wav: Path):
-    """
-    Synthesizes a warm, lush, 100% copyright-free cinematic background score matched to the story mood
-    (epic, mystery, sad, happy, calm) PLUS subtle soft whoosh SFX on scene transitions.
-    Uses warm multi-harmonic pads, slow LFO swells, soft plucked notes, and FFmpeg studio reverb/lowpass.
-    """
     sr = 22050
     n_samples = max(sr, int(math.ceil(total_dur * sr)))
 
     mood_chords = {
         "epic": [
-            (73.42, 146.83, 220.00, 293.66, 349.23),   # Dm cinematic
-            (58.27, 116.54, 174.61, 233.08, 293.66),   # Bbmaj7
-            (65.41, 130.81, 196.00, 261.63, 329.63),   # Csus2
-            (55.00, 110.00, 164.81, 220.00, 277.18),   # A major lift
+            (73.42, 146.83, 220.00, 293.66, 349.23),
+            (58.27, 116.54, 174.61, 233.08, 293.66),
+            (65.41, 130.81, 196.00, 261.63, 329.63),
+            (55.00, 110.00, 164.81, 220.00, 277.18),
         ],
         "mystery": [
-            (55.00, 110.00, 164.81, 220.00, 261.63),   # Am dark pad
-            (51.91, 103.83, 155.56, 207.65, 246.94),   # Ab/G# tension
-            (65.41, 130.81, 196.00, 246.94, 293.66),   # Cmaj9 eerie
-            (61.74, 123.47, 164.81, 220.00, 246.94),   # Bm7b5 suspense
+            (55.00, 110.00, 164.81, 220.00, 261.63),
+            (51.91, 103.83, 155.56, 207.65, 246.94),
+            (65.41, 130.81, 196.00, 246.94, 293.66),
+            (61.74, 123.47, 164.81, 220.00, 246.94),
         ],
         "sad": [
-            (65.41, 130.81, 155.56, 196.00, 261.63),   # Cm warm melancholic
-            (51.91, 103.83, 155.56, 196.00, 233.08),   # Abmaj7
-            (77.78, 155.56, 196.00, 233.08, 293.66),   # Ebmaj7
-            (58.27, 116.54, 146.83, 174.61, 233.08),   # Bb warm resolve
+            (65.41, 130.81, 155.56, 196.00, 261.63),
+            (51.91, 103.83, 155.56, 196.00, 233.08),
+            (77.78, 155.56, 196.00, 233.08, 293.66),
+            (58.27, 116.54, 146.83, 174.61, 233.08),
         ],
         "happy": [
-            (98.00, 196.00, 246.94, 293.66, 392.00),   # G major bright
-            (73.42, 146.83, 220.00, 293.66, 369.99),   # D major
-            (82.41, 164.81, 196.00, 246.94, 329.63),   # Em7 uplifting
-            (65.41, 130.81, 196.00, 246.94, 329.63),   # Cmaj7
+            (98.00, 196.00, 246.94, 293.66, 392.00),
+            (73.42, 146.83, 220.00, 293.66, 369.99),
+            (82.41, 164.81, 196.00, 246.94, 329.63),
+            (65.41, 130.81, 196.00, 246.94, 329.63),
         ],
         "calm": [
-            (87.31, 174.61, 220.00, 261.63, 329.63),   # Fmaj7 peaceful
-            (73.42, 146.83, 220.00, 261.63, 329.63),   # Dm9
-            (58.27, 116.54, 174.61, 220.00, 293.66),   # Bbmaj7
-            (65.41, 130.81, 196.00, 261.63, 329.63),   # C warm
+            (87.31, 174.61, 220.00, 261.63, 329.63),
+            (73.42, 146.83, 220.00, 261.63, 329.63),
+            (58.27, 116.54, 174.61, 220.00, 293.66),
+            (65.41, 130.81, 196.00, 261.63, 329.63),
         ],
     }
 
@@ -810,7 +759,6 @@ def generate_mood_soundtrack(mood: str, total_dur: float, transition_times: list
     raw_wav = out_wav.with_suffix(".raw.wav")
     rng = random.Random(42)
     lp_noise = 0.0
-
     trans_windows = [(int((t - 0.28) * sr), int((t + 0.18) * sr), int(t * sr)) for t in transition_times]
 
     buf = bytearray()
@@ -887,9 +835,6 @@ def generate_mood_soundtrack(mood: str, total_dur: float, transition_times: list
     )
 
 
-# ==============================================================================
-# Step 4: Compact Sleek Subtitles (1–2 Lines, Timed Chunks) + Full-Frame Montage
-# ==============================================================================
 def find_font_path(has_arabic: bool = True, has_latin: bool = False) -> str:
     if has_arabic and has_latin:
         for c in [
@@ -934,10 +879,6 @@ def prepare_caption_line(line: str, is_rtl: bool) -> tuple[str, dict]:
 
 
 def split_caption_into_chunks(text: str, is_vertical: bool) -> list[str]:
-    """
-    Split narration into 1–2 short timed chunks so the on-screen subtitle is ALWAYS a compact
-    1–2 line strip (never a huge 3–4 line box covering the scene, and never cuts off any words).
-    """
     cleaned = re.sub(r"[\U00010000-\U0010ffff\u2600-\u27BF]", "", str(text or "")).strip()
     words = cleaned.split()
     max_words_per_chunk = 8 if is_vertical else 12
@@ -948,7 +889,6 @@ def split_caption_into_chunks(text: str, is_vertical: bool) -> list[str]:
 
 
 def render_subtitle_png(text: str, out_png: Path, width: int, height: int):
-    """Renders a sleek, compact, slim subtitle strip at the lower edge so 90%+ of the image stays visible."""
     img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 
@@ -1021,10 +961,6 @@ def render_subtitle_png(text: str, out_png: Path, width: int, height: int):
 
 
 def get_ken_burns_expr(scene_idx: int, frames: int, W: int, H: int, fps: int) -> str:
-    """
-    Full-frame gentle cinematic camera motions (max 5% zoom, NO dark vignette, NO heavy edge cropping)
-    so the entire artwork stays crisp and visible from edge to edge.
-    """
     mode = scene_idx % 4
     f_den = max(1, frames)
     if mode == 0:
@@ -1238,11 +1174,7 @@ def build_1080p_video(
         return final_mp4
 
 
-# ==============================================================================
-# Step 5: Supabase Storage MP4 Upload + YouTube OAuth 2.0 Resumable Upload
-# ==============================================================================
 def upload_mp4_to_storage(mp4_path: Path, job_id: str) -> str:
-    """Upload rendered 1080p MP4 to Supabase Storage public bucket (videos) for direct client download."""
     try:
         requests.post(
             f"{SUPABASE_URL}/storage/v1/bucket",
@@ -1331,9 +1263,6 @@ def upload_to_youtube(mp4_path: Path, access_token: str, title: str, description
     return vid_id
 
 
-# ==============================================================================
-# Main Pipeline
-# ==============================================================================
 def main():
     if not JOB_ID:
         raise RuntimeError("Missing JOB_ID environment variable")
@@ -1446,6 +1375,16 @@ def main():
         print(f"[SUCCESS] Published 1080p video: {yt_url}", flush=True)
 
 
+def sanitize_customer_error(err_text: str) -> str:
+    raw = str(err_text or "")
+    low = raw.lower()
+    if "غير مربوطة" in raw or "refresh token" in low:
+        return "القناة غير مربوطة بيوتيوب — يرجى إعادة ربط القناة من صفحة القنوات."
+    if "youtube" in low and ("upload" in low or "quota" in low or "oauth" in low):
+        return "تعذّر رفع الفيديو على يوتيوب مؤقتاً — يرجى التأكد من ربط القناة والمحاولة مرة أخرى (لم يتم خصم أي رصيد)."
+    return "الخدمة السحابية مشغولة مؤقتاً — لم يتم خصم أي رصيد من حسابك، يرجى المحاولة مرة أخرى بعد قليل."
+
+
 if __name__ == "__main__":
     try:
         main()
@@ -1455,6 +1394,6 @@ if __name__ == "__main__":
             "status": "failed",
             "progress_pct": 100,
             "step_label": "تعذّر إكمال التوليد — لم يتم خصم أي رصيد",
-            "error_message": str(err)[:450],
+            "error_message": sanitize_customer_error(str(err)),
         })
         sys.exit(1)
