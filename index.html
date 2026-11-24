@@ -1578,9 +1578,15 @@
        <button type="button" id="bill-btn-monthly" onclick="setBillingCycle('MONTHLY')" class="px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold bg-indigo-600 text-white transition" data-en="Monthly" data-ar="اشتراك شهري">اشتراك شهري</button>
        <button type="button" id="bill-btn-annual" onclick="setBillingCycle('ANNUAL')" class="px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold text-zinc-300 hover:text-white transition" data-en="Annual (Save 25%)" data-ar="اشتراك سنوي (وفر 25%)">اشتراك سنوي (وفر 25%)</button>
       </div>
-      <div class="inline-flex flex-wrap items-center justify-center gap-1.5 p-1.5 rounded-full apple-glass border border-white/15">
-       <button type="button" id="gw-btn-intl" onclick="setPaymentGatewayRegion('INTL')" class="px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold bg-blue-600 text-white transition" data-en="International Payment in USD ($)" data-ar="دفع دولي بالدولار (USD $)">دفع دولي بالدولار (USD $)</button>
-       <button type="button" id="gw-btn-egypt" onclick="setPaymentGatewayRegion('EGY')" class="px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold text-zinc-300 hover:text-white transition" data-en="Egypt Local Payment in EGP" data-ar="دفع للمصريين بالجنيه المصري (EGP)">دفع للمصريين بالجنيه المصري (EGP)</button>
+      <div class="inline-flex flex-wrap items-center justify-center gap-2 p-2 rounded-2xl apple-glass border border-white/15 shadow-xl">
+       <button type="button" id="gw-btn-egypt" onclick="setPaymentGatewayRegion('EGY')" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-lg shadow-emerald-500/30 ring-2 ring-emerald-300/60 transition">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
+        <span data-en="Egypt Payment Methods (EGP)" data-ar="طرق الدفع للمصريين (جنيه مصري)">طرق الدفع للمصريين (جنيه مصري)</span>
+       </button>
+       <button type="button" id="gw-btn-intl" onclick="setPaymentGatewayRegion('INTL')" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-600/30 transition">
+        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M2 12h20"/><path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+        <span data-en="International Payment Methods (USD)" data-ar="طرق الدفع الدولي (دولار USD)">طرق الدفع الدولي (دولار USD)</span>
+       </button>
        <select id="whop-currency-select" class="hidden"><option value="USD" selected>USD</option></select>
       </div>
      </div>
@@ -1708,9 +1714,16 @@
         <span id="custom-slider-price-egp" class="text-xs text-emerald-300 font-bold">≈ 750 ج.م</span>
        </div>
        <p id="topup-subscribers-only-notice" class="hidden text-[11px] font-bold text-amber-300 bg-amber-500/15 border border-amber-500/35 rounded-xl px-3 py-2" data-en="🔒 Extra Minutes Top-Up is exclusive to active plan subscribers. Subscribe to a plan above first!" data-ar="🔒 زيادة الدقائق متاحة للمشتركين في إحدى الخطط فقط — اشترك في أي خطة بالأعلى أولاً!">🔒 زيادة الدقائق متاحة للمشتركين في إحدى الخطط فقط — اشترك في أي خطة بالأعلى أولاً!</p>
-       <button type="button" id="btn-topup-minutes-now" onclick="openCustomSliderCheckout()" class="w-full apple-btn-primary py-3 text-xs sm:text-sm font-bold" data-en="Top-Up Minutes Now" data-ar="شحن الدقائق الآن">
-        شحن الدقائق الآن
-       </button>
+       <div class="space-y-2 pt-1">
+        <button type="button" id="btn-topup-minutes-egp" onclick="openCustomSliderCheckout('EGY')" class="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs sm:text-sm font-extrabold bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/25 transition">
+         <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
+         <span data-en="Pay via Egypt Methods (EGP)" data-ar="الدفع بطرق الدفع للمصريين">الدفع بطرق الدفع للمصريين</span>
+        </button>
+        <button type="button" id="btn-topup-minutes-now" onclick="openCustomSliderCheckout('INTL')" class="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs sm:text-sm font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-600/30 transition">
+         <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="9"/><path d="M2 12h20"/><path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+         <span data-en="Pay via International Methods (USD)" data-ar="الدفع بطرق الدفع الدولي">الدفع بطرق الدفع الدولي</span>
+        </button>
+       </div>
       </div>
      </div>
     </div>
@@ -1768,147 +1781,145 @@
  <section id="view-policies" class="hidden flex-1 py-10 px-4 sm:px-6 overflow-x-hidden max-w-full">
   <div class="max-w-6xl mx-auto">
    <div class="text-center mb-8">
-    <h2 class="text-3xl font-bold text-white" data-en="Legal Center, Platform Policies, FAQ & Support Tickets" data-ar="المركز القانوني، السياسات، الدعم الفني والأسئلة الشائعة">Legal Center, Platform Policies, FAQ & Support Tickets</h2>
-    <p class="text-xs sm:text-sm text-zinc-400 mt-1" data-en="Comprehensive, legally binding policies tailored to Omniposts.online's Built-In AI Cloud Credit System and YouTube API Services" data-ar="سياسات حقيقية ومفصلة متوافقة تماماً مع نظام الكريدت المدمج في منصة Omniposts.online وواجهات YouTube API الرسمية">Comprehensive, legally binding policies tailored to Omniposts.online's Built-In AI Cloud Credit System and YouTube API Services</p>
+    <h2 class="text-3xl font-bold text-white" data-en="Legal Center, Platform Policies, FAQ &amp; Support Tickets" data-ar="المركز القانوني، السياسات، الدعم الفني والأسئلة الشائعة">المركز القانوني، السياسات، الدعم الفني والأسئلة الشائعة</h2>
+    <p class="text-xs sm:text-sm text-zinc-400 mt-1" data-en="Clear, up-to-date policies for Omniposts.online's Forever-Rollover Video Minutes System, Dual AI Video Modes, and YouTube OAuth 2.0 Automation" data-ar="سياسات محدثة وواضحة متوافقة بالكامل مع نظام دقائق الفيديو التراكمية في Omniposts.online والوضعين السحابيين وربط يوتيوب الرسمي">سياسات محدثة وواضحة متوافقة بالكامل مع نظام دقائق الفيديو التراكمية في Omniposts.online والوضعين السحابيين وربط يوتيوب الرسمي</p>
    </div>
    <div class="flex flex-wrap gap-2 justify-center mb-8">
-    <button type="button" onclick="openPolicyTab('terms')" id="pol-btn-terms" class="px-3.5 py-2 rounded-full text-xs font-semibold bg-blue-600 text-white" data-en="1. Terms of Use" data-ar="1. شروط الاستخدام">1. Terms of Use</button>
-    <button type="button" onclick="openPolicyTab('privacy')" id="pol-btn-privacy" class="px-3.5 py-2 rounded-full text-xs font-semibold bg-white/10 text-zinc-300" data-en="2. Privacy Policy" data-ar="2. سياسة الخصوصية">2. Privacy Policy</button>
-    <button type="button" onclick="openPolicyTab('refund')" id="pol-btn-refund" class="px-3.5 py-2 rounded-full text-xs font-semibold bg-white/10 text-zinc-300" data-en="3. Subscriptions & Refunds" data-ar="3. الاشتراكات والاسترداد">3. Subscriptions & Refunds</button>
-    <button type="button" onclick="openPolicyTab('abuse')" id="pol-btn-abuse" class="px-3.5 py-2 rounded-full text-xs font-semibold bg-white/10 text-zinc-300" data-en="4. Acceptable Use & Anti-Abuse" data-ar="4. الاستخدام المقبول ومنع الإساءة">4. Acceptable Use & Anti-Abuse</button>
-    <button type="button" onclick="openPolicyTab('copyright')" id="pol-btn-copyright" class="px-3.5 py-2 rounded-full text-xs font-semibold bg-white/10 text-zinc-300" data-en="5. Copyright & Media Liability" data-ar="5. حقوق النشر ومسؤولية الميديا">5. Copyright & Media Liability</button>
-    <button type="button" onclick="openPolicyTab('ai-policy')" id="pol-btn-ai-policy" class="px-3.5 py-2 rounded-full text-xs font-semibold bg-white/10 text-zinc-300" data-en="6. AI Usage & Disclosure" data-ar="6. سياسة الذكاء الاصطناعي والإفصاح">6. AI Usage & Disclosure</button>
-    <button type="button" onclick="openPolicyTab('faq')" id="pol-btn-faq" class="px-3.5 py-2 rounded-full text-xs font-semibold bg-white/10 text-zinc-300" data-en="7. FAQ & Channel Linking Guide" data-ar="7. الأسئلة الشائعة ودليل الربط">7. FAQ & Channel Linking Guide</button>
-    <button type="button" onclick="openPolicyTab('tickets')" id="pol-btn-tickets" class="px-3.5 py-2 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" data-en="8. Support Tickets & Contact" data-ar="8. فتح تذكرة والتواصل والدعم">8. Support Tickets & Contact</button>
+    <button type="button" onclick="openPolicyTab('terms')" id="pol-btn-terms" class="px-3.5 py-2 rounded-full text-xs font-semibold bg-blue-600 text-white" data-en="1. Terms of Use" data-ar="1. شروط الاستخدام">1. شروط الاستخدام</button>
+    <button type="button" onclick="openPolicyTab('privacy')" id="pol-btn-privacy" class="px-3.5 py-2 rounded-full text-xs font-semibold bg-white/10 text-zinc-300" data-en="2. Privacy Policy" data-ar="2. سياسة الخصوصية">2. سياسة الخصوصية</button>
+    <button type="button" onclick="openPolicyTab('refund')" id="pol-btn-refund" class="px-3.5 py-2 rounded-full text-xs font-semibold bg-white/10 text-zinc-300" data-en="3. Plans &amp; Refunds" data-ar="3. الباقات والاسترداد">3. الباقات والاسترداد</button>
+    <button type="button" onclick="openPolicyTab('abuse')" id="pol-btn-abuse" class="px-3.5 py-2 rounded-full text-xs font-semibold bg-white/10 text-zinc-300" data-en="4. Acceptable Use" data-ar="4. الاستخدام المقبول">4. الاستخدام المقبول</button>
+    <button type="button" onclick="openPolicyTab('copyright')" id="pol-btn-copyright" class="px-3.5 py-2 rounded-full text-xs font-semibold bg-white/10 text-zinc-300" data-en="5. Copyright &amp; Rights" data-ar="5. حقوق النشر والملكية">5. حقوق النشر والملكية</button>
+    <button type="button" onclick="openPolicyTab('ai-policy')" id="pol-btn-ai-policy" class="px-3.5 py-2 rounded-full text-xs font-semibold bg-white/10 text-zinc-300" data-en="6. AI Disclosure" data-ar="6. سياسة الذكاء الاصطناعي">6. سياسة الذكاء الاصطناعي</button>
+    <button type="button" onclick="openPolicyTab('faq')" id="pol-btn-faq" class="px-3.5 py-2 rounded-full text-xs font-semibold bg-white/10 text-zinc-300" data-en="7. FAQ &amp; Quick Guide" data-ar="7. الأسئلة الشائعة ودليل الربط">7. الأسئلة الشائعة ودليل الربط</button>
+    <button type="button" onclick="openPolicyTab('tickets')" id="pol-btn-tickets" class="px-3.5 py-2 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" data-en="8. Support Tickets &amp; Contact" data-ar="8. فتح تذكرة والتواصل والدعم">8. فتح تذكرة والتواصل والدعم</button>
    </div>
    <div class="apple-bento p-6 sm:p-9 leading-relaxed text-sm text-zinc-300 space-y-6">
     <div id="policy-pane-terms" class="space-y-4">
-     <h3 class="text-2xl font-bold text-white border-b border-white/10 pb-3" data-en="1. Terms of Use (Omniposts.online)" data-ar="1. شروط الاستخدام (Terms of Use — Omniposts.online)">1. Terms of Use (Omniposts.online)</h3>
-     <p data-en="Welcome to Omniposts.online. These Terms of Use govern your access to and use of our all-in-one Software-as-a-Service (SaaS) cloud platform for automated AI story creation, video rendering across 16+ global AI engines, and direct publishing to YouTube via official Google OAuth 2.0 authorization." data-ar="مرحباً بك في منصة Omniposts.online. تحكم شروط الاستخدام هذه وصولك واستخدامك لمنصتنا البرمجية كخدمة (SaaS) المتكاملة لتأليف القصص الفيروسية، وصناعة الفيديوهات بالذكاء الاصطناعي عبر 16 محركاً عالمياً مدمجاً داخل المنصة، ورفعها مباشرة على قنوات يوتيوب عبر بروتوكول Google OAuth 2.0 الرسمي.">Welcome to Omniposts.online. These Terms of Use govern your access to and use of our all-in-one Software-as-a-Service (SaaS) cloud platform for automated AI story creation, video rendering across 16+ global AI engines, and direct publishing to YouTube via official Google OAuth 2.0 authorization.</p>
+     <h3 class="text-2xl font-bold text-white border-b border-white/10 pb-3" data-en="1. Terms of Use (Omniposts.online)" data-ar="1. شروط الاستخدام (Terms of Use — Omniposts.online)">1. شروط الاستخدام (Terms of Use — Omniposts.online)</h3>
+     <p data-en="Welcome to Omniposts.online. These Terms of Use govern your access to our cloud Software-as-a-Service (SaaS) platform for automated AI story writing, cloud video production in two dedicated modes, and direct 24/7 publishing to YouTube via official Google OAuth 2.0." data-ar="مرحباً بك في منصة Omniposts.online. تحكم شروط الاستخدام هذه وصولك واستخدامك لمنصتنا السحابية (SaaS) المتكاملة لتأليف القصص، وصناعة الفيديوهات بالذكاء الاصطناعي عبر وضعين احترافيين مدمجين، والنشر التلقائي المباشر على يوتيوب 24/7 عبر بروتوكول Google OAuth 2.0 الرسمي.">مرحباً بك في منصة Omniposts.online. تحكم شروط الاستخدام هذه وصولك واستخدامك لمنصتنا السحابية (SaaS) المتكاملة لتأليف القصص، وصناعة الفيديوهات بالذكاء الاصطناعي عبر وضعين احترافيين مدمجين، والنشر التلقائي المباشر على يوتيوب 24/7 عبر بروتوكول Google OAuth 2.0 الرسمي.</p>
      <ul class="list-disc ps-5 space-y-2">
-      <li data-en="Built-In Cloud Service & Credit Wallet: Omniposts.online provides built-in access to our unified Full HD 1080p AI storytelling & voiceover engine (including Omniposts 1080p Engine, Omniposts 1080p Engine, Google Veo, Wan, Runway, Luma, Omniposts 1080p Engine, Omniposts 1080p Engine, Vidu, and Grok) using a unified platform credit wallet — requiring zero external API keys from the user." data-ar="طبيعة الخدمة السحابية ومحفظة الكريدت المدمجة: توفر منصة Omniposts.online وصولاً مدمجاً ومباشراً لـ 16 أداة عالمية لتوليد الفيديو والصوت وتأليف القصص من داخل المنصة مباشرة عبر محفظة كريدت موحدة، دون الحاجة لإدخال أي مفاتيح API خارجية من طرف العميل.">Built-In Cloud Service & Credit Wallet: Omniposts.online provides built-in access to our unified Full HD 1080p AI storytelling & voiceover engine (including Omniposts 1080p Engine, Omniposts 1080p Engine, Google Veo, Wan, Runway, Luma, Omniposts 1080p Engine, Omniposts 1080p Engine, Vidu, and Grok) using a unified platform credit wallet — requiring zero external API keys from the user.</li>
-      <li data-en="Account Eligibility & Security: Users must provide accurate registration details (Full Name, Username, Email, Password). You are solely responsible for safeguarding your account login credentials." data-ar="أهلية الحساب والأمان: يلتزم المستخدم بتقديم بيانات صحيحة عند إنشاء الحساب (الاسم الكامل، اسم المستخدم، البريد الإلكتروني، وكلمة المرور)، وهو مسؤول بالكامل عن الحفاظ على سرية بيانات دخوله.">Account Eligibility & Security: Users must provide accurate registration details (Full Name, Username, Email, Password). You are solely responsible for safeguarding your account login credentials.</li>
-      <li data-en="Multi-Channel Quotas: All active plans allow linking and managing up to five (5) independent YouTube channels per account and scheduling 1 to 5 automated videos per day per channel." data-ar="ربط القنوات والجدولة اليومية: تتيح جميع باقات المنصة ربط وإدارة حتى خمس (5) قنوات يوتيوب مستقلة في نفس الحساب، مع إمكانية جدولة من 1 إلى 5 فيديوهات يومياً لكل قناة.">Multi-Channel Quotas: All active plans allow linking and managing up to five (5) independent YouTube channels per account and scheduling 1 to 5 automated videos per day per channel.</li>
-      <li data-en="Transparent Per-Second Credit Deduction: Credit consumption is calculated transparently in real time before generation based on the user's selected AI video tool, resolution (480p, 720p, 1080p, or 4K), and video duration (from 5 seconds up to 60 minutes). Failed render tasks are never charged." data-ar="شفافية خصم الكريدت: يتم حساب وعرض تكلفة الفيديو بالكريدت أمام العميل لحظياً قبل التوليد بناءً على (الأداة المختارة × دقة الفيديو × مدة الفيديو بالثواني من 5 ثوانٍ حتى 60 دقيقة)، ولا يتم خصم أي كريدت في حال فشل مهمة الريندر.">Transparent Per-Second Credit Deduction: Credit consumption is calculated transparently in real time before generation based on the user's selected AI video tool, resolution (480p, 720p, 1080p, or 4K), and video duration (from 5 seconds up to 60 minutes). Failed render tasks are never charged.</li>
+      <li data-en="Two Built-In Cloud Video Modes (Zero External API Keys): Omniposts.online provides (1) 1080p Cinematic Stories (1× rate, 5s up to 60 minutes with voiceover, mood soundtrack, and timed captions) and (2) AI Motion Pro — Full Animated Video with Native Voice &amp; Dialogue (12× rate, 5s–30s in a single pass) using your unified Video Minutes wallet." data-ar="وضعان سحابيان مدمجان (بدون أي مفاتيح API خارجية): توفر المنصة (1) قصص 1080p سينمائية (بمعدل خصم 1×، من 5 ثوانٍ حتى 60 دقيقة بالتعليق الصوتي والموسيقى والترجمة)، و(2) فيديو متحرك بالصوت والحوار AI Motion Pro (بمعدل خصم 12×، من 5 إلى 30 ثانية بحركة وصوت وحوار متزامن) من خلال محفظة الدقائق الموحدة.">وضعان سحابيان مدمجان (بدون أي مفاتيح API خارجية): توفر المنصة (1) قصص 1080p سينمائية (بمعدل خصم 1×، من 5 ثوانٍ حتى 60 دقيقة بالتعليق الصوتي والموسيقى والترجمة)، و(2) فيديو متحرك بالصوت والحوار AI Motion Pro (بمعدل خصم 12×، من 5 إلى 30 ثانية بحركة وصوت وحوار متزامن) من خلال محفظة الدقائق الموحدة.</li>
+      <li data-en="Multi-Channel Automation Quotas: Starter Plan unlocks up to 2 YouTube channels, Pro Creator Plan unlocks up to 5 YouTube channels, and Max VIP Plan unlocks up to 10 YouTube channels — each with independent niches, languages, and daily schedules (1 to 5 videos/day)." data-ar="حصص ربط القنوات والأتمتة: تتيح باقة البداية ربط قناتين، وباقة المحترفين 5 قنوات، وباقة النخبة Max VIP حتى 10 قنوات يوتيوب مستقلة في نفس الحساب، مع جدولة يومية من 1 إلى 5 فيديوهات لكل قناة.">حصص ربط القنوات والأتمتة: تتيح باقة البداية ربط قناتين، وباقة المحترفين 5 قنوات، وباقة النخبة Max VIP حتى 10 قنوات يوتيوب مستقلة في نفس الحساب، مع جدولة يومية من 1 إلى 5 فيديوهات لكل قناة.</li>
+      <li data-en="100% Minutes Protection: The exact minutes required for every video are displayed clearly before generation. If any cloud render or upload fails for any technical reason, 0 minutes are deducted." data-ar="حماية الرصيد 100%: تظهر لك تكلفة كل فيديو بالدقائق بوضوح تام قبل التوليد، وفي حال فشل أي فيديو لأي سبب تقني لا يُخصم من محفظتك أي دقيقة أبداً.">حماية الرصيد 100%: تظهر لك تكلفة كل فيديو بالدقائق بوضوح تام قبل التوليد، وفي حال فشل أي فيديو لأي سبب تقني لا يُخصم من محفظتك أي دقيقة أبداً.</li>
      </ul>
     </div>
     <div id="policy-pane-privacy" class="hidden space-y-4">
-     <h3 class="text-2xl font-bold text-white border-b border-white/10 pb-3" data-en="2. Privacy Policy & Google API Services Compliance" data-ar="2. سياسة الخصوصية وحماية البيانات (Privacy Policy)">2. Privacy Policy & Google API Services Compliance</h3>
-     <p data-en="Omniposts.online is committed to strict data privacy, encryption, and full compliance with the Google API Services User Data Policy (including Limited Use requirements) and YouTube Terms of Service. The use of raw or derived user data received from Workspace APIs will adhere to the Google User Data Policy, including the Limited Use requirements. Raw and aggregated/anonymized Google user data is never used to develop, improve, or train generalized AI/ML models and is never transferred or sold to third parties for advertising:" data-ar="تلتزم منصة Omniposts.online بأعلى معايير التشفير وحماية الخصوصية، وبالتوافق التام مع سياسة Google API Services User Data Policy (بما في ذلك متطلبات الاستخدام المحدود Limited Use) وشروط خدمة يوتيوب (The use of raw or derived user data received from Workspace APIs will adhere to the Google User Data Policy, including the Limited Use requirements)، ولا يتم أبداً استخدام بيانات مستخدمي جوجل لتدريب نماذج الذكاء الاصطناعي العامة أو بيعها لأي طرف ثالث:">Omniposts.online is committed to strict data privacy, encryption, and full compliance with the Google API Services User Data Policy (including Limited Use requirements) and YouTube Terms of Service. The use of raw or derived user data received from Workspace APIs will adhere to the Google User Data Policy, including the Limited Use requirements. Raw and aggregated/anonymized Google user data is never used to develop, improve, or train generalized AI/ML models and is never transferred or sold to third parties for advertising:</p>
+     <h3 class="text-2xl font-bold text-white border-b border-white/10 pb-3" data-en="2. Privacy Policy &amp; Google API Services Compliance" data-ar="2. سياسة الخصوصية وحماية البيانات (Privacy Policy)">2. سياسة الخصوصية وحماية البيانات (Privacy Policy)</h3>
+     <p data-en="Omniposts.online is committed to strict data privacy, encryption, and full compliance with the Google API Services User Data Policy (including Limited Use requirements) and YouTube Terms of Service. Raw or derived Google user data is never used to train generalized AI/ML models and is never sold or shared for advertising." data-ar="تلتزم منصة Omniposts.online بأعلى معايير التشفير وحماية الخصوصية وبالتوافق التام مع سياسة Google API Services User Data Policy (بما في ذلك متطلبات الاستخدام المحدود Limited Use) وشروط خدمة يوتيوب. لا نستخدم أبداً بيانات مستخدمي جوجل لتدريب نماذج ذكاء اصطناعي ولا نبيعها لأي طرف ثالث.">تلتزم منصة Omniposts.online بأعلى معايير التشفير وحماية الخصوصية وبالتوافق التام مع سياسة Google API Services User Data Policy (بما في ذلك متطلبات الاستخدام المحدود Limited Use) وشروط خدمة يوتيوب. لا نستخدم أبداً بيانات مستخدمي جوجل لتدريب نماذج ذكاء اصطناعي ولا نبيعها لأي طرف ثالث.</p>
      <ul class="list-disc ps-5 space-y-2">
-      <li data-en="Information We Collect: We collect your name, username, email address, country (to display local EGP or international USD payment options), credit balance, and connected channel preferences." data-ar="البيانات التي نجمعها: نجمع الاسم، اسم المستخدم، البريد الإلكتروني، الدولة (لتوفير بوابة الدفع المحلية بالجنيه المصري أو الدولية بالدولار)، ورصيد الكريدت وإعدادات القنوات المربوطة.">Information We Collect: We collect your name, username, email address, country (to display local EGP or international USD payment options), credit balance, and connected channel preferences.</li>
-      <li data-en="YouTube OAuth 2.0 Scopes & Limited Use: Omniposts.online only requests official Google OAuth 2.0 permissions for youtube.readonly (to display your connected channel title, video count, and view statistics inside your dashboard) and youtube.upload (to upload and publish the AI videos you generate). We never sell, share, or use your Google user data for advertising or any unauthorized purpose." data-ar="صلاحيات يوتيوب الرسمية (Google OAuth 2.0): تطلب المنصة فقط صلاحية قراءة بيانات القناة الأساسية (youtube.readonly لعرض اسم قناتك وإحصائيات المشاهدات والفيديوهات داخل لوحة تحكمك) وصلاحية رفع الفيديوهات (youtube.upload لنشر الفيديوهات التي تولدها على قناتك). لا نقوم أبداً ببيع أو مشاركة بياناتك مع أي طرف ثالث أو التدخل في أرباح AdSense أو حذف فيديوهاتك.">YouTube OAuth 2.0 Scopes & Limited Use: Omniposts.online only requests official Google OAuth 2.0 permissions for youtube.readonly (to display your connected channel title, video count, and view statistics inside your dashboard) and youtube.upload (to upload and publish the AI videos you generate). We never sell, share, or use your Google user data for advertising or any unauthorized purpose.</li>
-      <li data-en="Encryption & Token Security: Your OAuth tokens and account records are securely stored in encrypted database tables and transmitted exclusively over HTTPS/TLS." data-ar="تشفير وأمان البيانات: يتم حفظ رموز التفويض وبيانات الحساب بتشفير آمن عبر اتصال HTTPS/TLS المشفر بالكامل.">Encryption & Token Security: Your OAuth tokens and account records are securely stored in encrypted database tables and transmitted exclusively over HTTPS/TLS.</li>
-      <li data-en="Revocation & Data Deletion: You may disconnect any YouTube channel at any time from your dashboard or revoke access directly via your Google Account Security Permissions page (myaccount.google.com/permissions)." data-ar="إلغاء الربط وحذف البيانات: يحق للمستخدم في أي وقت فصل قناته من لوحة التحكم أو إلغاء صلاحية الوصول فوراً من صفحة أمان حساب Google الرسمي (myaccount.google.com/permissions).">Revocation & Data Deletion: You may disconnect any YouTube channel at any time from your dashboard or revoke access directly via your Google Account Security Permissions page (myaccount.google.com/permissions).</li>
+      <li data-en="Information We Collect: Your name, email address, remaining video minutes balance, and connected channel preferences." data-ar="البيانات التي نجمعها: الاسم، البريد الإلكتروني، رصيد دقائق الفيديو المتبقي، وإعدادات القنوات والجدولة الخاصة بك.">البيانات التي نجمعها: الاسم، البريد الإلكتروني، رصيد دقائق الفيديو المتبقي، وإعدادات القنوات والجدولة الخاصة بك.</li>
+      <li data-en="YouTube OAuth 2.0 Scopes: We only request youtube.readonly (to show your channel name and stats inside your dashboard) and youtube.upload (to publish your generated videos). We never access AdSense revenue or delete your videos." data-ar="صلاحيات يوتيوب الرسمية (Google OAuth 2.0): نطلب فقط صلاحية youtube.readonly (لعرض اسم قناتك وإحصائياتها في لوحة التحكم) وصلاحية youtube.upload (لرفع الفيديوهات التي تولدها). لا نتدخل أبداً في أرباح AdSense ولا نحذف فيديوهاتك.">صلاحيات يوتيوب الرسمية (Google OAuth 2.0): نطلب فقط صلاحية youtube.readonly (لعرض اسم قناتك وإحصائياتها في لوحة التحكم) وصلاحية youtube.upload (لرفع الفيديوهات التي تولدها). لا نتدخل أبداً في أرباح AdSense ولا نحذف فيديوهاتك.</li>
+      <li data-en="Revocation &amp; Data Deletion: Disconnect any channel anytime from your Dashboard or revoke access via myaccount.google.com/permissions, or request full account deletion via support@omniposts.online." data-ar="إلغاء الربط وحذف البيانات: يمكنك فصل أي قناة في أي وقت من لوحة التحكم أو عبر myaccount.google.com/permissions، أو طلب حذف حسابك بالكامل عبر support@omniposts.online.">إلغاء الربط وحذف البيانات: يمكنك فصل أي قناة في أي وقت من لوحة التحكم أو عبر myaccount.google.com/permissions، أو طلب حذف حسابك بالكامل عبر support@omniposts.online.</li>
      </ul>
     </div>
     <div id="policy-pane-refund" class="hidden space-y-4">
-     <h3 class="text-2xl font-bold text-white border-b border-white/10 pb-3" data-en="3. Plans, Forever-Rollover Credits & Refund Policy" data-ar="3. سياسة الباقات وشحن الكريدت والاسترداد (Subscriptions, Credits & Refund Policy)">3. Plans, Forever-Rollover Credits & Refund Policy</h3>
-     <p data-en="Omniposts.online operates on transparent credit packages and instant top-ups with a Forever-Rollover guarantee:" data-ar="تعمل منصة Omniposts.online بنظام باقات الكريدت الواضحة وشحن الرصيد الفوري مع ضمان عدم انتهاء صلاحية الكريدت أبداً:">Omniposts.online operates on transparent credit packages and instant top-ups with a Forever-Rollover guarantee:</p>
+     <h3 class="text-2xl font-bold text-white border-b border-white/10 pb-3" data-en="3. Plans, Forever-Rollover Video Minutes &amp; Refund Policy" data-ar="3. سياسة الباقات وشحن الدقائق والاسترداد (Plans &amp; Refund Policy)">3. سياسة الباقات وشحن الدقائق والاسترداد (Plans &amp; Refund Policy)</h3>
+     <p data-en="Omniposts.online uses a transparent Video Minutes wallet with a Forever-Rollover guarantee:" data-ar="تعمل منصة Omniposts.online بنظام محفظة دقائق الفيديو الشفافة مع ضمان عدم انتهاء صلاحية دقائقك أبداً:">تعمل منصة Omniposts.online بنظام محفظة دقائق الفيديو الشفافة مع ضمان عدم انتهاء صلاحية دقائقك أبداً:</p>
      <ul class="list-disc ps-5 space-y-2">
-      <li data-en="Approved Credit Plans: Starter Plan — 1,000 Credits (900 + 100 Bonus, generates up to 100 videos) for $9.99 (538 EGP); Pro Creator Plan — 2,500 Credits (2,000 + 500 Bonus, generates up to 250 videos) for $19.99 (1,077 EGP); and VIP Agency Plan — 5,000 Credits (4,000 + 1,000 Bonus, generates up to 500 videos) for $39.99 (2,154 EGP)." data-ar="الباقات المعتمدة في المنصة: باقة البداية (Starter) وتمنح 1,000 نقطة كريدت (900 أساسي + 100 هدية — تولد 100 فيديو) بسعر $9.99 (538 ج.م)؛ باقة المحترفين (Pro) وتمنح 2,500 نقطة كريدت (2,000 أساسي + 500 هدية — تولد 250 فيديو) بسعر $19.99 (1,077 ج.م)؛ وباقة النخبة (VIP) وتمنح 5,000 نقطة كريدت (4,000 أساسي + 1,000 هدية — تولد 500 فيديو) بسعر $39.99 (2,154 ج.م).">Approved Credit Plans: Starter Plan — 1,000 Credits (900 + 100 Bonus, generates up to 100 videos) for $9.99 (538 EGP); Pro Creator Plan — 2,500 Credits (2,000 + 500 Bonus, generates up to 250 videos) for $19.99 (1,077 EGP); and VIP Agency Plan — 5,000 Credits (4,000 + 1,000 Bonus, generates up to 500 videos) for $39.99 (2,154 EGP).</li>
-      <li data-en="Instant Credit Top-Up & Forever Rollover: Subscribed users or users whose balance runs out may recharge extra credits at any time starting from a minimum of 1,000 Credits ($9.99 / 538 EGP). Unused credits never expire and automatically roll over month after month." data-ar="شحن الرصيد الإضافي وعدم انتهاء الكريدت: يمكن لأي عميل شحن وتزويد رصيد كريدت إضافي في أي وقت بدون اشتراك جديد بحد أدنى 1,000 كريدت ($9.99 / 538 ج.م). جميع نقاط الكريدت في محفظة العميل لا تحترق ولا تنتهي صلاحيتها أبداً وتترحل تلقائياً.">Instant Credit Top-Up & Forever Rollover: Subscribed users or users whose balance runs out may recharge extra credits at any time starting from a minimum of 1,000 Credits ($9.99 / 538 EGP). Unused credits never expire and automatically roll over month after month.</li>
-      <li data-en="Refund Policy: Full refunds are available within 48 hours of purchase provided no more than 50 Credits have been consumed from the purchased package, or if a verified technical defect on Omniposts.online servers remains unresolved for 72 hours after opening a support ticket." data-ar="سياسة الاسترداد (Refund Policy): يحق للعميل طلب استرداد كامل المبلغ خلال 48 ساعة من تاريخ الشراء بشرط عدم استهلاك أكثر من 50 نقطة كريدت من الرصيد المشحون، أو في حال وجود عطل تقني في خوادم المنصة تعذر حله خلال 72 ساعة من فتح تذكرة دعم رسمية.">Refund Policy: Full refunds are available within 48 hours of purchase provided no more than 50 Credits have been consumed from the purchased package, or if a verified technical defect on Omniposts.online servers remains unresolved for 72 hours after opening a support ticket.</li>
+      <li data-en="Official Plans: Starter — 60 Minutes (2 Channels) at $19.99/mo ($179/yr for 720 Min); Pro Creator — 150 Minutes (5 Channels) at $29.99/mo ($269/yr for 1,800 Min); Max VIP — 350 Minutes (10 Channels) at $49.99/mo ($449/yr for 4,200 Min)." data-ar="الباقات الرسمية المعتمدة: باقة البداية (Starter) وتمنح 60 دقيقة (قناتين) بسعر $19.99 شهرياً (أو $179 سنوياً لـ 720 دقيقة)؛ باقة المحترفين (Pro) وتمنح 150 دقيقة (5 قنوات) بسعر $29.99 شهرياً (أو $269 سنوياً لـ 1,800 دقيقة)؛ وباقة النخبة (Max VIP) وتمنح 350 دقيقة (10 قنوات) بسعر $49.99 شهرياً (أو $449 سنوياً لـ 4,200 دقيقة).">الباقات الرسمية المعتمدة: باقة البداية (Starter) وتمنح 60 دقيقة (قناتين) بسعر $19.99 شهرياً (أو $179 سنوياً لـ 720 دقيقة)؛ باقة المحترفين (Pro) وتمنح 150 دقيقة (5 قنوات) بسعر $29.99 شهرياً (أو $269 سنوياً لـ 1,800 دقيقة)؛ وباقة النخبة (Max VIP) وتمنح 350 دقيقة (10 قنوات) بسعر $49.99 شهرياً (أو $449 سنوياً لـ 4,200 دقيقة).</li>
+      <li data-en="Instant Extra Minutes Top-Up &amp; Forever Rollover: Active subscribers can top up extra minutes anytime (from 10 up to 5,000 minutes) via Egypt or International payment methods. Unused minutes never expire." data-ar="شحن الدقائق الإضافي وعدم انتهاء الصلاحية: يمكن للمشتركين شحن دقائق إضافية في أي وقت (من 10 حتى 5,000 دقيقة) عبر طرق الدفع للمصريين أو طرق الدفع الدولي، وجميع الدقائق تترحل معك للأبد ولا تنتهي بنهاية الشهر.">شحن الدقائق الإضافي وعدم انتهاء الصلاحية: يمكن للمشتركين شحن دقائق إضافية في أي وقت (من 10 حتى 5,000 دقيقة) عبر طرق الدفع للمصريين أو طرق الدفع الدولي، وجميع الدقائق تترحل معك للأبد ولا تنتهي بنهاية الشهر.</li>
+      <li data-en="Refund Policy: Full refunds are available within 48 hours of purchase provided no more than 5 minutes have been consumed, or if a verified platform technical defect remains unresolved for 72 hours after contacting support@omniposts.online." data-ar="سياسة الاسترداد (Refund Policy): يحق للعميل استرداد كامل المبلغ خلال 48 ساعة من الشراء بشرط عدم استهلاك أكثر من 5 دقائق من الرصيد، أو في حال وجود عطل تقني مؤكد في المنصة تعذر حله خلال 72 ساعة من التواصل عبر support@omniposts.online.">سياسة الاسترداد (Refund Policy): يحق للعميل استرداد كامل المبلغ خلال 48 ساعة من الشراء بشرط عدم استهلاك أكثر من 5 دقائق من الرصيد، أو في حال وجود عطل تقني مؤكد في المنصة تعذر حله خلال 72 ساعة من التواصل عبر support@omniposts.online.</li>
      </ul>
     </div>
     <div id="policy-pane-abuse" class="hidden space-y-4">
-     <h3 class="text-2xl font-bold text-white border-b border-white/10 pb-3" data-en="4. Acceptable Use & Anti-Abuse Policy" data-ar="4. سياسة الاستخدام المقبول ومنع الإساءة (Acceptable Use & Anti-Abuse Policy)">4. Acceptable Use & Anti-Abuse Policy</h3>
-     <p data-en="To protect our cloud rendering and YouTube upload infrastructure, you may not use Omniposts.online for:" data-ar="لحماية خوادم الريندر السحابية وسمعة المنصة لدى يوتيوب، يُحظر تماماً استخدام Omniposts.online في أي من الأنشطة التالية:">To protect our cloud rendering and YouTube upload infrastructure, you may not use Omniposts.online for:</p>
+     <h3 class="text-2xl font-bold text-white border-b border-white/10 pb-3" data-en="4. Acceptable Use &amp; Anti-Abuse Policy" data-ar="4. سياسة الاستخدام المقبول ومنع الإساءة">4. سياسة الاستخدام المقبول ومنع الإساءة</h3>
+     <p data-en="To protect our cloud rendering servers and YouTube compliance, you may not use Omniposts.online for:" data-ar="لحماية خوادم الريندر السحابية وسمعة القنوات لدى يوتيوب، يُحظر استخدام Omniposts.online في:">لحماية خوادم الريندر السحابية وسمعة القنوات لدى يوتيوب، يُحظر استخدام Omniposts.online في:</p>
      <ul class="list-disc ps-5 space-y-2">
-      <li data-en="Generating or publishing hate speech, graphic violence, terrorism, illegal content, sexually explicit material (NSFW), or child exploitation." data-ar="كتابة أو توليد أو نشر أي محتوى مخصص يحض على الكراهية، العنف الدموي، الإرهاب، المحتوى غير القانوني، أو المحتوى الإباحي أو استغلال الأطفال.">Generating or publishing hate speech, graphic violence, terrorism, illegal content, sexually explicit material (NSFW), or child exploitation.</li>
-      <li data-en="Creating malicious deepfakes impersonating real individuals for defamation, financial fraud, or political/medical disinformation." data-ar="إنشاء مقاطع تزييف عميق (Deepfakes) تنتحل شخصيات حقيقية بهدف التشهير أو الاحتيال المالي أو التضليل الطبي والسياسي.">Creating malicious deepfakes impersonating real individuals for defamation, financial fraud, or political/medical disinformation.</li>
-      <li data-en="Attempting to manipulate credit balances, exploit platform endpoints, or exceed the 5-channel limit per account." data-ar="محاولة التلاعب برصيد الكريدت أو إساءة استخدام واجهات الريندر السحابي أو تجاوز الحد الأقصى المسموح به (5 قنوات للحساب).">Attempting to manipulate credit balances, exploit platform endpoints, or exceed the 5-channel limit per account.</li>
-      <li data-en="Platform administrators reserve the right to immediately lock any account violating these rules without refund." data-ar="يحق لإدارة المنصة إغلاق وتجميد أي حساب ينتهك هذه السياسة فوراً دون التزام برد الرصيد المتبقي.">Platform administrators reserve the right to immediately lock any account violating these rules without refund.</li>
+      <li data-en="Generating or publishing hate speech, graphic violence, terrorism, illegal content, or sexually explicit (NSFW) material." data-ar="توليد أو نشر محتوى يحض على الكراهية، العنف الدموي، الإرهاب، الأنشطة غير القانونية، أو المحتوى الإباحي.">توليد أو نشر محتوى يحض على الكراهية، العنف الدموي، الإرهاب، الأنشطة غير القانونية، أو المحتوى الإباحي.</li>
+      <li data-en="Creating malicious deepfakes impersonating real people for defamation, fraud, or disinformation." data-ar="إنشاء مقاطع تزييف عميق تنتحل شخصيات حقيقية للتشهير أو الاحتيال أو التضليل.">إنشاء مقاطع تزييف عميق تنتحل شخصيات حقيقية للتشهير أو الاحتيال أو التضليل.</li>
+      <li data-en="Attempting to bypass minute balances, abuse cloud rendering endpoints, or violate account channel limits." data-ar="محاولة التلاعب برصيد الدقائق أو إساءة استخدام خوادم الريندر السحابية.">محاولة التلاعب برصيد الدقائق أو إساءة استخدام خوادم الريندر السحابية.</li>
      </ul>
     </div>
     <div id="policy-pane-copyright" class="hidden space-y-4">
-     <h3 class="text-2xl font-bold text-white border-b border-white/10 pb-3" data-en="5. Copyright Policy & Client Responsibility for Videos, Stories & Audio" data-ar="5. سياسة حقوق النشر ومسؤولية العميل عن المحتوى والميديا (Copyright & Media Liability)">5. Copyright Policy & Client Responsibility for Videos, Stories & Audio</h3>
-     <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs sm:text-sm">
-      <strong data-en="Important Legal Notice Regarding Commercial Rights & Copyright Liability:" data-ar="تنبيه قانوني هام حول الملكية التجارية وحقوق الطبع والنشر:">Important Legal Notice Regarding Commercial Rights & Copyright Liability:</strong>
-     </div>
+     <h3 class="text-2xl font-bold text-white border-b border-white/10 pb-3" data-en="5. Copyright Policy &amp; Commercial Ownership" data-ar="5. سياسة حقوق النشر وملكية الفيديوهات">5. سياسة حقوق النشر وملكية الفيديوهات</h3>
      <ul class="list-disc ps-5 space-y-2.5">
-      <li data-en="Full Commercial Ownership of Generated Videos: The client owns 100% of the commercial rights to all stories, scripts, voiceovers, and AI videos generated using their credits on Omniposts.online. We claim zero ownership over your YouTube channels or monetized videos." data-ar="ملكية العميل الكاملة للمخرجات: يمتلك العميل كافة الحقوق التجارية وحقوق النشر لجميع القصص والسيناريوهات والفيديوهات التي يولدها برصيد الكريدت الخاص به عبر المنصة، ولا تطالب Omniposts.online بأي نسبة من أرباح قنواته.">Full Commercial Ownership of Generated Videos: The client owns 100% of the commercial rights to all stories, scripts, voiceovers, and AI videos generated using their credits on Omniposts.online. We claim zero ownership over your YouTube channels or monetized videos.</li>
-      <li data-en="Client Responsibility for Custom Niches & Prompts: When selecting a preset trend or typing a custom content niche, you are solely responsible for ensuring your topic does not infringe third-party trademarks or copyrighted franchises." data-ar="مسؤولية العميل عن المحتوى المخصص: عند اختيار ترند أو كتابة محتوى مخصص (Custom Niche)، يتحمل العميل المسؤولية القانونية الكاملة عن ضمان عدم انتهاك الفكرة التي كتبها للعلامات التجارية أو الشخصيات المحمية بحقوق ملكية لطرف ثالث.">Client Responsibility for Custom Niches & Prompts: When selecting a preset trend or typing a custom content niche, you are solely responsible for ensuring your topic does not infringe third-party trademarks or copyrighted franchises.</li>
-      <li data-en="YouTube Community Guidelines & Monetization: Omniposts.online bears zero liability if a client's channel receives a YouTube strike or demonetization penalty due to user-selected custom topics or violation of YouTube Community Guidelines." data-ar="إرشادات منتدى يوتيوب وتحقيق الربح: لا تتحمل منصة Omniposts.online أي مسؤولية قانونية أو مالية في حال تلقي قناة العميل لمخالفة أو إيقاف ربح على يوتيوب نتيجة اختيار العميل لمواضيع مخصصة تخالف إرشادات منتدى يوتيوب.">YouTube Community Guidelines & Monetization: Omniposts.online bears zero liability if a client's channel receives a YouTube strike or demonetization penalty due to user-selected custom topics or violation of YouTube Community Guidelines.</li>
+      <li data-en="100% Commercial Ownership: You own 100% of the commercial rights to all stories, voiceovers, and videos generated using your minutes on Omniposts.online. We take 0% of your YouTube AdSense revenue." data-ar="ملكية تجارية 100%: تمتلك كافة الحقوق التجارية لجميع القصص والفيديوهات التي تولدها برصيدك في Omniposts.online، ولا نأخذ أي نسبة من أرباح قنواتك على يوتيوب.">ملكية تجارية 100%: تمتلك كافة الحقوق التجارية لجميع القصص والفيديوهات التي تولدها برصيدك في Omniposts.online، ولا نأخذ أي نسبة من أرباح قنواتك على يوتيوب.</li>
+      <li data-en="Client Responsibility for Custom Prompts: When entering a custom niche or prompt, you are responsible for ensuring it does not infringe third-party trademarks or copyrights." data-ar="مسؤولية المحتوى المخصص: عند كتابة فكرة أو محتوى مخصص، تتحمل مسؤولية عدم انتهاك العلامات التجارية أو حقوق الملكية لأي طرف ثالث.">مسؤولية المحتوى المخصص: عند كتابة فكرة أو محتوى مخصص، تتحمل مسؤولية عدم انتهاك العلامات التجارية أو حقوق الملكية لأي طرف ثالث.</li>
      </ul>
     </div>
     <div id="policy-pane-ai-policy" class="hidden space-y-4">
-     <h3 class="text-2xl font-bold text-white border-b border-white/10 pb-3" data-en="6. AI Story Engine & Synthetic Content Disclosure Policy" data-ar="6. سياسة الذكاء الاصطناعي وتوليد القصص والإفصاح (AI & Synthetic Content Disclosure)">6. AI Usage & Synthetic Content Disclosure</h3>
-     <p data-en="In accordance with global YouTube policies regarding Altered or Synthetic Content and original storytelling:" data-ar="تماشياً مع سياسات يوتيوب العالمية الخاصة بالمحتوى المُنشأ بالذكاء الاصطناعي (Altered or Synthetic Content) وأصالة القصص:">In accordance with global YouTube policies regarding Altered or Synthetic Content and original storytelling:</p>
+     <h3 class="text-2xl font-bold text-white border-b border-white/10 pb-3" data-en="6. AI Story Engine &amp; Synthetic Content Disclosure" data-ar="6. سياسة الذكاء الاصطناعي وتأليف القصص الفريدة">6. سياسة الذكاء الاصطناعي وتأليف القصص الفريدة</h3>
      <ul class="list-disc ps-5 space-y-2.5">
-      <li data-en="Non-Repeating AI Story Director Engine: Every time you generate a video on Omniposts.online, our AI Story Director checks your channel's episode history and writes a brand-new story, character interaction, plot twist, SEO title, and visual prompt so your channel never publishes duplicate videos." data-ar="محرك تأليف القصص الفريدة ومنع التكرار: في كل مرة تضغط فيها على توليد فيديو، يقوم محرك المخرج القصصي في Omniposts.online بفحص سجل الحلقات السابقة لقناتك وتأليف قصة درامية جديدة بشخصيات وحبكة وبرومبت وعنوان مختلف تماماً لضمان تفرد كل فيديو على قناتك.">Non-Repeating AI Story Director Engine: Every time you generate a video on Omniposts.online, our AI Story Director checks your channel's episode history and writes a brand-new story, character interaction, plot twist, SEO title, and visual prompt so your channel never publishes duplicate videos.</li>
-      <li data-en="Synthetic Media Compliance: For realistic historical or sci-fi simulations, Omniposts.online supports YouTube's synthetic media disclosure standards to keep your channels in good standing." data-ar="التوافق مع معايير الإفصاح عن المحتوى الاصطناعي: يدعم النظام معايير يوتيوب للإفصاح عن المشاهد الواقعية المولدة بالذكاء الاصطناعي للحفاظ على أمان وموثوقية قنواتك.">Synthetic Media Compliance: For realistic historical or sci-fi simulations, Omniposts.online supports YouTube's synthetic media disclosure standards to keep your channels in good standing.</li>
+      <li data-en="Unique Non-Repeating Episodes: Our AI Story Director checks each channel's history and generates fresh plots, characters, titles, and visuals every time so your channel never uploads duplicate content." data-ar="قصص فريدة بدون تكرار: يراجع محرك القصص الذكي سجل كل قناة ليؤلف في كل مرة قصة وعنواناً ومشاهداً جديدة تماماً بدون أي تكرار.">قصص فريدة بدون تكرار: يراجع محرك القصص الذكي سجل كل قناة ليؤلف في كل مرة قصة وعنواناً ومشاهداً جديدة تماماً بدون أي تكرار.</li>
+      <li data-en="YouTube Synthetic Media Standards: Omniposts.online aligns with YouTube's AI content disclosure guidelines to keep your channels safe and monetization-ready." data-ar="التوافق مع معايير يوتيوب: تتوافق المنصة مع إرشادات يوتيوب الخاصة بالمحتوى المُنشأ بالذكاء الاصطناعي للحفاظ على أمان قنواتك وجاهزيتها للربح.">التوافق مع معايير يوتيوب: تتوافق المنصة مع إرشادات يوتيوب الخاصة بالمحتوى المُنشأ بالذكاء الاصطناعي للحفاظ على أمان قنواتك وجاهزيتها للربح.</li>
      </ul>
     </div>
     <div id="policy-pane-faq" class="hidden space-y-5">
-     <h3 class="text-2xl font-bold text-white border-b border-white/10 pb-3" data-en="7. Frequently Asked Questions & Step-by-Step Channel Linking Guide" data-ar="7. الأسئلة الشائعة ودليل ربط القنوات وتوليد الفيديوهات خطوة بخطوة">7. Frequently Asked Questions & Step-by-Step Channel Linking Guide</h3>
+     <h3 class="text-2xl font-bold text-white border-b border-white/10 pb-3" data-en="7. Frequently Asked Questions &amp; Quick Start Guide" data-ar="7. الأسئلة الشائعة ودليل التشغيل السريع خطوة بخطوة">7. الأسئلة الشائعة ودليل التشغيل السريع خطوة بخطوة</h3>
      <div class="p-5 rounded-2xl bg-blue-500/10 border border-blue-500/30 space-y-3">
-      <h4 class="text-base font-bold text-blue-300" data-en="📘 3-Minute Quick Start Guide (No External API Keys Needed!):" data-ar="📘 دليل البدء السريع في 3 دقائق (بدون أي مفاتيح API خارجية!):">📘 3-Minute Quick Start Guide (No External API Keys Needed!):</h4>
+      <h4 class="text-base font-bold text-blue-300" data-en="📘 3-Minute Quick Start Guide (No External API Keys Needed):" data-ar="📘 دليل البدء السريع في 3 دقائق (بدون أي مفاتيح API خارجية):">📘 دليل البدء السريع في 3 دقائق (بدون أي مفاتيح API خارجية):</h4>
       <ol class="list-decimal ps-5 space-y-2 text-xs sm:text-sm text-zinc-200">
-       <li data-en="Create Your Account & Charge Your Credit Wallet: Sign up on Omniposts.online, open 'Plans & Credit Top-Up' from the menu, and choose a plan (Starter 1,000 Credits, Pro 2,500 Credits, or VIP 5,000 Credits) or top up your balance via the Egypt EGP gateway or International USD gateway." data-ar="إنشاء الحساب وشحن محفظة الكريدت: أنشئ حسابك في المنصة، ثم افتح صفحة (الخطط وشحن الرصيد) من القائمة، واختر باقتك (1,000 أو 2,500 أو 5,000 كريدت) أو اشحن رصيدك عبر بوابة مصر (بالجنيه) أو البوابة الدولية (بالدولار).">Create Your Account & Charge Your Credit Wallet: Sign up on Omniposts.online, open 'Plans & Credit Top-Up' from the menu, and choose a plan (Starter 1,000 Credits, Pro 2,500 Credits, or VIP 5,000 Credits) or top up your balance via the Egypt EGP gateway or International USD gateway.</li>
-       <li data-en="Link Up to 5 YouTube Channels: In your Dashboard, select Channel Slot 1 through 5, click 'Link Official YouTube Channel', and approve Google's official OAuth screen." data-ar="ربط قنوات اليوتيوب (حتى 5 قنوات في نفس الحساب): من لوحة التحكم، اختر القناة (من 1 إلى 5)، واضغط على زر (ربط قناة اليوتيوب الرسمية) ووافق على الصلاحيات عبر شاشة Google الآمنة.">Link Up to 5 YouTube Channels: In your Dashboard, select Channel Slot 1 through 5, click 'Link Official YouTube Channel', and approve Google's official OAuth screen.</li>
-       <li data-en="Customize Your Viral Story, AI Tool, Resolution & Duration: Pick from 28 viral story niches (such as Ancient History, Space Mysteries, Success Stories Stories, or Tiny Workers) or choose 'Write Another Custom Niche...', then select your preferred AI video tool (16 global tools), resolution (480p to 4K), duration (5s up to 60m with audio), and video language." data-ar="تخصيص القصة والأداة والدقة والمدة: اختر من الـ 28 ترند قصصي فيروسي (مثل الفواكه الناطقة أو قصص القط البرتقالي أو العمال الأقزام) أو اختر (✍️ كتابة محتوى آخر مخصص...)، ثم حدد أداة التوليد المفضلة لديك من بين 16 أداة، ودقة الفيديو (من 480p حتى 4K)، والمدة (من 5 ثوانٍ حتى ساعة كاملة بالصوت)، ولغة الفيديو.">Customize Your Viral Story, AI Tool, Resolution & Duration: Pick from 28 viral story niches (such as Ancient History, Space Mysteries, Success Stories Stories, or Tiny Workers) or choose 'Write Another Custom Niche...', then select your preferred AI video tool (16 global tools), resolution (480p to 4K), duration (5s up to 60m with audio), and video language.</li>
-       <li data-en="Generate Instantly or Schedule Daily: Check the live credit cost badge shown above the button, then click 'Generate & Publish Now' or 'Save Daily Schedule'. Our cloud writes a unique story, renders the video, and uploads it directly to your YouTube channel!" data-ar="التوليد الفوري أو الجدولة اليومية: ستظهر لك تكلفة الفيديو بالكريدت أمامك فوراً حسب اختياراتك؛ اضغط (توليد ونشر الفيديو الآن) أو احفظ جدول النشر اليومي، وستقوم المنصة بتأليف قصة جديدة وصناعة الفيديو ورفعه مباشرة على قناتك!">Generate Instantly or Schedule Daily: Check the live credit cost badge shown above the button, then click 'Generate & Publish Now' or 'Save Daily Schedule'. Our cloud writes a unique story, renders the video, and uploads it directly to your YouTube channel!</li>
+       <li data-en="Choose Your Plan: Open 'Plans' and subscribe to Starter (60 Min / 2 Channels), Pro (150 Min / 5 Channels), or Max VIP (350 Min / 10 Channels) using Egypt Payment Methods or International Payment Methods." data-ar="اختر باقتك: افتح صفحة (الخطط والأسعار) واشترك في باقة البداية (60 دقيقة / قناتين) أو المحترفين (150 دقيقة / 5 قنوات) أو النخبة (350 دقيقة / 10 قنوات) عبر طرق الدفع للمصريين أو طرق الدفع الدولي.">اختر باقتك: افتح صفحة (الخطط والأسعار) واشترك في باقة البداية (60 دقيقة / قناتين) أو المحترفين (150 دقيقة / 5 قنوات) أو النخبة (350 دقيقة / 10 قنوات) عبر طرق الدفع للمصريين أو طرق الدفع الدولي.</li>
+       <li data-en="Link Your YouTube Channels: Select any channel slot in your Dashboard and click 'Link Official YouTube Channel' through Google's secure OAuth screen." data-ar="اربط قنوات يوتيوب: من لوحة التحكم اختر رقم القناة واضغط (ربط قناة يوتيوب الرسمية) ووافق على الصلاحيات الآمنة من جوجل.">اربط قنوات يوتيوب: من لوحة التحكم اختر رقم القناة واضغط (ربط قناة يوتيوب الرسمية) ووافق على الصلاحيات الآمنة من جوجل.</li>
+       <li data-en="Pick Your Video Mode: Choose between '1080p Cinematic Stories' (1× rate, up to 60 min with narrator voice &amp; captions) OR 'AI Motion Pro' (12× rate, 5s–30s animated video with built-in voice, dialogue &amp; sound effects)." data-ar="اختر وضع التوليد: اختر بين (قصص 1080p سينمائية بمعدل 1× حتى 60 دقيقة بالتعليق الصوتي والترجمة) أو (فيديو متحرك بالصوت والحوار AI Motion Pro بمعدل 12× من 5 إلى 30 ثانية بحركة وصوت ومؤثرات مدمجة).">اختر وضع التوليد: اختر بين (قصص 1080p سينمائية بمعدل 1× حتى 60 دقيقة بالتعليق الصوتي والترجمة) أو (فيديو متحرك بالصوت والحوار AI Motion Pro بمعدل 12× من 5 إلى 30 ثانية بحركة وصوت ومؤثرات مدمجة).</li>
+       <li data-en="Generate or Schedule 24/7: Click 'Generate &amp; Publish Now' or set your daily schedule (1 to 5 videos/day) — our cloud renders and uploads automatically even while your phone is off!" data-ar="توليد فوري أو جدولة 24/7: اضغط (توليد ونشر الآن) أو فعّل الجدولة اليومية (1 إلى 5 فيديوهات يومياً) لتعمل قناتك تلقائياً حتى وهاتفك مغلق!">توليد فوري أو جدولة 24/7: اضغط (توليد ونشر الآن) أو فعّل الجدولة اليومية (1 إلى 5 فيديوهات يومياً) لتعمل قناتك تلقائياً حتى وهاتفك مغلق!</li>
       </ol>
      </div>
      <div class="space-y-3">
       <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
-       <h5 class="font-bold text-white" data-en="Q: Do I need to buy or bring any external API key to generate videos?" data-ar="س: هل أحتاج لشراء أو إدخال أي مفتاح API خارجي لتوليد الفيديوهات؟">Q: Do I need to buy or bring any external API key to generate videos?</h5>
-       <p class="text-xs sm:text-sm text-zinc-400 mt-1" data-en="A: No! Everything is 100% built into Omniposts.online. The 1080p Cloud Storytelling Engine and story writers work directly inside our platform using your credit balance." data-ar="ج: لا نهائياً! كل شيء مدمج بالكامل داخل منصتنا. جميع أدوات توليد الفيديو الـ 16 ومحرك تأليف القصص تعمل مباشرة من داخل حسابك باستخدام رصيد الكريدت الخاص بك دون الحاجة لأي مواقع خارجية.">A: No! Everything is 100% built into Omniposts.online. The 1080p Cloud Storytelling Engine and story writers work directly inside our platform using your credit balance.</p>
+       <h5 class="font-bold text-white" data-en="Q: What is the difference between 1080p Cinematic Stories (1×) and AI Motion Pro (12×)?" data-ar="س: ما الفرق بين وضع (قصص 1080p سينمائية 1×) ووضع (فيديو متحرك بالصوت والحوار 12×)؟">س: ما الفرق بين وضع (قصص 1080p سينمائية 1×) ووضع (فيديو متحرك بالصوت والحوار 12×)؟</h5>
+       <p class="text-xs sm:text-sm text-zinc-400 mt-1" data-en="A: 1080p Cinematic Stories generates illustrated 1080p scenes with smooth motion, voiceover, soundtrack, and captions (1 minute of video = 1 minute from your wallet, up to 60 minutes). AI Motion Pro generates full animated video clips with built-in synchronized dialogue, lip-sync, and sound effects (5s–30s, at 12× wallet minutes rate)." data-ar="ج: وضع قصص 1080p سينمائية ينتج مشاهد سينمائية فائقة الدقة مع تعليق صوتي وموسيقى وترجمة (دقيقة الفيديو = دقيقة واحدة من محفظتك، حتى 60 دقيقة). أما وضع فيديو متحرك بالصوت والحوار فينتج فيديو متحرك بالكامل مع حوار ومؤثرات صوتية مدمجة (5 إلى 30 ثانية، بمعدل 12× من رصيد الدقائق).">ج: وضع قصص 1080p سينمائية ينتج مشاهد سينمائية فائقة الدقة مع تعليق صوتي وموسيقى وترجمة (دقيقة الفيديو = دقيقة واحدة من محفظتك، حتى 60 دقيقة). أما وضع فيديو متحرك بالصوت والحوار فينتج فيديو متحرك بالكامل مع حوار ومؤثرات صوتية مدمجة (5 إلى 30 ثانية، بمعدل 12× من رصيد الدقائق).</p>
       </div>
       <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
-       <h5 class="font-bold text-white" data-en="Q: Do my unused credits expire at the end of the month?" data-ar="س: هل ينتهي رصيد الكريدت المتبقي بنهاية الشهر؟">Q: Do my unused credits expire at the end of the month?</h5>
-       <p class="text-xs sm:text-sm text-zinc-400 mt-1" data-en="A: Never! Your credits carry our Forever-Rollover guarantee. Any credits you don't use stay in your wallet forever, and you can top up extra credits (starting from 1,000 Credits) anytime without changing your plan." data-ar="ج: لا ينتهي أبداً! رصيد الكريدت في محفظتك ملكك للأبد ويترحل معك تلقائياً كل شهر، كما يمكنك تزويد وشحن كريدت إضافي في أي وقت (بحد أدنى 1,000 كريدت) بدون الحاجة لاشتراك جديد.">A: Never! Your credits carry our Forever-Rollover guarantee. Any credits you don't use stay in your wallet forever, and you can top up extra credits (starting from 1,000 Credits) anytime without changing your plan.</p>
+       <h5 class="font-bold text-white" data-en="Q: Do my unused video minutes expire at the end of the month?" data-ar="س: هل تنتهي صلاحية دقائق الفيديو المتبقية بنهاية الشهر؟">س: هل تنتهي صلاحية دقائق الفيديو المتبقية بنهاية الشهر؟</h5>
+       <p class="text-xs sm:text-sm text-zinc-400 mt-1" data-en="A: Never! Your minutes roll over forever, and failed renders always cost 0 minutes." data-ar="ج: لا تنتهي أبداً! دقائقك ملكك للأبد وتترحل تلقائياً، وأي فيديو يفشل لا يُخصم منه ولا دقيقة.">ج: لا تنتهي أبداً! دقائقك ملكك للأبد وتترحل تلقائياً، وأي فيديو يفشل لا يُخصم منه ولا دقيقة.</p>
       </div>
       <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
-       <h5 class="font-bold text-white" data-en="Q: How do you ensure two videos in the same niche don't repeat the same story?" data-ar="س: كيف تضمن المنصة عدم تكرار نفس القصة أو الفيديو عند اختيار نفس الترند؟">Q: How do you ensure two videos in the same niche don't repeat the same story?</h5>
-       <p class="text-xs sm:text-sm text-zinc-400 mt-1" data-en="A: Our AI Story Director saves a memory of previous episodes for each channel and crafts a brand-new episode with different characters, conflicts, plot twists, titles, and visual prompts every single time." data-ar="ج: يحتفظ محرك المخرج القصصي بسجل الحلقات السابقة لكل قناة، ويؤلف في كل مرة حلقة جديدة كلياً بشخصيات وأحداث ونهاية مفاجئة وبرومبت بصري مختلف تماماً عن أي فيديو سابق.">A: Our AI Story Director saves a memory of previous episodes for each channel and crafts a brand-new episode with different characters, conflicts, plot twists, titles, and visual prompts every single time.</p>
-      </div>
-      <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
-       <h5 class="font-bold text-white" data-en="Q: How many YouTube channels can I link in my plan?" data-ar="س: كم قناة يوتيوب يمكنني ربطها في الباقة؟">Q: How many YouTube channels can I link in my plan?</h5>
-       <p class="text-xs sm:text-sm text-zinc-400 mt-1" data-en="A: All plans (Starter, Pro, and VIP) allow you to connect and manage up to 5 YouTube channels per account, each with its own niche, AI tool, resolution, language, and daily schedule." data-ar="ج: جميع الخطط في المنصة (البداية، المحترفين، والنخبة) تتيح لك ربط وإدارة حتى 5 قنوات يوتيوب كاملة في نفس الحساب، مع تخصيص محتوى وأداة ولغة وجدولة مستقلة لكل قناة.">A: All plans (Starter, Pro, and VIP) allow you to connect and manage up to 5 YouTube channels per account, each with its own niche, AI tool, resolution, language, and daily schedule.</p>
+       <h5 class="font-bold text-white" data-en="Q: How do I contact technical support?" data-ar="س: كيف أتواصل مع الدعم الفني عند وجود أي استفسار؟">س: كيف أتواصل مع الدعم الفني عند وجود أي استفسار؟</h5>
+       <p class="text-xs sm:text-sm text-zinc-400 mt-1" data-en="A: Open a ticket in Tab 8 below or email us directly at support@omniposts.online — our team replies 24/7." data-ar="ج: افتح تذكرة دعم من تبويب (فتح تذكرة والتواصل والدعم) أو راسلنا مباشرة على البريد الرسمي support@omniposts.online وسنرد عليك سريعاً.">ج: افتح تذكرة دعم من تبويب (فتح تذكرة والتواصل والدعم) أو راسلنا مباشرة على البريد الرسمي support@omniposts.online وسنرد عليك سريعاً.</p>
       </div>
      </div>
     </div>
     <div id="policy-pane-tickets" class="hidden space-y-6">
-     <h3 class="text-2xl font-bold text-white border-b border-white/10 pb-3" data-en="8. Support Center, Open a Ticket & Contact Us" data-ar="8. مركز التواصل والدعم الفني وفتح التذاكر (Support Tickets & Contact Us)">8. Support Center, Open a Ticket & Contact Us</h3>
+     <h3 class="text-2xl font-bold text-white border-b border-white/10 pb-3" data-en="8. Support Center, Open a Ticket &amp; Direct Support Email" data-ar="8. مركز التواصل والدعم الفني وفتح التذاكر">8. مركز التواصل والدعم الفني وفتح التذاكر</h3>
+     <!-- Direct Official Support Email Card shown prominently whenever customer opens Tickets -->
+     <div class="p-5 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-blue-500/15 to-indigo-500/15 border border-emerald-400/40 flex flex-wrap items-center justify-between gap-4">
+      <div class="space-y-1">
+       <span class="text-xs font-extrabold text-emerald-300 uppercase" data-en="📩 Direct Official Support Email" data-ar="📩 بريد الدعم الفني الرسمي المباشر">📩 بريد الدعم الفني الرسمي المباشر</span>
+       <p class="text-xs sm:text-sm text-zinc-200" data-en="Send your issue directly to our support inbox or open a ticket below:" data-ar="يمكنك مراسلتنا بمشكلتك مباشرة على بريد الدعم الرسمي أو فتح تذكرة بالأسفل:">يمكنك مراسلتنا بمشكلتك مباشرة على بريد الدعم الرسمي أو فتح تذكرة بالأسفل:</p>
+       <div class="text-base sm:text-lg font-extrabold font-mono text-white select-all" dir="ltr">support@omniposts.online</div>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+       <button type="button" onclick="navigator.clipboard &amp;&amp; navigator.clipboard.writeText('support@omniposts.online'); showToast(t('✅ Support email copied: support@omniposts.online', '✅ تم نسخ بريد الدعم: support@omniposts.online'), 'info');" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/20 transition" data-en="📋 Copy Email" data-ar="📋 نسخ البريد">📋 نسخ البريد</button>
+       <a href="mailto:support@omniposts.online?subject=Omniposts%20Support%20Request" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 text-xs font-extrabold shadow-lg transition" data-en="✉️ Email Support Now" data-ar="✉️ إرسال رسالة على البريد الآن">✉️ إرسال رسالة على البريد الآن</a>
+      </div>
+     </div>
      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       <div class="lg:col-span-6 p-5 rounded-2xl bg-white/5 border border-white/10">
-       <h4 class="text-base font-bold text-white mb-3" data-en="🎫 Open a New Support Ticket" data-ar="🎫 فتح تذكرة دعم فني جديدة">🎫 Open a New Support Ticket</h4>
+       <h4 class="text-base font-bold text-white mb-3" data-en="🎫 Open a New Support Ticket" data-ar="🎫 فتح تذكرة دعم فني جديدة">🎫 فتح تذكرة دعم فني جديدة</h4>
        <form onsubmit="handleCreateSupportTicket(event)" class="space-y-3.5">
         <div>
-         <label class="block text-xs text-zinc-300 mb-1" data-en="Ticket Subject / Issue" data-ar="عنوان التذكرة / المشكلة">Ticket Subject / Issue</label>
-         <input type="text" id="ticket-subject" required placeholder="e.g. Question about credit top-up or channel linking" data-ph-en="e.g. Question about credit top-up or channel linking" data-ph-ar="مثال: استفسار حول شحن الكريدت أو ربط القناة" class="apple-input w-full px-3.5 py-2.5 text-sm" />
+         <label class="block text-xs text-zinc-300 mb-1" data-en="Ticket Subject / Issue" data-ar="عنوان التذكرة / المشكلة">عنوان التذكرة / المشكلة</label>
+         <input type="text" id="ticket-subject" required placeholder="مثال: استفسار حول شحن الدقائق أو ربط القناة" data-ph-en="e.g. Question about minutes top-up or channel linking" data-ph-ar="مثال: استفسار حول شحن الدقائق أو ربط القناة" class="apple-input w-full px-3.5 py-2.5 text-sm" />
         </div>
         <div>
-         <label class="block text-xs text-zinc-300 mb-1" data-en="Department" data-ar="القسم المختص">Department</label>
+         <label class="block text-xs text-zinc-300 mb-1" data-en="Department" data-ar="القسم المختص">القسم المختص</label>
          <select id="ticket-category" class="apple-input w-full px-3.5 py-2.5 text-sm">
-          <option value="Plans, Credit Top-Up & Billing (USD / EGP)" data-en="Plans, Credit Top-Up & Billing (USD / EGP)" data-ar="الخطط وشحن الكريدت والمدفوعات (مصر / دولي)">Plans, Credit Top-Up & Billing (USD / EGP)</option>
-          <option value="AI Video Tools, Stories & Rendering" data-en="AI Video Tools, Stories & Rendering" data-ar="أدوات الفيديو وتأليف القصص والريندر">AI Video Tools, Stories & Rendering</option>
-          <option value="YouTube Channel Linking & Scheduling" data-en="YouTube Channel Linking & Scheduling" data-ar="ربط قنوات اليوتيوب والجدولة السحابية">YouTube Channel Linking & Scheduling</option>
-          <option value="General Inquiries & Feature Requests" data-en="General Inquiries & Feature Requests" data-ar="اقتراحات واستفسارات عامة">General Inquiries & Feature Requests</option>
+          <option value="Plans, Minutes Top-Up &amp; Billing" data-en="Plans, Minutes Top-Up &amp; Billing (Egypt / International)" data-ar="الخطط وشحن الدقائق والمدفوعات (مصر / دولي)">الخطط وشحن الدقائق والمدفوعات (مصر / دولي)</option>
+          <option value="Video Generation (1080p Stories / AI Motion Pro)" data-en="Video Generation (1080p Stories / AI Motion Pro)" data-ar="توليد الفيديوهات (قصص 1080p / فيديو متحرك بالصوت)">توليد الفيديوهات (قصص 1080p / فيديو متحرك بالصوت)</option>
+          <option value="YouTube Channel Linking &amp; Scheduling" data-en="YouTube Channel Linking &amp; Scheduling" data-ar="ربط قنوات اليوتيوب والجدولة السحابية">ربط قنوات اليوتيوب والجدولة السحابية</option>
+          <option value="General Inquiries &amp; Feature Requests" data-en="General Inquiries &amp; Feature Requests" data-ar="اقتراحات واستفسارات عامة">اقتراحات واستفسارات عامة</option>
          </select>
         </div>
         <div>
-         <label class="block text-xs text-zinc-300 mb-1" data-en="Message Details" data-ar="تفاصيل الرسالة">Message Details</label>
-         <textarea id="ticket-message" rows="3" required placeholder="Describe your question or issue in detail and our team will respond shortly..." data-ph-en="Describe your question or issue in detail and our team will respond shortly..." data-ph-ar="اشرح استفسارك بالتفصيل وسيرد عليك فريق الدعم..." class="apple-input w-full px-3.5 py-2.5 text-sm"></textarea>
+         <label class="block text-xs text-zinc-300 mb-1" data-en="Message Details" data-ar="تفاصيل الرسالة">تفاصيل الرسالة</label>
+         <textarea id="ticket-message" rows="3" required placeholder="اشرح استفسارك بالتفصيل وسيرد عليك فريق الدعم..." data-ph-en="Describe your question or issue in detail and our team will respond shortly..." data-ph-ar="اشرح استفسارك بالتفصيل وسيرد عليك فريق الدعم..." class="apple-input w-full px-3.5 py-2.5 text-sm"></textarea>
         </div>
-        <button type="submit" class="w-full apple-btn-primary py-3 text-xs sm:text-sm font-bold" data-en="Submit Support Ticket" data-ar="إرسال التذكرة لفريق الدعم">
-         Submit Support Ticket
-        </button>
+        <button type="submit" class="w-full apple-btn-primary py-3 text-xs sm:text-sm font-bold" data-en="Submit Support Ticket" data-ar="إرسال التذكرة لفريق الدعم">إرسال التذكرة لفريق الدعم</button>
        </form>
       </div>
       <div class="lg:col-span-6 space-y-4">
        <div class="p-5 rounded-2xl bg-white/5 border border-white/10">
-        <h4 class="text-base font-bold text-white mb-3" data-en="📋 Your Support Tickets History" data-ar="📋 سجل التذاكر الخاصة بك">📋 Your Support Tickets History</h4>
+        <h4 class="text-base font-bold text-white mb-3" data-en="📋 Your Support Tickets History" data-ar="📋 سجل التذاكر الخاصة بك">📋 سجل التذاكر الخاصة بك</h4>
         <div id="user-tickets-list" class="space-y-2.5 text-xs">
         </div>
        </div>
        <div class="p-5 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-xs space-y-1.5">
-        <h5 class="font-bold text-white text-sm" data-en="📞 Direct Contact Information:" data-ar="📞 بيانات التواصل المباشر (اتصل بنا):">📞 Direct Contact Information:</h5>
-        <p><span data-en="Official Support Email: " data-ar="البريد الرسمي للدعم: ">Official Support Email: </span><span class="text-blue-300 font-mono">ma1979368@gmail.com</span></p>
-        <p><span data-en="Platform Domain: " data-ar="النطاق الرسمي للمنصة: ">Platform Domain: </span><span class="text-blue-300 font-mono">https://omniposts.online</span></p>
-        <p data-en="Support Hours: 24/7 ticket coverage with an average response time under 2 hours." data-ar="ساعات عمل الدعم الفني: متاح 24/7 عبر نظام التذاكر بمتوسط سرعة رد أقل من ساعتين.">Support Hours: 24/7 ticket coverage with an average response time under 2 hours.</p>
+        <h5 class="font-bold text-white text-sm" data-en="📞 Direct Contact Information:" data-ar="📞 بيانات التواصل المباشر (اتصل بنا):">📞 بيانات التواصل المباشر (اتصل بنا):</h5>
+        <p><span data-en="Official Support Email: " data-ar="البريد الرسمي للدعم: ">البريد الرسمي للدعم: </span><a href="mailto:support@omniposts.online" class="text-emerald-300 hover:text-emerald-200 underline font-mono">support@omniposts.online</a></p>
+        <p><span data-en="Platform Domain: " data-ar="النطاق الرسمي للمنصة: ">النطاق الرسمي للمنصة: </span><span class="text-blue-300 font-mono">https://omniposts.online</span></p>
+        <p data-en="Support Hours: 24/7 ticket &amp; email coverage with fast response." data-ar="ساعات عمل الدعم الفني: متاح 24/7 عبر التذاكر والبريد الرسمي بمتوسط سرعة رد سريع.">ساعات عمل الدعم الفني: متاح 24/7 عبر التذاكر والبريد الرسمي بمتوسط سرعة رد سريع.</p>
        </div>
       </div>
      </div>
@@ -1947,7 +1958,7 @@
      </div>
      <div class="md:col-span-2">
       <label for="admin-central-reserve-credits" class="block text-xs text-zinc-300 mb-1.5 font-semibold" data-en="2. Runware.ai Balance ($):" data-ar="2. رصيد Runware.ai ($):">2. Central Reserve (💎):</label>
-      <input type="number" id="admin-central-reserve-credits" min="0" step="100" value="80" oninput="updateAdminCreditCoverageRadar()" class="apple-input w-full px-3 py-2.5 text-xs sm:text-sm font-extrabold text-emerald-300 text-center" dir="ltr" />
+      <input type="number" id="admin-central-reserve-credits" min="0" step="0.5" value="10" oninput="updateAdminCreditCoverageRadar()" class="apple-input w-full px-3 py-2.5 text-xs sm:text-sm font-extrabold text-emerald-300 text-center" dir="ltr" />
      </div>
      <div class="md:col-span-2">
       <label for="admin-central-spent-usd" class="block text-xs text-zinc-300 mb-1.5 font-semibold" data-en="3. Total You Spent ($ USD):" data-ar="3. إجمالي ما صرفته ($):">3. Total You Spent ($ USD):</label>
@@ -2002,17 +2013,20 @@
       </div>
      </div>
      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center pt-1">
-      <div class="p-3 rounded-xl bg-white/5 border border-white/10">
-       <div class="text-[11px] text-zinc-400" data-en="Your Central Reserve Balance" data-ar="رصيدك المركزي المتاح حالياً">رصيدك المركزي المتاح حالياً</div>
-       <div id="admin-radar-reserve-val" class="text-xl font-extrabold text-emerald-400 mt-1">80m</div>
+      <div class="p-4 rounded-xl bg-white/5 border border-emerald-500/25">
+       <div class="text-[11px] text-zinc-300 font-semibold" data-en="Your Live Runware API Balance ($)" data-ar="1. رصيدك المتاح حالياً في Runware ($)">1. رصيدك المتاح حالياً في Runware ($)</div>
+       <div id="admin-radar-reserve-val" class="text-2xl font-extrabold text-emerald-400 mt-1">$10.00</div>
+       <div id="admin-radar-reserve-sub" class="text-[11px] text-emerald-200/80 mt-1">يغطي بأمان حتى 100 دقيقة مشترك</div>
       </div>
-      <div class="p-3 rounded-xl bg-white/5 border border-white/10">
-       <div class="text-[11px] text-zinc-400" data-en="Total Customer Credits Bought" data-ar="إجمالي الكريدت في محافظ جميع العملاء">إجمالي الكريدت في محافظ جميع العملاء</div>
-       <div id="admin-radar-liability-val" class="text-xl font-extrabold text-blue-400 mt-1">0m</div>
+      <div class="p-4 rounded-xl bg-white/5 border border-blue-500/25">
+       <div class="text-[11px] text-zinc-300 font-semibold" data-en="Subscribers' Active Minutes &amp; Required Cost ($)" data-ar="2. دقائق المشتركين الحالية والمطلوب تغطيته ($)">2. دقائق المشتركين الحالية والمطلوب تغطيته ($)</div>
+       <div id="admin-radar-liability-val" class="text-2xl font-extrabold text-blue-400 mt-1">0 دقيقة ($0.00)</div>
+       <div id="admin-radar-liability-sub" class="text-[11px] text-blue-200/80 mt-1">متوسط متوقع: $0.00 • حد أقصى آمن: $0.00</div>
       </div>
-      <div class="p-3 rounded-xl bg-white/5 border border-white/10">
-       <div class="text-[11px] text-zinc-400" data-en="Surplus / Deficit to Top-Up" data-ar="الفائض الآمن / العجز المطلوب شحنه">الفائض الآمن / العجز المطلوب شحنه</div>
-       <div id="admin-radar-diff-val" class="text-xl font-extrabold text-emerald-300 mt-1">+80m</div>
+      <div class="p-4 rounded-xl bg-white/5 border border-amber-500/25">
+       <div class="text-[11px] text-zinc-300 font-semibold" data-en="Coverage Status (Surplus / Deficit)" data-ar="3. حالة التغطية (اكتفاء وزيادة أم عجز للشحن؟)">3. حالة التغطية (اكتفاء وزيادة أم عجز للشحن؟)</div>
+       <div id="admin-radar-diff-val" class="text-2xl font-extrabold text-emerald-300 mt-1">+$10.00</div>
+       <div id="admin-radar-diff-sub" class="text-[11px] text-emerald-200/90 mt-1">✅ في اكتفاء وزيادة — لا تحتاج للشحن الآن</div>
       </div>
      </div>
      <div id="admin-radar-deficit-warning-box" class="hidden p-3.5 rounded-xl bg-red-500/20 border-2 border-red-500/50 text-xs text-red-200 font-bold leading-relaxed"></div>
@@ -2966,7 +2980,7 @@
    const resInp = document.getElementById('admin-central-reserve-credits');
    const spentInp = document.getElementById('admin-central-spent-usd');
    if (resInp && document.activeElement === resInp) {
-    const typedRes = parseInt(resInp.value, 10);
+    const typedRes = parseFloat(resInp.value);
     if (!isNaN(typedRes) && typedRes >= 0) platformMasterEngine.reserveCredits = typedRes;
    } else if (resInp) {
     resInp.value = String(platformMasterEngine.reserveCredits || 0);
@@ -2977,25 +2991,41 @@
    } else if (spentInp) {
     spentInp.value = String(platformMasterEngine.totalSpentUsd || 0);
    }
-   const reserve = Math.max(0, parseFloat(platformMasterEngine.reserveCredits) || 0);
+
+   // reserveUsd = your actual current USD balance in Runware.ai
+   const reserveUsd = Math.max(0, parseFloat(platformMasterEngine.reserveCredits) || 0);
    const totalSpentUsd = Math.max(0, parseFloat(platformMasterEngine.totalSpentUsd) || 0);
-   let totalCustomerCredits = 0;
+
+   // Live sum of all active remaining minutes across ALL non-admin subscribers
+   // Automatically decreases when subscribers generate videos and increases when they buy/top-up!
+   let totalCustomerMinutes = 0;
    let totalRevenueUsd = 0;
    if (Array.isArray(appState.adminUsers)) {
     appState.adminUsers.forEach(function(u) {
      if (u.email && u.email.toLowerCase() !== OWNER_ADMIN_EMAIL.toLowerCase()) {
-      totalCustomerCredits += (parseFloat(u.credits) || 0);
+      totalCustomerMinutes += Math.max(0, parseFloat(u.credits) || 0);
       if (u.subscribed) {
        totalRevenueUsd += estimatePlanUsd(u);
       }
      }
     });
    }
+   totalCustomerMinutes = Math.round(totalCustomerMinutes * 100) / 100;
    totalRevenueUsd = parseFloat(totalRevenueUsd.toFixed(2));
+
+   // Exact Runware API coverage rates per 1 subscriber wallet minute:
+   // - 1080p Cinematic Stories (1x): ~$0.03 per subscriber minute
+   // - AI Motion Pro (12x = 5 sec of HeyGen Video 1.0 @ $0.02/sec non-promo): $0.10 MAX per subscriber minute
+   // - Realistic mixed usage average: ~$0.055 per subscriber minute
+   const maxSafeNeededUsd = parseFloat((totalCustomerMinutes * 0.10).toFixed(2));
+   const avgExpectedNeededUsd = parseFloat((totalCustomerMinutes * 0.055).toFixed(2));
+   const safeCoveredMinutes = Math.floor(reserveUsd / 0.10);
+   const storyCoveredMinutes = Math.floor(reserveUsd / 0.03);
+
    const netCashProfitUsd = parseFloat((totalRevenueUsd - totalSpentUsd).toFixed(2));
-   const wholesaleCostOfSoldCreditsUsd = parseFloat((totalCustomerCredits * 0.03).toFixed(2));
-   const realizedProfitOnSoldUsd = parseFloat((totalRevenueUsd - wholesaleCostOfSoldCreditsUsd).toFixed(2));
-   const egpRate = appState.egpRate || 53.86;
+   const realizedProfitOnSoldUsd = parseFloat((totalRevenueUsd - avgExpectedNeededUsd).toFixed(2));
+   const egpRate = appState.egpRate || 50.0;
+
    const revUsdEl = document.getElementById('admin-fin-revenue-usd');
    const revEgpEl = document.getElementById('admin-fin-revenue-egp');
    const spUsdEl = document.getElementById('admin-fin-spent-usd');
@@ -3006,88 +3036,108 @@
    const realSubEl = document.getElementById('admin-fin-realized-sub');
    const profPill = document.getElementById('admin-profit-status-pill');
    const kpiRevEl = document.getElementById('admin-kpi-revenue');
+
    if (revUsdEl) revUsdEl.textContent = '$' + totalRevenueUsd.toFixed(2);
    if (revEgpEl) revEgpEl.textContent = Math.round(totalRevenueUsd * egpRate).toLocaleString() + (isEn() ? ' EGP' : ' ج.م');
    if (spUsdEl) spUsdEl.textContent = '$' + totalSpentUsd.toFixed(2);
    if (spEgpEl) spEgpEl.textContent = Math.round(totalSpentUsd * egpRate).toLocaleString() + (isEn() ? ' EGP' : ' ج.م');
    if (kpiRevEl) kpiRevEl.textContent = '$' + totalRevenueUsd.toFixed(2);
+
    const marginPct = totalRevenueUsd > 0 ? Math.round((netCashProfitUsd / totalRevenueUsd) * 100) : 0;
    if (netCashProfitUsd >= 0) {
-    if (netUsdEl) {
-     netUsdEl.className = 'text-2xl font-extrabold text-emerald-400 mt-1';
-     netUsdEl.textContent = '+$' + netCashProfitUsd.toFixed(2);
-    }
-    if (netEgpEl) {
-     netEgpEl.textContent = '+' + Math.round(netCashProfitUsd * egpRate).toLocaleString() + (isEn() ? ' EGP (Margin: ' + marginPct + '%)' : ' ج.م (هامش ربح: ' + marginPct + '%)');
-    }
+    if (netUsdEl) { netUsdEl.className = 'text-2xl font-extrabold text-emerald-400 mt-1'; netUsdEl.textContent = '+$' + netCashProfitUsd.toFixed(2); }
+    if (netEgpEl) netEgpEl.textContent = '+' + Math.round(netCashProfitUsd * egpRate).toLocaleString() + (isEn() ? ' EGP (Margin: ' + marginPct + '%)' : ' ج.م (هامش ربح: ' + marginPct + '%)');
     if (profPill) {
      profPill.className = 'px-3 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold';
-     profPill.textContent = t('🟢 Winning (Net Profit: +$' + netCashProfitUsd.toFixed(2) + ')', '🟢 رابح (صافي مكسب: +$' + netCashProfitUsd.toFixed(2) + ')');
+     profPill.textContent = t('🟢 Net Profit: +$' + netCashProfitUsd.toFixed(2), '🟢 صافي الربح: +$' + netCashProfitUsd.toFixed(2));
     }
    } else {
     const absLoss = Math.abs(netCashProfitUsd);
-    if (netUsdEl) {
-     netUsdEl.className = 'text-2xl font-extrabold text-rose-400 mt-1';
-     netUsdEl.textContent = '-$' + absLoss.toFixed(2);
-    }
-    if (netEgpEl) {
-     netEgpEl.textContent = '-' + Math.round(absLoss * egpRate).toLocaleString() + (isEn() ? ' EGP (Prepaid Reserve)' : ' ج.م (رصيد مشحون لم يُبع بعد)');
-    }
+    if (netUsdEl) { netUsdEl.className = 'text-2xl font-extrabold text-rose-400 mt-1'; netUsdEl.textContent = '-$' + absLoss.toFixed(2); }
+    if (netEgpEl) netEgpEl.textContent = '-' + Math.round(absLoss * egpRate).toLocaleString() + (isEn() ? ' EGP (Prepaid Reserve)' : ' ج.م (رصيد مشحون لم يُبع بعد)');
     if (profPill) {
      profPill.className = 'px-3 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[11px] font-bold';
-     profPill.textContent = t('🔴 Prepaid Balance (-$' + absLoss.toFixed(2) + ' until sold)', '🔴 فرق الشحن (-$' + absLoss.toFixed(2) + ' يُعوّض مع المبيعات)');
+     profPill.textContent = t('🔴 Prepaid Balance (-$' + absLoss.toFixed(2) + ')', '🔴 رصيد مقدم (-$' + absLoss.toFixed(2) + ')');
     }
    }
-   if (realUsdEl) {
-    realUsdEl.textContent = (realizedProfitOnSoldUsd >= 0 ? '+$' : '-$') + Math.abs(realizedProfitOnSoldUsd).toFixed(2);
-   }
+
+   if (realUsdEl) realUsdEl.textContent = (realizedProfitOnSoldUsd >= 0 ? '+$' : '-$') + Math.abs(realizedProfitOnSoldUsd).toFixed(2);
    if (realSubEl) {
     realSubEl.textContent = t(
-     'Wholesale cost of sold credits: $' + wholesaleCostOfSoldCreditsUsd.toFixed(2),
-     'التكلفة الفعلية للكريدت المباع: $' + wholesaleCostOfSoldCreditsUsd.toFixed(2)
+     'Est. API cost for ' + totalCustomerMinutes.toLocaleString() + ' min: $' + avgExpectedNeededUsd.toFixed(2) + ' (Max: $' + maxSafeNeededUsd.toFixed(2) + ')',
+     'التكلفة المتوقعة لـ ' + totalCustomerMinutes.toLocaleString() + ' دقيقة: $' + avgExpectedNeededUsd.toFixed(2) + ' (حد أقصى: $' + maxSafeNeededUsd.toFixed(2) + ')'
     );
    }
-   const diff = reserve - totalCustomerCredits;
+
+   // Coverage Radar: Compare your actual USD balance vs Max Safe Required USD for all subscriber minutes
+   const diffUsd = parseFloat((reserveUsd - maxSafeNeededUsd).toFixed(2));
    const resValEl = document.getElementById('admin-radar-reserve-val');
+   const resSubEl = document.getElementById('admin-radar-reserve-sub');
    const liabValEl = document.getElementById('admin-radar-liability-val');
+   const liabSubEl = document.getElementById('admin-radar-liability-sub');
    const diffValEl = document.getElementById('admin-radar-diff-val');
+   const diffSubEl = document.getElementById('admin-radar-diff-sub');
    const pillEl = document.getElementById('admin-radar-status-pill');
    const warnBox = document.getElementById('admin-radar-deficit-warning-box');
    const topAlert = document.getElementById('top-bar-credit-deficit-alert');
-   if (resValEl) resValEl.textContent = reserve.toLocaleString() + ' Min';
-   if (liabValEl) liabValEl.textContent = totalCustomerCredits.toLocaleString() + ' Min';
-   if (diff >= 0) {
+
+   if (resValEl) resValEl.textContent = '$' + reserveUsd.toFixed(2);
+   if (resSubEl) {
+    resSubEl.textContent = t(
+     'Covers up to ' + safeCoveredMinutes.toLocaleString() + ' min (100% Motion) or ' + storyCoveredMinutes.toLocaleString() + ' min (1080p)',
+     'يغطي حتى ' + safeCoveredMinutes.toLocaleString() + ' دقيقة (أقصى أمان) أو ' + storyCoveredMinutes.toLocaleString() + ' دقيقة قصص 1080p'
+    );
+   }
+   if (liabValEl) {
+    liabValEl.textContent = totalCustomerMinutes.toLocaleString() + (isEn() ? ' Min ($' : ' دقيقة ($') + maxSafeNeededUsd.toFixed(2) + ')';
+   }
+   if (liabSubEl) {
+    liabSubEl.textContent = t(
+     'Avg cost: $' + avgExpectedNeededUsd.toFixed(2) + ' • 100% Safe Max: $' + maxSafeNeededUsd.toFixed(2),
+     'المتوسط المتوقع: $' + avgExpectedNeededUsd.toFixed(2) + ' • الحد الأقصى الآمن: $' + maxSafeNeededUsd.toFixed(2)
+    );
+   }
+
+   if (diffUsd >= 0) {
     if (diffValEl) {
-     diffValEl.className = 'text-xl font-extrabold text-emerald-400 mt-1';
-     diffValEl.textContent = '+' + diff.toLocaleString() + ' Min';
+     diffValEl.className = 'text-2xl font-extrabold text-emerald-400 mt-1';
+     diffValEl.textContent = '+$' + diffUsd.toFixed(2);
+    }
+    if (diffSubEl) {
+     diffSubEl.className = 'text-[11px] text-emerald-300 font-bold mt-1';
+     diffSubEl.textContent = t('✅ Surplus Coverage — No top-up needed right now', '✅ في اكتفاء وزيادة (+$' + diffUsd.toFixed(2) + ' فائض آمن) — لا تحتاج للشحن حالياً');
     }
     if (pillEl) {
      pillEl.className = 'px-3 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold';
-     pillEl.textContent = t('✅ Reserve Covers All Customers', '✅ رصيدك المركزي يغطي جميع العملاء بالكامل');
+     pillEl.textContent = t('✅ Sufficient Balance (+$' + diffUsd.toFixed(2) + ' Surplus)', '✅ اكتفاء كامل (+$' + diffUsd.toFixed(2) + ' زيادة آمنة)');
     }
     if (warnBox) warnBox.classList.add('hidden');
     if (topAlert) topAlert.classList.add('hidden');
    } else {
-    const deficit = Math.abs(diff);
-    const estKieTopupUsd = Math.max(5, Math.ceil((deficit * 0.005) / 5) * 5);
+    const deficitUsd = Math.abs(diffUsd);
+    const recTopupUsd = Math.max(5, Math.ceil(deficitUsd / 5) * 5);
     if (diffValEl) {
-     diffValEl.className = 'text-xl font-extrabold text-red-400 mt-1';
-     diffValEl.textContent = '-' + deficit.toLocaleString() + ' Min';
+     diffValEl.className = 'text-2xl font-extrabold text-rose-400 mt-1';
+     diffValEl.textContent = '-$' + deficitUsd.toFixed(2);
+    }
+    if (diffSubEl) {
+     diffSubEl.className = 'text-[11px] text-rose-300 font-bold mt-1';
+     diffSubEl.textContent = t('🚨 Deficit! Top up ~$' + recTopupUsd + ' in Runware', '🚨 يوجد عجز! يُنصح بشحن $' + recTopupUsd + ' في Runware للتغطية الكاملة');
     }
     if (pillEl) {
      pillEl.className = 'px-3 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/40 text-[11px] font-bold animate-pulse';
-     pillEl.textContent = t('🚨 Deficit: ' + deficit.toLocaleString() + ' Credits Needed!', '🚨 عجز: مطلوب شحن ' + deficit.toLocaleString() + ' كريدت!');
+     pillEl.textContent = t('🚨 Deficit: -$' + deficitUsd.toFixed(2) + ' (Top up $' + recTopupUsd + ')', '🚨 عجز تغطية: -$' + deficitUsd.toFixed(2) + ' (اشحن $' + recTopupUsd + ')');
     }
     if (warnBox) {
      warnBox.classList.remove('hidden');
      warnBox.textContent = t(
-      '🚨 ADMIN CREDIT DEFICIT ALERT: Your customers currently hold ' + totalCustomerCredits.toLocaleString() + ' Credits, while your central reserve is ' + reserve.toLocaleString() + ' Credits (Deficit: ' + deficit.toLocaleString() + ' Credits). Please top up your central Runware.ai account with ~$' + estKieTopupUsd + ' USD (from customer sales revenue) and record your top-up above!',
-      '🚨 تنبيه هام للأدمن (عجز في التغطية): إجمالي الكريدت المملوك للعملاء حالياً هو (' + totalCustomerCredits.toLocaleString() + ' 💎) بينما رصيدك المركزي المتاح هو (' + reserve.toLocaleString() + ' 💎) — أي يوجد عجز قدره (' + deficit.toLocaleString() + ' 💎)! يرجى شحن حسابك المركزي في Runware.ai بمبلغ حوالي $' + estKieTopupUsd + ' دولار (من أرباح المبيعات) وتسجيل الشحنة بالأعلى!'
+      '🚨 API COVERAGE DEFICIT: Subscribers currently hold ' + totalCustomerMinutes.toLocaleString() + ' unused minutes (Max safe cost: $' + maxSafeNeededUsd.toFixed(2) + '), while your Runware balance is $' + reserveUsd.toFixed(2) + ' (Deficit: -$' + deficitUsd.toFixed(2) + '). Top up ~$' + recTopupUsd + ' USD in Runware and update your balance above.',
+      '🚨 تنبيه عجز تغطية: المشتركون لديهم حالياً (' + totalCustomerMinutes.toLocaleString() + ' دقيقة متبقية) بتكلفة قصوى آمنة ($' + maxSafeNeededUsd.toFixed(2) + ') بينما رصيدك الحالي في Runware هو ($' + reserveUsd.toFixed(2) + ') — يوجد عجز قدره (-$' + deficitUsd.toFixed(2) + '). يُنصح بشحن حوالي ($' + recTopupUsd + ' دولار) في Runware لتغطية كل الدقائق بأمان!'
      );
     }
     if (topAlert) {
      topAlert.classList.remove('hidden');
-     topAlert.textContent = t('🚨 Credit Deficit: -' + deficit.toLocaleString() + ' 💎 (Open Admin Panel)', '🚨 تنبيه للأدمن: عجز التغطية -' + deficit.toLocaleString() + ' 💎 (افتح لوحة الأدمن)');
+     topAlert.textContent = t('🚨 Coverage Deficit: -$' + deficitUsd.toFixed(2) + ' (Open Admin Panel)', '🚨 تنبيه للأدمن: عجز التغطية -$' + deficitUsd.toFixed(2) + ' (افتح لوحة الأدمن)');
     }
    }
   }
@@ -3438,17 +3488,19 @@
    const canTopup = Boolean(appState.isLoggedIn && (u.subscribed || isOwner));
    const notice = document.getElementById('topup-subscribers-only-notice');
    const btn = document.getElementById('btn-topup-minutes-now');
+   const btnEg = document.getElementById('btn-topup-minutes-egp');
    const inp = document.getElementById('custom-topup-manual-input');
    const sld = document.getElementById('custom-plan-slider');
    if (notice) {
     if (canTopup) notice.classList.add('hidden');
     else notice.classList.remove('hidden');
    }
-   if (btn) {
-    btn.disabled = !canTopup;
-    if (!canTopup) btn.classList.add('opacity-50', 'cursor-not-allowed');
-    else btn.classList.remove('opacity-50', 'cursor-not-allowed');
-   }
+   [btn, btnEg].forEach(function(b) {
+    if (!b) return;
+    b.disabled = !canTopup;
+    if (!canTopup) b.classList.add('opacity-50', 'cursor-not-allowed');
+    else b.classList.remove('opacity-50', 'cursor-not-allowed');
+   });
    if (inp) inp.disabled = !canTopup;
    if (sld) sld.disabled = !canTopup;
   }
@@ -3559,7 +3611,10 @@
      : ('≈ ' + egpPrice.toLocaleString() + (isEn() ? ' EGP' : ' ج.م'));
    }
   }
-  function openCustomSliderCheckout() {
+  function openCustomSliderCheckout(forcedRegion) {
+   if (forcedRegion === 'EGY' || forcedRegion === 'INTL') {
+    setPaymentGatewayRegion(forcedRegion);
+   }
    const u = appState.currentUser || {};
    const isOwner = Boolean(u.email && u.email.toLowerCase() === OWNER_ADMIN_EMAIL.toLowerCase());
    if (!u.subscribed && !isOwner) {
@@ -5703,15 +5758,15 @@
    const egMethods = document.getElementById('egypt-gateway-methods');
    const intlMethods = document.getElementById('intl-gateway-methods');
    if (region === 'EGY') {
-    btnEg.className = 'px-5 py-2 rounded-full text-xs sm:text-sm font-bold bg-blue-600 text-white transition';
-    btnIntl.className = 'px-5 py-2 rounded-full text-xs sm:text-sm font-bold text-zinc-300 hover:text-white transition';
-    egMethods.classList.remove('hidden');
-    intlMethods.classList.add('hidden');
+    if (btnEg) btnEg.className = 'inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-lg shadow-emerald-500/35 ring-2 ring-emerald-300/80 transition';
+    if (btnIntl) btnIntl.className = 'inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-white/5 text-zinc-300 hover:text-white hover:bg-white/10 border border-white/10 transition';
+    if (egMethods) egMethods.classList.remove('hidden');
+    if (intlMethods) intlMethods.classList.add('hidden');
    } else {
-    btnIntl.className = 'px-5 py-2 rounded-full text-xs sm:text-sm font-bold bg-blue-600 text-white transition';
-    btnEg.className = 'px-5 py-2 rounded-full text-xs sm:text-sm font-bold text-zinc-300 hover:text-white transition';
-    intlMethods.classList.remove('hidden');
-    egMethods.classList.add('hidden');
+    if (btnIntl) btnIntl.className = 'inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-600/35 ring-2 ring-blue-300/70 transition';
+    if (btnEg) btnEg.className = 'inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 border border-emerald-500/40 transition';
+    if (intlMethods) intlMethods.classList.remove('hidden');
+    if (egMethods) egMethods.classList.add('hidden');
    }
    updatePricingCardsForGateway();
    updateCheckoutSummary();
