@@ -2976,6 +2976,82 @@
    updateAdminCreditCoverageRadar();
    showToast(t('✅ Added +' + addCr.toLocaleString() + ' Central Credits ($' + addUsd.toFixed(2) + ' spent). Reserve & Net Profit updated!', '✅ تم تسجيل شحنة مركزية جديدة (+' + addCr.toLocaleString() + ' 💎 بتكلفة $' + addUsd.toFixed(2) + ') وتحديث رصيدك وصافي أرباحك فوراً!'), 'info');
   }
+  let _runwareAutoSyncInFlight = false;
+  function fetchLiveRunwareAccountBalance(showToastOnDone) {
+   if (_runwareAutoSyncInFlight) return;
+   const u = appState.currentUser || {};
+   if (!u.email || u.email.toLowerCase() !== OWNER_ADMIN_EMAIL.toLowerCase()) return;
+   const keyInp = document.getElementById('admin-master-kie-key');
+   const apiKey = ((keyInp && keyInp.value) || platformMasterEngine.apiKey || '').trim();
+   _runwareAutoSyncInFlight = true;
+   const badge = document.getElementById('admin-master-key-badge');
+   if (badge) badge.textContent = t('⏳ Syncing Live Runware Balance...', '⏳ جاري جلب رصيد Runware الحقيقي تلقائياً...');
+
+   const applyRunwareData = function(bal, totalSpent, todaySpent) {
+    if (typeof bal === 'number' && !isNaN(bal)) {
+     platformMasterEngine.reserveCredits = parseFloat(bal.toFixed(2));
+     const resInp = document.getElementById('admin-central-reserve-credits');
+     if (resInp) resInp.value = String(platformMasterEngine.reserveCredits);
+    }
+    if (typeof totalSpent === 'number' && !isNaN(totalSpent)) {
+     platformMasterEngine.totalSpentUsd = parseFloat(totalSpent.toFixed(2));
+     const spInp = document.getElementById('admin-central-spent-usd');
+     if (spInp) spInp.value = String(platformMasterEngine.totalSpentUsd);
+    }
+    if (badge) {
+     badge.textContent = t(
+      '✅ Live Runware Synced ($' + (platformMasterEngine.reserveCredits || 0).toFixed(2) + ')',
+      '✅ متزامن تلقائياً مع Runware ($' + (platformMasterEngine.reserveCredits || 0).toFixed(2) + ')'
+     );
+    }
+    updateAdminCreditCoverageRadar();
+    if (showToastOnDone) {
+     showToast(t(
+      '✅ Live Runware Balance synced: $' + (platformMasterEngine.reserveCredits || 0).toFixed(2) + ' (Total spent: $' + (platformMasterEngine.totalSpentUsd || 0).toFixed(2) + ')',
+      '✅ تم جلب رصيدك الحقيقي من Runware تلقائياً: $' + (platformMasterEngine.reserveCredits || 0).toFixed(2) + ' (إجمالي المصروف: $' + (platformMasterEngine.totalSpentUsd || 0).toFixed(2) + ')'
+     ), 'info');
+    }
+   };
+
+   const done = function() { _runwareAutoSyncInFlight = false; };
+
+   // Call Runware official accountManagement getDetails API via our secure Edge Function proxy (no CORS issues)
+   fetch(SUPABASE_URL + '/functions/v1/whop-payments', {
+    method: 'POST',
+    headers: {
+     'Content-Type': 'application/json',
+     'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+     'apikey': SUPABASE_ANON_KEY
+    },
+    body: JSON.stringify({
+     action: 'runware_balance',
+     admin_email: u.email,
+     runware_api_key: apiKey
+    })
+   }).then(function(r) { return r.json(); }).then(function(res) {
+    if (res && res.ok && typeof res.balance === 'number') {
+     applyRunwareData(res.balance, res.total_spent, res.today_spent);
+     done();
+     return;
+    }
+    // Direct fallback if browser allows CORS and admin key is present
+    if (!apiKey) { done(); return; }
+    const uuid = (crypto && crypto.randomUUID) ? crypto.randomUUID() : 'f4dd3dfe-955f-49d5-a785-7e3b633d6e7a';
+    return fetch('https://api.runware.ai/v1', {
+     method: 'POST',
+     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+     body: JSON.stringify([{ taskType: 'accountManagement', taskUUID: uuid, operation: 'getDetails' }])
+    }).then(function(r2) { return r2.json(); }).then(function(d2) {
+     const item = d2 && Array.isArray(d2.data) && d2.data[0];
+     if (item && typeof item.balance === 'number') {
+      const tot = item.usage && item.usage.total ? Number(item.usage.total.credits || 0) : null;
+      const tod = item.usage && item.usage.today ? Number(item.usage.today.credits || 0) : null;
+      applyRunwareData(item.balance, tot, tod);
+     }
+     done();
+    }).catch(function() { done(); });
+   }).catch(function() { done(); });
+  }
   function updateAdminCreditCoverageRadar() {
    const resInp = document.getElementById('admin-central-reserve-credits');
    const spentInp = document.getElementById('admin-central-spent-usd');
