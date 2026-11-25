@@ -249,6 +249,10 @@
     <button type="button" onclick="navigateView('landing')" class="hover:text-white transition" data-en="Home" data-ar="الرئيسية">Home</button>
     <button type="button" onclick="navigateView('dashboard')" class="hover:text-white transition" data-en="Dashboard" data-ar="لوحة التحكم">Dashboard</button>
     <button type="button" onclick="navigateView('pricing')" class="hover:text-white transition" data-en="Pricing" data-ar="خطط الأسعار">Pricing</button>
+    <button type="button" onclick="navigateView('affiliates')" class="hover:text-emerald-300 text-emerald-400 font-semibold transition flex items-center gap-1.5">
+     <span data-en="Affiliates" data-ar="الإحالة">الإحالة</span>
+     <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/35">20%</span>
+    </button>
     <button type="button" onclick="openPolicyTab('faq')" class="hover:text-white transition" data-en="FAQ & Guide" data-ar="الأسئلة الشائعة">FAQ & Guide</button>
     <button type="button" onclick="openPolicyTab('tickets')" class="hover:text-white transition" data-en="Help & Tickets" data-ar="المساعدة وفتح تذكرة">Help & Tickets</button>
     <button type="button" onclick="openPolicyTab('terms')" class="hover:text-white transition" data-en="Policies" data-ar="سياسات المنصة">Policies</button>
@@ -326,6 +330,15 @@
     <button type="button" onclick="navigateView('pricing'); closeMenus();" class="mt-2.5 w-full apple-btn-primary py-2 text-xs font-semibold flex items-center justify-center gap-1.5">
      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
      <span data-en="Plans & Credit Top-Up" data-ar="الخطط وشحن الرصيد">Plans & Credit Top-Up</span>
+    </button>
+    <button type="button" id="subtab-btn-affiliates" onclick="navigateView('affiliates'); closeMenus();" class="w-full text-start px-3 py-2.5 rounded-xl hover:bg-white/10 text-sm font-medium text-teal-300 flex items-center justify-between gap-2 transition">
+     <span class="flex items-center gap-3">
+      <span class="w-8 h-8 rounded-lg bg-teal-500/15 border border-teal-500/30 flex items-center justify-center text-teal-400 shrink-0">
+       <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+      </span>
+      <span data-en="Affiliate Program" data-ar="الإحالة والأرباح">الإحالة والأرباح</span>
+     </span>
+     <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/35">20%</span>
     </button>
    </div>
    <div class="space-y-1.5">
@@ -2048,6 +2061,50 @@
      <span class="text-[11px] text-zinc-400 mt-1 block" data-en="International (USD) + Egypt Gateway (EGP)" data-ar="بوابة مصر (EGP) + البوابة الدولية (USD)">International (USD) + Egypt Gateway (EGP)</span>
     </div>
    </div>
+   <!-- Owner Admin: Affiliate Payout Requests Management -->
+   <div id="admin-affiliate-payouts-card" class="apple-bento p-5 sm:p-6 mb-6 border border-emerald-500/30 bg-gradient-to-br from-emerald-950/20 via-zinc-950/80 to-zinc-950/90 space-y-4">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+     <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+       <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <div>
+       <div class="flex flex-wrap items-center gap-2">
+        <h3 class="text-base sm:text-lg font-bold text-white" data-en="Affiliate Withdrawal Requests" data-ar="طلبات سحب أرباح الشركاء (نظام الإحالة)">طلبات سحب أرباح الشركاء (نظام الإحالة)</h3>
+        <span id="admin-aff-pending-badge" class="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/35">0 قيد المراجعة</span>
+       </div>
+       <p class="text-xs text-zinc-400 mt-0.5" data-en="Review partner payout methods, copy wallet addresses, transfer funds, and mark completed to notify them with timestamp." data-ar="راجع وسيلة السحب وانسخ عنوان المحفظة أو الرقم، وبعد ما تحوّل الفلوس اضغط (تأكيد اكتمال السحب) ليظهر للشريك فوراً بالتاريخ والوقت.">راجع وسيلة السحب وانسخ عنوان المحفظة أو الرقم، وبعد ما تحوّل الفلوس اضغط (تأكيد اكتمال السحب) ليظهر للشريك فوراً بالتاريخ والوقت.</p>
+      </div>
+     </div>
+     <div class="flex items-center gap-2.5">
+      <div class="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs">
+       <span class="text-zinc-400" data-en="Pending Total:" data-ar="إجمالي المطلوب سحبه:">إجمالي المطلوب سحبه:</span>
+       <span id="admin-aff-pending-usd" class="font-extrabold text-emerald-400 ms-1">$0.00</span>
+      </div>
+      <button type="button" onclick="loadAdminAffiliatePayouts(true)" class="apple-btn-secondary px-3 py-1.5 text-xs font-semibold flex items-center gap-1.5">
+       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+       <span data-en="Refresh" data-ar="تحديث">تحديث</span>
+      </button>
+     </div>
+    </div>
+    <div class="overflow-x-auto">
+     <table class="w-full text-start text-xs">
+      <thead>
+       <tr class="border-b border-white/10 text-zinc-400">
+        <th class="py-3 px-2" data-en="Partner" data-ar="الشريك (المسوّق)">الشريك (المسوّق)</th>
+        <th class="py-3 px-2" data-en="Amount" data-ar="المبلغ">المبلغ</th>
+        <th class="py-3 px-2" data-en="Payout Method & Wallet/Number" data-ar="وسيلة السحب والعنوان">وسيلة السحب والعنوان</th>
+        <th class="py-3 px-2" data-en="Requested At" data-ar="تاريخ ووقت الطلب">تاريخ ووقت الطلب</th>
+        <th class="py-3 px-2" data-en="Status" data-ar="الحالة">الحالة</th>
+        <th class="py-3 px-2 text-end" data-en="Action" data-ar="الإجراء">الإجراء</th>
+       </tr>
+      </thead>
+      <tbody id="admin-aff-payouts-tbody" class="divide-y divide-white/10">
+       <tr><td colspan="6" class="py-5 text-center text-zinc-500">لا توجد طلبات سحب حتى الآن.</td></tr>
+      </tbody>
+     </table>
+    </div>
+   </div>
    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
     <div class="lg:col-span-8 apple-bento p-6 space-y-4">
      <div class="flex flex-wrap items-center justify-between gap-3">
@@ -2092,6 +2149,331 @@
    </div>
   </div>
  </section>
+ <section id="view-affiliates" class="hidden flex-1 py-8 sm:py-12 px-4 sm:px-6">
+  <div class="max-w-6xl mx-auto space-y-8">
+   <!-- Hero Banner -->
+   <div class="relative overflow-hidden rounded-3xl apple-bento border border-emerald-500/25 bg-gradient-to-br from-emerald-950/35 via-slate-950/90 to-indigo-950/35 p-6 sm:p-10">
+    <div class="absolute -top-24 -end-24 w-72 h-72 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-24 -start-24 w-72 h-72 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none"></div>
+    <div class="relative z-10 max-w-3xl space-y-4">
+     <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/35 text-emerald-300 text-xs font-bold tracking-wide">
+      <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+      <span data-en="Official Partner Program • 20% Lifetime Recurring" data-ar="برنامج شركاء الإحالة الرسمي • عمولة 20% متكررة مدى الحياة">برنامج شركاء الإحالة الرسمي • عمولة 20% متكررة مدى الحياة</span>
+     </div>
+     <h1 class="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight" data-en="Earn 20% Lifetime Recurring Commission on Every Subscriber" data-ar="اربح 20% عمولة متكررة مدى الحياة على كل مشترك عبر رابطك">اربح 20% عمولة متكررة مدى الحياة على كل مشترك عبر رابطك</h1>
+     <p class="text-sm sm:text-base text-zinc-300 leading-relaxed" data-en="Share your personal referral link from inside your account. Every user who signs up through your link is permanently tied to you — earn 20% automatically on every paid plan, renewal, upgrade, and credit top-up for life." data-ar="انضم مجاناً من داخل حسابك واحصل فوراً على رابط إحالة خاص بك. كل شخص يسجّل عبر رابطك يرتبط بحسابك مدى الحياة، وتنزل لك عمولة 20% تلقائياً على كل اشتراك مدفوع أو تجديد شهري أو سنوي أو شحن دقائق يقوم به.">انضم مجاناً من داخل حسابك واحصل فوراً على رابط إحالة خاص بك. كل شخص يسجّل عبر رابطك يرتبط بحسابك مدى الحياة، وتنزل لك عمولة 20% تلقائياً على كل اشتراك مدفوع أو تجديد شهري أو سنوي أو شحن دقائق يقوم به.</p>
+    </div>
+
+    <!-- 4 Key Highlight Pills -->
+    <div class="relative z-10 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-7">
+     <div class="rounded-2xl bg-white/[0.04] border border-white/10 p-4 flex items-start gap-3">
+      <div class="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+       <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+      </div>
+      <div>
+       <div class="text-lg sm:text-xl font-extrabold text-white">20%</div>
+       <div class="text-[11px] text-zinc-400 leading-snug" data-en="Lifetime on paid plans & renewals" data-ar="عمولة مدى الحياة على الاشتراكات والتجديدات">عمولة مدى الحياة على الاشتراكات والتجديدات</div>
+      </div>
+     </div>
+     <div class="rounded-2xl bg-white/[0.04] border border-white/10 p-4 flex items-start gap-3">
+      <div class="w-9 h-9 rounded-xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
+       <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+      </div>
+      <div>
+       <div class="text-lg sm:text-xl font-extrabold text-white">$10</div>
+       <div class="text-[11px] text-zinc-400 leading-snug" data-en="Minimum withdrawal threshold" data-ar="الحد الأدنى لطلب السحب">الحد الأدنى لطلب السحب</div>
+      </div>
+     </div>
+     <div class="rounded-2xl bg-white/[0.04] border border-white/10 p-4 flex items-start gap-3">
+      <div class="w-9 h-9 rounded-xl bg-teal-500/15 border border-teal-500/30 flex items-center justify-center text-teal-400 shrink-0">
+       <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+      </div>
+      <div>
+       <div class="text-lg sm:text-xl font-extrabold text-emerald-400">$0</div>
+       <div class="text-[11px] text-zinc-400 leading-snug" data-en="Zero fees via USDT (TRC20)" data-ar="رسوم سحب صفر عبر USDT (TRC20)">رسوم سحب صفر عبر USDT (TRC20)</div>
+      </div>
+     </div>
+     <div class="rounded-2xl bg-white/[0.04] border border-white/10 p-4 flex items-start gap-3">
+      <div class="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
+       <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <div>
+       <div class="text-lg sm:text-xl font-extrabold text-white" data-en="1–24h" data-ar="1–24 ساعة">1–24 ساعة</div>
+       <div class="text-[11px] text-zinc-400 leading-snug" data-en="Fast payout processing SLA" data-ar="وصول الأرباح لحسابك بحد أقصى">وصول الأرباح لحسابك بحد أقصى</div>
+      </div>
+     </div>
+    </div>
+
+    <!-- Join CTA Box (Hidden automatically once user joins) -->
+    <div id="aff-join-cta-box" class="relative z-10 mt-7 flex flex-wrap items-center gap-3">
+     <button type="button" id="aff-join-now-btn" onclick="joinAffiliateProgram(false)" class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-sm sm:text-base shadow-lg shadow-emerald-500/25 transition flex items-center gap-2.5">
+      <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+      <span data-en="Join Affiliate Program Free — Instant Activation" data-ar="انضم لبرنامج الإحالة الآن مجاناً — تفعيل فوري">انضم لبرنامج الإحالة الآن مجاناً — تفعيل فوري</span>
+     </button>
+     <span class="text-xs text-zinc-400" data-en="No approval wait • Instant referral link inside your dashboard" data-ar="بدون انتظار موافقة • رابطك ولوحة أرباحك يفتحان فوراً داخل الموقع">بدون انتظار موافقة • رابطك ولوحة أرباحك يفتحان فوراً داخل الموقع</span>
+    </div>
+   </div>
+
+   <!-- IN-SITE AFFILIATE PARTNER DASHBOARD (Visible once joined) -->
+   <div id="aff-dashboard-wrap" class="hidden space-y-6">
+    <!-- Partner Link & Share Card -->
+    <div class="apple-bento p-5 sm:p-6 border border-emerald-500/30 space-y-4">
+     <div class="flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+       <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+       </div>
+       <div>
+        <div class="flex flex-wrap items-center gap-2">
+         <h2 class="text-base sm:text-lg font-bold text-white" data-en="Your Personal Referral Link" data-ar="رابط الإحالة الخاص بك">رابط الإحالة الخاص بك</h2>
+         <span id="aff-partner-code-badge" class="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">CODE</span>
+        </div>
+        <p class="text-xs text-zinc-400 mt-0.5" data-en="Share this link in YouTube descriptions, TikTok bio, Telegram, or WhatsApp — 20% lifetime commission on every paid plan." data-ar="انشر هذا الرابط في وصف فيديوهاتك أو البايو أو التليجرام والواتساب — وكل مشترك عن طريقه ينزلك منه 20% مدى الحياة.">انشر هذا الرابط في وصف فيديوهاتك أو البايو أو التليجرام والواتساب — وكل مشترك عن طريقه ينزلك منه 20% مدى الحياة.</p>
+       </div>
+      </div>
+      <button type="button" onclick="loadAffiliateDashboard(true)" class="apple-btn-secondary px-3 py-1.5 text-xs font-semibold flex items-center gap-1.5">
+       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+       <span data-en="Refresh Stats" data-ar="تحديث الإحصائيات">تحديث الإحصائيات</span>
+      </button>
+     </div>
+     <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+      <input type="text" id="aff-ref-link-input" readonly value="https://omniposts.online/?ref=" dir="ltr" class="apple-input flex-1 px-4 py-3 text-sm font-mono text-emerald-300 bg-black/50 border-emerald-500/30 select-all" />
+      <button type="button" onclick="copyAffiliateRefLink()" class="px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm transition flex items-center justify-center gap-2 shrink-0">
+       <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+       <span data-en="Copy Link" data-ar="نسخ الرابط">نسخ الرابط</span>
+      </button>
+     </div>
+    </div>
+
+    <!-- 5 Live KPI Cards (Including 48-Hour Pending Review Balance) -->
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
+     <div class="apple-bento p-4 sm:p-5 border border-emerald-500/35 bg-emerald-950/20 space-y-2">
+      <div class="flex items-center justify-between text-xs text-zinc-300">
+       <span data-en="Available to Withdraw" data-ar="الرصيد المتاح للسحب">الرصيد المتاح للسحب</span>
+       <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <div id="aff-kpi-available" class="text-2xl sm:text-3xl font-extrabold text-emerald-400">$0.00</div>
+      <div class="text-[11px] text-zinc-400" data-en="Min. payout: $10.00" data-ar="الحد الأدنى للسحب: $10.00">الحد الأدنى للسحب: $10.00</div>
+     </div>
+     <div class="apple-bento p-4 sm:p-5 border border-amber-500/35 bg-amber-950/15 space-y-2">
+      <div class="flex items-center justify-between text-xs text-amber-200/90">
+       <span data-en="Pending Review (48h)" data-ar="أرباح في المراجعة (48 ساعة)">أرباح في المراجعة (48 ساعة)</span>
+       <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <div id="aff-kpi-pending-hold" class="text-2xl sm:text-3xl font-extrabold text-amber-300">$0.00</div>
+      <div class="text-[11px] text-zinc-400" data-en="Auto-releases after 48h" data-ar="تترحّل تلقائياً للمتاح بعد 48 ساعة">تترحّل تلقائياً للمتاح بعد 48 ساعة</div>
+     </div>
+     <div class="apple-bento p-4 sm:p-5 space-y-2">
+      <div class="flex items-center justify-between text-xs text-zinc-400">
+       <span data-en="Total Lifetime Earnings" data-ar="إجمالي الأرباح المكتسبة">إجمالي الأرباح المكتسبة</span>
+       <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      </div>
+      <div id="aff-kpi-earned" class="text-2xl sm:text-3xl font-extrabold text-white">$0.00</div>
+      <div id="aff-kpi-paidout-sub" class="text-[11px] text-zinc-400">تم سحب: $0.00</div>
+     </div>
+     <div class="apple-bento p-5 space-y-2">
+      <div class="flex items-center justify-between text-xs text-zinc-400">
+       <span data-en="Total Registered Users" data-ar="إجمالي المسجّلين عبر رابطك">إجمالي المسجّلين عبر رابطك</span>
+       <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      </div>
+      <div id="aff-kpi-signups" class="text-2xl sm:text-3xl font-extrabold text-white">0</div>
+      <div class="text-[11px] text-zinc-400" data-en="Permanently linked to your account" data-ar="مرتبطون بحسابك مدى الحياة">مرتبطون بحسابك مدى الحياة</div>
+     </div>
+     <div class="apple-bento p-5 space-y-2">
+      <div class="flex items-center justify-between text-xs text-zinc-400">
+       <span data-en="Active Paid Subscribers" data-ar="المشتركون الفعليون في الخطط">المشتركون الفعليون في الخطط</span>
+       <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <div id="aff-kpi-subscribed" class="text-2xl sm:text-3xl font-extrabold text-amber-300">0</div>
+      <div class="text-[11px] text-zinc-400" data-en="Commission applies to paid plans only" data-ar="العمولة تُحسب على المشتركين فقط">العمولة تُحسب على المشتركين فقط</div>
+     </div>
+    </div>
+
+    <!-- Withdrawal Request Card + Payout Rules -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+     <div class="lg:col-span-5 apple-bento p-5 sm:p-6 space-y-4 border border-white/10">
+      <div class="flex items-center gap-3">
+       <div class="w-9 h-9 rounded-xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+       </div>
+       <div>
+        <h3 class="text-base font-bold text-white" data-en="Request Withdrawal" data-ar="طلب سحب الأرباح">طلب سحب الأرباح</h3>
+        <p class="text-[11px] text-zinc-400" data-en="Arrives in 1 to 24 hours max • $0 fee on USDT TRC20" data-ar="يصل خلال ساعة إلى 24 ساعة بحد أقصى • رسوم $0 على USDT TRC20">يصل خلال ساعة إلى 24 ساعة بحد أقصى • رسوم $0 على USDT TRC20</p>
+       </div>
+      </div>
+      <form id="aff-withdraw-form" onsubmit="submitAffiliateWithdrawal(event)" class="space-y-3.5">
+       <div>
+        <label class="block text-xs font-semibold text-zinc-300 mb-1.5" data-en="Payout Method" data-ar="وسيلة السحب">وسيلة السحب</label>
+        <select id="aff-payout-method" onchange="updateAffPayoutPlaceholder()" class="apple-input w-full px-3.5 py-2.5 text-xs sm:text-sm">
+         <option value="USDT (TRC20)">USDT (TRC20) — رسوم السحب $0 (موصى به)</option>
+         <option value="USDT (Solana)">USDT (Solana)</option>
+         <option value="Vodafone Cash / InstaPay (Egypt)">فودافون كاش / إنستاباي (مصر)</option>
+         <option value="PayPal">PayPal</option>
+        </select>
+       </div>
+       <div>
+        <label id="aff-payout-address-label" class="block text-xs font-semibold text-zinc-300 mb-1.5" data-en="Wallet Address / Account Details" data-ar="عنوان محفظة USDT (TRC20)">عنوان محفظة USDT (TRC20)</label>
+        <input type="text" id="aff-payout-address" required placeholder="T... (أدخل عنوان محفظة TRC20 الصحيح)" dir="ltr" class="apple-input w-full px-3.5 py-2.5 text-xs sm:text-sm font-mono" />
+       </div>
+       <div>
+        <div class="flex items-center justify-between mb-1.5">
+         <label class="text-xs font-semibold text-zinc-300" data-en="Amount (USD)" data-ar="المبلغ المطلوب سحبه (دولار USD)">المبلغ المطلوب سحبه (دولار USD)</label>
+         <button type="button" onclick="fillMaxAffiliateWithdraw()" class="text-[11px] text-emerald-400 hover:text-emerald-300 font-bold" data-en="Withdraw All" data-ar="سحب كامل الرصيد">سحب كامل الرصيد</button>
+        </div>
+        <input type="number" id="aff-payout-amount" min="10" step="0.01" required placeholder="10.00" dir="ltr" class="apple-input w-full px-3.5 py-2.5 text-sm font-bold" />
+       </div>
+       <div class="rounded-xl bg-white/[0.03] border border-white/10 p-3 text-[11px] text-zinc-400 space-y-1">
+        <div class="flex items-center justify-between">
+         <span data-en="Minimum Withdrawal:" data-ar="الحد الأدنى للسحب:">الحد الأدنى للسحب:</span>
+         <span class="text-white font-semibold">$10.00 USD</span>
+        </div>
+        <div class="flex items-center justify-between">
+         <span data-en="USDT (TRC20) Fee:" data-ar="رسوم سحب USDT (TRC20):">رسوم سحب USDT (TRC20):</span>
+         <span class="text-emerald-400 font-bold">$0.00</span>
+        </div>
+        <div class="flex items-center justify-between">
+         <span data-en="Commission Hold Period:" data-ar="فترة مراجعة العمولة:">فترة مراجعة العمولة:</span>
+         <span class="text-amber-300 font-semibold" data-en="48 Hours (Anti-Refund)" data-ar="48 ساعة ثم تترحّل للمتاح تلقائياً">48 ساعة ثم تترحّل للمتاح تلقائياً</span>
+        </div>
+        <div class="flex items-center justify-between">
+         <span data-en="Arrival Time:" data-ar="مدة وصول السحب:">مدة وصول السحب:</span>
+         <span class="text-white font-semibold" data-en="1 – 24 Hours Max" data-ar="من ساعة إلى 24 ساعة بحد أقصى">من ساعة إلى 24 ساعة بحد أقصى</span>
+        </div>
+       </div>
+       <button type="submit" id="aff-withdraw-submit-btn" class="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+        <span data-en="Submit Withdrawal Request" data-ar="تأكيد طلب السحب الآن">تأكيد طلب السحب الآن</span>
+       </button>
+      </form>
+     </div>
+
+     <!-- Payout History Table -->
+     <div class="lg:col-span-7 apple-bento p-5 sm:p-6 space-y-4 border border-white/10">
+      <div class="flex items-center justify-between gap-2">
+       <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+        </div>
+        <div>
+         <h3 class="text-base font-bold text-white" data-en="Withdrawal History" data-ar="جدول السحوبات">جدول السحوبات</h3>
+         <p class="text-[11px] text-zinc-400" data-en="Live status updates from Pending Review to Completed with exact date, time & method." data-ar="يُخصم المبلغ فور الطلب ويظهر بحالة (في المراجعة) حتى اكتمال التحويل بالتاريخ والوقت وطريقة السحب.">يُخصم المبلغ فور الطلب ويظهر بحالة (في المراجعة) حتى اكتمال التحويل بالتاريخ والوقت وطريقة السحب.</p>
+        </div>
+       </div>
+      </div>
+      <div class="overflow-x-auto">
+       <table class="w-full text-start text-xs">
+        <thead>
+         <tr class="border-b border-white/10 text-zinc-400">
+          <th class="py-3 px-2" data-en="Amount" data-ar="المبلغ">المبلغ</th>
+          <th class="py-3 px-2" data-en="Method" data-ar="طريقة السحب">طريقة السحب</th>
+          <th class="py-3 px-2" data-en="Requested" data-ar="تاريخ ووقت الطلب">تاريخ ووقت الطلب</th>
+          <th class="py-3 px-2" data-en="Status" data-ar="الحالة">الحالة</th>
+          <th class="py-3 px-2" data-en="Completed At" data-ar="وقت اكتمال السحب">وقت اكتمال السحب</th>
+         </tr>
+        </thead>
+        <tbody id="aff-payouts-tbody" class="divide-y divide-white/10">
+         <tr><td colspan="5" class="py-6 text-center text-zinc-500">لا توجد عمليات سحب مسجّلة حتى الآن.</td></tr>
+        </tbody>
+       </table>
+      </div>
+     </div>
+    </div>
+
+    <!-- Referred Users & Subscribed Plans Table -->
+    <div class="apple-bento p-5 sm:p-6 space-y-4 border border-white/10">
+     <div class="flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-3">
+       <div class="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+       </div>
+       <div>
+        <h3 class="text-base font-bold text-white" data-en="Referred Users & Active Plans" data-ar="جدول المسجّلين والمشتركين عبر رابطك">جدول المسجّلين والمشتركين عبر رابطك</h3>
+        <p class="text-[11px] text-zinc-400" data-en="Track every user who registered via your link, whether they subscribed, their exact plan, and your 20% lifetime commission." data-ar="تابع كل شخص سجّل عبر رابطك، وحالة اشتراكه، واسم الخطة المشترك بها، وإجمالي عمولتك منه مدى الحياة.">تابع كل شخص سجّل عبر رابطك، وحالة اشتراكه، واسم الخطة المشترك بها، وإجمالي عمولتك منه مدى الحياة.</p>
+       </div>
+      </div>
+     </div>
+     <div class="overflow-x-auto">
+      <table class="w-full text-start text-xs">
+       <thead>
+        <tr class="border-b border-white/10 text-zinc-400">
+         <th class="py-3 px-2" data-en="Referred User" data-ar="المستخدم">المستخدم</th>
+         <th class="py-3 px-2" data-en="Status" data-ar="الحالة">الحالة</th>
+         <th class="py-3 px-2" data-en="Subscribed Plan" data-ar="الخطة المشترك بها">الخطة المشترك بها</th>
+         <th class="py-3 px-2" data-en="Registered Date" data-ar="تاريخ التسجيل">تاريخ التسجيل</th>
+         <th class="py-3 px-2 text-end" data-en="Your 20% Earnings" data-ar="إجمالي عمولتك (20%)">إجمالي عمولتك (20%)</th>
+        </tr>
+       </thead>
+       <tbody id="aff-referrals-tbody" class="divide-y divide-white/10">
+        <tr><td colspan="5" class="py-6 text-center text-zinc-500">لم يسجّل أحد عبر رابطك بعد — ابدأ بمشاركة رابطك الآن!</td></tr>
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+
+   <!-- Interactive Earnings Calculator -->
+   <div class="apple-bento p-6 sm:p-8 border border-white/10 space-y-6">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+     <div>
+      <h2 class="text-lg sm:text-xl font-extrabold text-white" data-en="Lifetime Recurring Income Calculator" data-ar="حاسبة أرباحك المتكررة مدى الحياة">حاسبة أرباحك المتكررة مدى الحياة</h2>
+      <p class="text-xs sm:text-sm text-zinc-400 mt-1" data-en="Estimate your monthly & yearly passive income at 20% lifetime commission." data-ar="احسب دخلك الشهري والسنوي المتكرر بنسبة عمولة 20% على كل تجديد.">احسب دخلك الشهري والسنوي المتكرر بنسبة عمولة 20% على كل تجديد.</p>
+     </div>
+     <div class="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-xl p-1 text-xs">
+      <button type="button" onclick="setAffCalcPlan(19.99, this)" class="aff-calc-plan-btn px-3 py-1.5 rounded-lg text-zinc-300 hover:text-white transition">Starter ($19.99)</button>
+      <button type="button" onclick="setAffCalcPlan(29.99, this)" class="aff-calc-plan-btn px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/35 font-bold transition">Pro ($29.99)</button>
+      <button type="button" onclick="setAffCalcPlan(49.99, this)" class="aff-calc-plan-btn px-3 py-1.5 rounded-lg text-zinc-300 hover:text-white transition">Max VIP ($49.99)</button>
+     </div>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+     <div class="lg:col-span-7 space-y-3">
+      <div class="flex items-center justify-between text-xs sm:text-sm">
+       <span class="text-zinc-300 font-semibold" data-en="Active Subscribers via Your Link:" data-ar="عدد المشتركين الفعليين عبر رابطك:">عدد المشتركين الفعليين عبر رابطك:</span>
+       <span id="aff-calc-users-label" class="text-lg font-extrabold text-emerald-400">25 مشترك</span>
+      </div>
+      <input type="range" id="aff-calc-slider" min="5" max="250" step="5" value="25" oninput="updateAffiliateCalc()" class="w-full accent-emerald-500 cursor-pointer" />
+      <div class="flex justify-between text-[11px] text-zinc-500">
+       <span>5</span><span>50</span><span>100</span><span>150</span><span>250</span>
+      </div>
+     </div>
+     <div class="lg:col-span-5 grid grid-cols-2 gap-3">
+      <div class="rounded-2xl bg-emerald-500/10 border border-emerald-500/30 p-4 text-center">
+       <div class="text-[11px] text-emerald-300 font-semibold" data-en="Monthly Recurring" data-ar="دخلك الشهري المتكرر">دخلك الشهري المتكرر</div>
+       <div id="aff-calc-monthly" class="text-2xl sm:text-3xl font-extrabold text-white mt-1">$150</div>
+      </div>
+      <div class="rounded-2xl bg-indigo-500/10 border border-indigo-500/30 p-4 text-center">
+       <div class="text-[11px] text-indigo-300 font-semibold" data-en="Yearly Recurring" data-ar="دخلك السنوي المتكرر">دخلك السنوي المتكرر</div>
+       <div id="aff-calc-yearly" class="text-2xl sm:text-3xl font-extrabold text-white mt-1">$1,799</div>
+      </div>
+     </div>
+    </div>
+   </div>
+
+   <!-- Program Rules & How It Works (3 Pro Cards) -->
+   <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+    <div class="apple-bento p-6 space-y-3">
+     <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+     </div>
+     <h3 class="text-base font-bold text-white" data-en="1. Share Your Unique Link" data-ar="1. شارك رابطك الخاص">1. شارك رابطك الخاص</h3>
+     <p class="text-xs text-zinc-400 leading-relaxed" data-en="Anyone can join — YouTubers, TikTokers, bloggers, or Omniposts users. Get your link in one click right inside your account." data-ar="البرنامج مفتوح للجميع: صُنّاع المحتوى، المسوّقين، وأي مستخدم للمنصة. بضغطة زر تحصل على رابطك الخاص وتبدأ فوراً.">البرنامج مفتوح للجميع: صُنّاع المحتوى، المسوّقين، وأي مستخدم للمنصة. بضغطة زر تحصل على رابطك الخاص وتبدأ فوراً.</p>
+    </div>
+    <div class="apple-bento p-6 space-y-3">
+     <div class="w-10 h-10 rounded-xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+     </div>
+     <h3 class="text-base font-bold text-white" data-en="2. Paid Plans Only — For Life" data-ar="2. عمولة على المشتركين فقط مدى الحياة">2. عمولة على المشتركين فقط مدى الحياة</h3>
+     <p class="text-xs text-zinc-400 leading-relaxed" data-en="Free signups appear in your stats ($0). Paid subscriptions and renewals earn 20% for life — held in Pending Review for 48 hours against refunds, then auto-released to Available Balance." data-ar="التسجيل المجاني يظهر في إحصائياتك بدون عمولة ($0). عمولة الـ 20% على الاشتراكات والتجديدات تبقى في خانة المراجعة 48 ساعة فقط (لضمان عدم الاسترداد)، ثم تترحّل تلقائياً لرصيدك المتاح للسحب مدى الحياة.">التسجيل المجاني يظهر في إحصائياتك بدون عمولة ($0). عمولة الـ 20% على الاشتراكات والتجديدات تبقى في خانة المراجعة 48 ساعة فقط (لضمان عدم الاسترداد)، ثم تترحّل تلقائياً لرصيدك المتاح للسحب مدى الحياة.</p>
+    </div>
+    <div class="apple-bento p-6 space-y-3">
+     <div class="w-10 h-10 rounded-xl bg-teal-500/15 border border-teal-500/30 flex items-center justify-center text-teal-400">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+     </div>
+     <h3 class="text-base font-bold text-white" data-en="3. Fast Payouts — $0 Fee on TRC20" data-ar="3. سحب سريع برسوم صفر على TRC20">3. سحب سريع برسوم صفر على TRC20</h3>
+     <p class="text-xs text-zinc-400 leading-relaxed" data-en="Request withdrawal starting at $10. Zero fees via USDT (TRC20), plus USDT Solana, Vodafone Cash / InstaPay, and PayPal. Processed in 1–24 hours." data-ar="اطلب السحب بداية من $10 فقط. رسوم السحب $0 عبر USDT (TRC20)، مع دعم فودافون كاش / إنستاباي وUSDT Solana وPayPal. يصل التحويل خلال ساعة إلى 24 ساعة.">اطلب السحب بداية من $10 فقط. رسوم السحب $0 عبر USDT (TRC20)، مع دعم فودافون كاش / إنستاباي وUSDT Solana وPayPal. يصل التحويل خلال ساعة إلى 24 ساعة.</p>
+    </div>
+   </div>
+  </div>
+ </section>
  <footer class="bg-zinc-950 border-t border-white/10 py-8 px-4 sm:px-6 text-xs text-zinc-500 mt-12">
   <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
    <div class="flex items-center gap-2">
@@ -2099,6 +2481,7 @@
     <span data-en="— All Rights Reserved © 2026" data-ar="— جميع الحقوق محفوظة © 2026">— All Rights Reserved © 2026</span>
    </div>
    <div class="flex flex-wrap items-center gap-4">
+    <button type="button" onclick="navigateView('affiliates')" class="text-emerald-400 hover:text-emerald-300 font-semibold transition" data-en="Affiliate Program (20%)" data-ar="نظام الإحالة (20% مدى الحياة)">نظام الإحالة (20% مدى الحياة)</button>
     <a href="https://omniposts.online/?policy=terms" onclick="event.preventDefault(); openPolicyTab('terms')" class="hover:text-white transition" data-en="Terms of Use" data-ar="شروط الاستخدام">Terms of Use</a>
     <a href="https://omniposts.online/?policy=privacy" onclick="event.preventDefault(); openPolicyTab('privacy')" class="hover:text-white transition" data-en="Privacy Policy" data-ar="سياسة الخصوصية">Privacy Policy</a>
     <button type="button" onclick="openPolicyTab('refund')" class="hover:text-white transition" data-en="Refund Policy" data-ar="سياسة الاسترداد">Refund Policy</button>
@@ -2326,6 +2709,7 @@
     dashboard: 'subtab-btn-automation',
     channels: 'subtab-btn-channels',
     pricing: 'subtab-btn-pricing',
+    affiliates: 'subtab-btn-affiliates',
     settings: 'subtab-btn-settings',
     faq: 'subtab-btn-faq',
     policies: 'subtab-btn-policies'
@@ -2343,6 +2727,10 @@
      btn.className = (k === activeKey)
       ? 'w-full text-start px-3 py-2.5 rounded-xl bg-emerald-600/25 border border-emerald-500/40 text-sm font-medium text-emerald-300 flex items-center gap-3 transition'
       : 'w-full text-start px-3 py-2.5 rounded-xl hover:bg-white/10 text-sm font-medium text-emerald-300 flex items-center gap-3 transition';
+    } else if (k === 'affiliates') {
+     btn.className = (k === activeKey)
+      ? 'w-full text-start px-3 py-2.5 rounded-xl bg-teal-600/25 border border-teal-500/40 text-sm font-medium text-teal-200 flex items-center justify-between gap-2 transition'
+      : 'w-full text-start px-3 py-2.5 rounded-xl hover:bg-white/10 text-sm font-medium text-teal-300 flex items-center justify-between gap-2 transition';
     } else {
      btn.className = (k === activeKey) ? activeBase : inactiveBase;
     }
@@ -2361,7 +2749,7 @@
     showToast(t('Owner Admin Panel is restricted to the platform owner only.', 'لوحة تحكم الأدمن مخصصة لمالك المنصة فقط.'), 'warn');
     viewName = 'dashboard';
    }
-   const views = ['landing', 'register', 'login', 'dashboard', 'channels', 'settings', 'pricing', 'policies', 'admin'];
+   const views = ['landing', 'register', 'login', 'dashboard', 'channels', 'settings', 'pricing', 'affiliates', 'policies', 'admin'];
    views.forEach(function(v) {
     const el = document.getElementById('view-' + v);
     if (el) {
@@ -2377,7 +2765,12 @@
    if (viewName === 'admin') {
     fetchLiveRunwareAccountBalance(false);
     syncAllAdminUsersFromSupabase(false);
+    if (typeof loadAdminAffiliatePayouts === 'function') loadAdminAffiliatePayouts(false);
     if (typeof renderAdminUsersTable === 'function') renderAdminUsersTable();
+   }
+   if (viewName === 'affiliates') {
+    if (typeof updateAffiliateCalc === 'function') updateAffiliateCalc();
+    if (typeof loadAffiliateDashboard === 'function') loadAffiliateDashboard(false);
    }
    if (viewName === 'channels') {
     renderSevenChannelsManagerGrid();
@@ -2396,7 +2789,7 @@
    const loginBtn = document.getElementById('header-login-btn');
    const regBtn = document.getElementById('header-register-btn');
    const logoutBtn = document.getElementById('header-logout-btn');
-   const isPublicPage = (viewName === 'landing' || viewName === 'register' || viewName === 'login');
+   const isPublicPage = (!appState.isLoggedIn || viewName === 'landing' || viewName === 'register' || viewName === 'login');
    const aiFloatWrap = document.getElementById('ai-support-floating-wrapper');
    if (aiFloatWrap) {
     if (isPublicPage) aiFloatWrap.classList.add('hidden');
@@ -3240,7 +3633,8 @@
      usd_price: cleanUsd,
      credits: creditsAmount,
      days: days,
-     plan_name: planName
+     plan_name: planName,
+     ref_code: (typeof getStoredAffiliateRefCode === 'function' ? getStoredAffiliateRefCode() : '')
     })
    }).then(function(r) { return r.json(); }).then(function(res) {
     if (res && res.ok && res.purchase_url) {
@@ -3944,7 +4338,20 @@
      selectChannelSlot(1);
      syncDashboardUI();
      if (isOwner) syncAllAdminUsersFromSupabase();
-     navigateView('dashboard');
+     if (typeof bindPendingReferralForUser === 'function') bindPendingReferralForUser(email);
+     let wantAffJoin = false;
+     try {
+      if (localStorage.getItem('omniposts_pending_affiliate_join') === '1') {
+       wantAffJoin = true;
+       localStorage.removeItem('omniposts_pending_affiliate_join');
+      }
+     } catch (e) {}
+     if (wantAffJoin) {
+      navigateView('affiliates');
+      if (typeof joinAffiliateProgram === 'function') joinAffiliateProgram(true);
+     } else {
+      navigateView('dashboard');
+     }
      if (isOwner) {
       showToast(t('👑 Welcome Owner Admin! Your account and Admin Control Panel are now unlocked.', '👑 أهلاً بك يا مالك المنصة! تم تفعيل حسابك وفتح لوحة تحكم الأدمن لك.'), 'info');
      } else {
@@ -6613,6 +7020,554 @@
     }
    } catch (err) {}
   });
+
+  // =========================================================================
+  // IN-SITE AFFILIATE & REFERRAL SYSTEM (20% LIFETIME RECURRING)
+  // =========================================================================
+  const affiliateState = {
+   account: null,
+   referrals: [],
+   commissions: [],
+   payouts: [],
+   availableUsd: 0,
+   calcPlanPrice: 29.99,
+   adminPayouts: []
+  };
+
+  function captureAffiliateRefFromUrl() {
+   try {
+    const params = new URLSearchParams(window.location.search || '');
+    const rawRef = (params.get('ref') || '').trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 32);
+    if (rawRef) {
+     localStorage.setItem('omniposts_ref_code', JSON.stringify({ code: rawRef, ts: Date.now() }));
+    }
+   } catch (e) {}
+  }
+
+  function getStoredAffiliateRefCode() {
+   try {
+    const raw = localStorage.getItem('omniposts_ref_code');
+    if (!raw) return '';
+    const parsed = JSON.parse(raw);
+    if (!parsed || !parsed.code) return '';
+    // 30-day referral cookie window
+    if (Date.now() - (parsed.ts || 0) > 30 * 24 * 60 * 60 * 1000) {
+     localStorage.removeItem('omniposts_ref_code');
+     return '';
+    }
+    return String(parsed.code).trim().toUpperCase();
+   } catch (e) {
+    return '';
+   }
+  }
+
+  function bindPendingReferralForUser(newUserEmail) {
+   const cleanEmail = String(newUserEmail || '').trim().toLowerCase();
+   const refCode = getStoredAffiliateRefCode();
+   if (!cleanEmail || !refCode || !supabaseClient) return Promise.resolve();
+   return sbExec(
+    supabaseClient.from('affiliate_accounts').select('user_email, ref_code').eq('ref_code', refCode).maybeSingle()
+   ).then(function(res) {
+    const acc = res && res.data ? res.data : null;
+    if (!acc || !acc.user_email) return;
+    const referrerEmail = String(acc.user_email).trim().toLowerCase();
+    if (referrerEmail === cleanEmail) return; // Block self-referral
+    return sbExec(
+     supabaseClient.from('affiliate_referrals').upsert({
+      referred_email: cleanEmail,
+      ref_code: acc.ref_code,
+      referrer_email: referrerEmail,
+      status: 'registered',
+      first_plan_name: ''
+     }, { onConflict: 'referred_email', ignoreDuplicates: true })
+    );
+   }).catch(function() {});
+  }
+
+  function maskEmailForAffiliatePrivacy(email) {
+   const s = String(email || '').trim();
+   const parts = s.split('@');
+   if (parts.length !== 2) return s || '—';
+   const name = parts[0];
+   const visible = name.length <= 3 ? name.slice(0, 1) : name.slice(0, 3);
+   return visible + '***@' + parts[1];
+  }
+
+  function formatAffDateTime(isoStr) {
+   if (!isoStr) return '—';
+   try {
+    const d = new Date(isoStr);
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleString(appState.lang === 'ar' ? 'ar-EG' : 'en-US', {
+     year: 'numeric',
+     month: 'short',
+     day: 'numeric',
+     hour: '2-digit',
+     minute: '2-digit'
+    });
+   } catch (e) {
+    return String(isoStr).slice(0, 16).replace('T', ' ');
+   }
+  }
+
+  function generatePartnerRefCode(email) {
+   const prefix = String(email || 'USER').split('@')[0].replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 5) || 'OMNI';
+   const rand = Math.random().toString(36).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4).padEnd(4, '7');
+   return prefix + rand;
+  }
+
+  function setAffCalcPlan(price, btnEl) {
+   affiliateState.calcPlanPrice = Number(price) || 29.99;
+   document.querySelectorAll('.aff-calc-plan-btn').forEach(function(b) {
+    b.className = 'aff-calc-plan-btn px-3 py-1.5 rounded-lg text-zinc-300 hover:text-white transition';
+   });
+   if (btnEl) {
+    btnEl.className = 'aff-calc-plan-btn px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/35 font-bold transition';
+   }
+   updateAffiliateCalc();
+  }
+
+  function updateAffiliateCalc() {
+   const slider = document.getElementById('aff-calc-slider');
+   const users = slider ? (parseInt(slider.value, 10) || 25) : 25;
+   const monthly = Math.round(users * affiliateState.calcPlanPrice * 0.20);
+   const yearly = Math.round(monthly * 12);
+   const uLbl = document.getElementById('aff-calc-users-label');
+   const mEl = document.getElementById('aff-calc-monthly');
+   const yEl = document.getElementById('aff-calc-yearly');
+   if (uLbl) uLbl.textContent = users + ' ' + t('subscribers', 'مشترك');
+   if (mEl) mEl.textContent = '$' + monthly.toLocaleString('en-US');
+   if (yEl) yEl.textContent = '$' + yearly.toLocaleString('en-US');
+  }
+
+  function updateAffPayoutPlaceholder() {
+   const methodEl = document.getElementById('aff-payout-method');
+   const labelEl = document.getElementById('aff-payout-address-label');
+   const inputEl = document.getElementById('aff-payout-address');
+   if (!methodEl || !labelEl || !inputEl) return;
+   const m = methodEl.value;
+   if (m === 'USDT (TRC20)') {
+    labelEl.textContent = t('USDT (TRC20) Wallet Address', 'عنوان محفظة USDT (TRC20)');
+    inputEl.placeholder = 'T... (أدخل عنوان محفظة TRC20 الصحيح)';
+   } else if (m === 'USDT (Solana)') {
+    labelEl.textContent = t('USDT (Solana) Wallet Address', 'عنوان محفظة USDT (Solana)');
+    inputEl.placeholder = 'أدخل عنوان محفظة Solana الصحيح';
+   } else if (m.indexOf('Vodafone') !== -1) {
+    labelEl.textContent = t('Vodafone Cash Number or InstaPay Address', 'رقم فودافون كاش أو عنوان إنستاباي');
+    inputEl.placeholder = '010XXXXXXXX أو username@instapay';
+   } else {
+    labelEl.textContent = t('PayPal Email Address', 'البريد الإلكتروني لحساب PayPal');
+    inputEl.placeholder = 'name@example.com';
+   }
+  }
+
+  function fillMaxAffiliateWithdraw() {
+   const amtEl = document.getElementById('aff-payout-amount');
+   if (!amtEl) return;
+   if (affiliateState.availableUsd < 10) {
+    showToast(t('Minimum withdrawal is $10.00 USD.', 'الحد الأدنى للسحب هو $10.00 دولار.'), 'warn');
+    return;
+   }
+   amtEl.value = affiliateState.availableUsd.toFixed(2);
+  }
+
+  function copyAffiliateRefLink() {
+   const inputEl = document.getElementById('aff-ref-link-input');
+   if (!inputEl || !inputEl.value) return;
+   if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(inputEl.value).then(function() {
+     showToast(t('Referral link copied! Start sharing to earn 20% for life.', 'تم نسخ رابط الإحالة بنجاح! ابدأ بنشره لتربح 20% مدى الحياة.'), 'info');
+    }).catch(function() {
+     inputEl.select();
+     document.execCommand('copy');
+     showToast(t('Referral link copied!', 'تم نسخ رابط الإحالة بنجاح!'), 'info');
+    });
+   } else {
+    inputEl.select();
+    document.execCommand('copy');
+    showToast(t('Referral link copied!', 'تم نسخ رابط الإحالة بنجاح!'), 'info');
+   }
+  }
+
+  function joinAffiliateProgram(silent) {
+   if (!appState.isLoggedIn || !appState.currentUser || !appState.currentUser.email) {
+    try { localStorage.setItem('omniposts_pending_affiliate_join', '1'); } catch (e) {}
+    showToast(t('Create your free account or log in first — your Affiliate Dashboard will activate instantly!', 'سجّل حسابك المجاني أو ادخل أولاً — وستُفعّل لوحة الإحالة ورابطك فوراً!'), 'info');
+    navigateView('register');
+    return;
+   }
+   if (!supabaseClient) {
+    showToast(t('Database connection unavailable right now.', 'تعذر الاتصال بقاعدة البيانات حالياً.'), 'warn');
+    return;
+   }
+   const userEmail = String(appState.currentUser.email).trim().toLowerCase();
+   const btn = document.getElementById('aff-join-now-btn');
+   if (btn) btn.disabled = true;
+
+   sbExec(
+    supabaseClient.from('affiliate_accounts').select('*').eq('user_email', userEmail).maybeSingle()
+   ).then(function(res) {
+    if (res && res.data) {
+     affiliateState.account = res.data;
+     return res.data;
+    }
+    const newCode = generatePartnerRefCode(userEmail);
+    return sbExec(
+     supabaseClient.from('affiliate_accounts').insert({
+      user_email: userEmail,
+      ref_code: newCode,
+      commission_rate: 20,
+      total_earned_usd: 0,
+      paid_out_usd: 0
+     }).select().single()
+    ).then(function(ins) {
+     if (ins && ins.error) {
+      throw new Error(ins.error.message || 'Could not activate partner account');
+     }
+     return ins && ins.data ? ins.data : null;
+    });
+   }).then(function(acc) {
+    if (btn) btn.disabled = false;
+    if (acc) {
+     affiliateState.account = acc;
+     if (!silent) {
+      showToast(t('Welcome to the Omniposts Affiliate Program! Your link is ready.', 'مرحباً بك في برنامج شركاء Omniposts! تم تفعيل حسابك ورابط الإحالة جاهز الآن.'), 'info');
+     }
+     loadAffiliateDashboard(false);
+    }
+   }).catch(function(err) {
+    if (btn) btn.disabled = false;
+    showToast(t('Setup pending: ', 'تعذر التفعيل حالياً: ') + (err && err.message ? err.message : ''), 'warn');
+   });
+  }
+
+  function loadAffiliateDashboard(showNotify) {
+   const joinBox = document.getElementById('aff-join-cta-box');
+   const dashWrap = document.getElementById('aff-dashboard-wrap');
+   if (!appState.isLoggedIn || !appState.currentUser || !appState.currentUser.email || !supabaseClient) {
+    if (joinBox) joinBox.classList.remove('hidden');
+    if (dashWrap) dashWrap.classList.add('hidden');
+    return;
+   }
+   const userEmail = String(appState.currentUser.email).trim().toLowerCase();
+   sbExec(
+    supabaseClient.from('affiliate_accounts').select('*').eq('user_email', userEmail).maybeSingle()
+   ).then(function(accRes) {
+    const acc = accRes && accRes.data ? accRes.data : null;
+    if (!acc) {
+     affiliateState.account = null;
+     if (joinBox) joinBox.classList.remove('hidden');
+     if (dashWrap) dashWrap.classList.add('hidden');
+     return;
+    }
+    affiliateState.account = acc;
+    if (joinBox) joinBox.classList.add('hidden');
+    if (dashWrap) dashWrap.classList.remove('hidden');
+
+    return Promise.all([
+     sbExec(supabaseClient.from('affiliate_referrals').select('*').eq('referrer_email', userEmail).order('created_at', { ascending: false })),
+     sbExec(supabaseClient.from('affiliate_commissions').select('*').eq('referrer_email', userEmail).order('created_at', { ascending: false })),
+     sbExec(supabaseClient.from('affiliate_payouts').select('*').eq('referrer_email', userEmail).order('created_at', { ascending: false }))
+    ]).then(function(results) {
+     affiliateState.referrals = (results[0] && Array.isArray(results[0].data)) ? results[0].data : [];
+     affiliateState.commissions = (results[1] && Array.isArray(results[1].data)) ? results[1].data : [];
+     affiliateState.payouts = (results[2] && Array.isArray(results[2].data)) ? results[2].data : [];
+     renderAffiliateDashboardUI();
+     if (showNotify) {
+      showToast(t('Affiliate stats refreshed.', 'تم تحديث إحصائيات الإحالة والأرباح بنجاح.'), 'info');
+     }
+    });
+   }).catch(function() {});
+  }
+
+  function renderAffiliateDashboardUI() {
+   const acc = affiliateState.account;
+   if (!acc) return;
+   const refLink = 'https://omniposts.online/?ref=' + encodeURIComponent(acc.ref_code);
+   const linkEl = document.getElementById('aff-ref-link-input');
+   const codeBadge = document.getElementById('aff-partner-code-badge');
+   if (linkEl) linkEl.value = refLink;
+   if (codeBadge) codeBadge.textContent = acc.ref_code;
+
+   // Compute accurate live totals with automatic 48-hour anti-refund hold:
+   // - Commissions < 48h stay in "Pending Review (48h)" and cannot be withdrawn yet
+   // - Commissions >= 48h automatically move out of Pending Review into "Available to Withdraw"
+   // - Refunded commissions are excluded completely
+   const nowMs = Date.now();
+   const HOLD_MS = 48 * 60 * 60 * 1000;
+   let pendingHoldUsd = 0;
+   let releasedEarnedUsd = 0;
+   const commByUser = {};
+   const pendingByUser = {};
+   const nextUnlockMsByUser = {};
+   const latestPlanByUser = {};
+
+   affiliateState.commissions.forEach(function(c) {
+    if (String(c.status || 'active').toLowerCase() === 'refunded') return;
+    const amt = parseFloat(c.commission_usd) || 0;
+    const em = String(c.referred_email || '').toLowerCase();
+    const createdMs = c.created_at ? new Date(c.created_at).getTime() : 0;
+    const unlockMs = c.unlock_at ? new Date(c.unlock_at).getTime() : (createdMs + HOLD_MS);
+    const isLocked = (unlockMs > nowMs);
+
+    if (isLocked) {
+     pendingHoldUsd += amt;
+     pendingByUser[em] = Math.round(((pendingByUser[em] || 0) + amt) * 100) / 100;
+     if (!nextUnlockMsByUser[em] || unlockMs < nextUnlockMsByUser[em]) nextUnlockMsByUser[em] = unlockMs;
+    } else {
+     releasedEarnedUsd += amt;
+    }
+    commByUser[em] = Math.round(((commByUser[em] || 0) + amt) * 100) / 100;
+    if (!latestPlanByUser[em] && c.plan_name) latestPlanByUser[em] = c.plan_name;
+   });
+
+   pendingHoldUsd = Math.round(pendingHoldUsd * 100) / 100;
+   releasedEarnedUsd = Math.round(releasedEarnedUsd * 100) / 100;
+   const totalEarned = Math.round((pendingHoldUsd + releasedEarnedUsd) * 100) / 100;
+
+   const totalRequestedOrPaid = affiliateState.payouts.reduce(function(sum, p) {
+    return sum + (parseFloat(p.amount_usd) || 0);
+   }, 0);
+   const totalCompletedPaid = affiliateState.payouts.reduce(function(sum, p) {
+    return sum + (p.status === 'completed' ? (parseFloat(p.amount_usd) || 0) : 0);
+   }, 0);
+   const available = Math.max(0, Math.round((releasedEarnedUsd - totalRequestedOrPaid) * 100) / 100);
+   affiliateState.availableUsd = available;
+
+   const totalSignups = affiliateState.referrals.length;
+   const totalSubscribed = affiliateState.referrals.filter(function(r) { return r.status === 'subscribed'; }).length;
+
+   const kAvail = document.getElementById('aff-kpi-available');
+   const kPending = document.getElementById('aff-kpi-pending-hold');
+   const kEarned = document.getElementById('aff-kpi-earned');
+   const kPaidSub = document.getElementById('aff-kpi-paidout-sub');
+   const kSignups = document.getElementById('aff-kpi-signups');
+   const kSub = document.getElementById('aff-kpi-subscribed');
+   if (kAvail) kAvail.textContent = '$' + available.toFixed(2);
+   if (kPending) kPending.textContent = '$' + pendingHoldUsd.toFixed(2);
+   if (kEarned) kEarned.textContent = '$' + totalEarned.toFixed(2);
+   if (kPaidSub) kPaidSub.textContent = t('Paid out: ', 'تم سحبه: ') + '$' + totalCompletedPaid.toFixed(2);
+   if (kSignups) kSignups.textContent = String(totalSignups);
+   if (kSub) kSub.textContent = String(totalSubscribed);
+
+   // Render Referrals Table
+   const refTbody = document.getElementById('aff-referrals-tbody');
+   if (refTbody) {
+    if (!affiliateState.referrals.length) {
+     refTbody.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-zinc-500">' + t('No referred users yet — share your link to start earning 20% for life!', 'لم يسجّل أحد عبر رابطك بعد — ابدأ بمشاركة رابطك الآن!') + '</td></tr>';
+    } else {
+     refTbody.innerHTML = affiliateState.referrals.map(function(r) {
+      const em = String(r.referred_email || '').toLowerCase();
+      const earnedFromUser = commByUser[em] || 0;
+      const isSub = (r.status === 'subscribed' || earnedFromUser > 0);
+      const planLabel = latestPlanByUser[em] || r.first_plan_name || (isSub ? t('Paid Plan', 'خطة مدفوعة') : '—');
+      const statusBadge = isSub
+       ? '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' + t('Subscribed', 'مشترك فعلي') + '</span>'
+       : '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-zinc-500/15 text-zinc-400 border border-white/10 text-[11px] font-semibold">' + t('Registered Only', 'مسجّل فقط') + '</span>';
+      return '<tr class="hover:bg-white/[0.02]">' +
+       '<td class="py-3 px-2 font-mono text-zinc-200" dir="ltr">' + escapeHtml(maskEmailForAffiliatePrivacy(em)) + '</td>' +
+       '<td class="py-3 px-2">' + statusBadge + '</td>' +
+       '<td class="py-3 px-2 text-zinc-200 font-semibold">' + escapeHtml(planLabel) + '</td>' +
+       '<td class="py-3 px-2 text-zinc-400">' + escapeHtml(formatAffDateTime(r.created_at)) + '</td>' +
+       '<td class="py-3 px-2 text-end"><div class="font-extrabold ' + (earnedFromUser > 0 ? 'text-emerald-400' : 'text-zinc-500') + '">$' + earnedFromUser.toFixed(2) + '</div>' + ((pendingByUser[em] || 0) > 0 ? '<div class="text-[10px] text-amber-300 font-semibold mt-0.5">' + t('48h Review: $', 'قيد المراجعة: $') + (pendingByUser[em] || 0).toFixed(2) + ' (' + Math.max(1, Math.ceil(((nextUnlockMsByUser[em] || nowMs) - nowMs) / 3600000)) + t('h left)', ' ساعة متبقية)') + '</div>' : '') + '</td>' +
+       '</tr>';
+     }).join('');
+    }
+   }
+
+   // Render Payout History Table
+   const payTbody = document.getElementById('aff-payouts-tbody');
+   if (payTbody) {
+    if (!affiliateState.payouts.length) {
+     payTbody.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-zinc-500">' + t('No withdrawal requests yet.', 'لا توجد عمليات سحب مسجّلة حتى الآن.') + '</td></tr>';
+    } else {
+     payTbody.innerHTML = affiliateState.payouts.map(function(p) {
+      const isDone = (p.status === 'completed');
+      const badge = isDone
+       ? '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/35 text-[11px] font-bold"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' + t('Completed', 'اكتمل السحب') + '</span>'
+       : '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/35 text-[11px] font-bold"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' + t('Pending Review', 'في المراجعة') + '</span>';
+      const addrShort = String(p.payout_address || '');
+      const displayAddr = addrShort.length > 18 ? (addrShort.slice(0, 8) + '...' + addrShort.slice(-6)) : addrShort;
+      return '<tr class="hover:bg-white/[0.02]">' +
+       '<td class="py-3 px-2 font-extrabold text-white">$' + (parseFloat(p.amount_usd) || 0).toFixed(2) + '</td>' +
+       '<td class="py-3 px-2"><div class="font-semibold text-zinc-200">' + escapeHtml(p.payout_method) + '</div><div class="text-[10px] font-mono text-zinc-500" dir="ltr">' + escapeHtml(displayAddr) + '</div></td>' +
+       '<td class="py-3 px-2 text-zinc-400">' + escapeHtml(formatAffDateTime(p.created_at)) + '</td>' +
+       '<td class="py-3 px-2">' + badge + '</td>' +
+       '<td class="py-3 px-2 text-zinc-300">' + (isDone ? escapeHtml(formatAffDateTime(p.paid_at)) : '<span class="text-zinc-500">—</span>') + '</td>' +
+       '</tr>';
+     }).join('');
+    }
+   }
+  }
+
+  function submitAffiliateWithdrawal(e) {
+   e.preventDefault();
+   if (!affiliateState.account || !supabaseClient) return;
+   const method = (document.getElementById('aff-payout-method') || {}).value || 'USDT (TRC20)';
+   const address = ((document.getElementById('aff-payout-address') || {}).value || '').trim();
+   const amount = Math.round((parseFloat((document.getElementById('aff-payout-amount') || {}).value) || 0) * 100) / 100;
+
+   if (amount < 10) {
+    showToast(t('Minimum withdrawal amount is $10.00 USD.', 'الحد الأدنى لطلب السحب هو $10.00 دولار.'), 'warn');
+    return;
+   }
+   if (amount > affiliateState.availableUsd) {
+    showToast(t('Requested amount exceeds your available balance ($' + affiliateState.availableUsd.toFixed(2) + ').', 'المبلغ المطلوب أكبر من رصيدك المتاح حالياً ($' + affiliateState.availableUsd.toFixed(2) + ').'), 'warn');
+    return;
+   }
+   if (address.length < 6) {
+    showToast(t('Please enter a valid wallet address or payout account.', 'يرجى إدخال عنوان محفظة أو رقم حساب سحب صحيح.'), 'warn');
+    return;
+   }
+
+   const submitBtn = document.getElementById('aff-withdraw-submit-btn');
+   if (submitBtn) submitBtn.disabled = true;
+
+   const userEmail = String(affiliateState.account.user_email).toLowerCase();
+   const refCode = affiliateState.account.ref_code;
+
+   sbExec(
+    supabaseClient.from('affiliate_payouts').insert({
+     referrer_email: userEmail,
+     ref_code: refCode,
+     amount_usd: amount,
+     payout_method: method,
+     payout_address: address,
+     status: 'pending'
+    }).select().single()
+   ).then(function(res) {
+    if (submitBtn) submitBtn.disabled = false;
+    if (res && res.error) {
+     showToast(t('Could not submit request: ', 'تعذر تسجيل طلب السحب: ') + res.error.message, 'warn');
+     return;
+    }
+    // Also notify Owner Admin via support_tickets log so it is impossible to miss
+    sbExec(
+     supabaseClient.from('support_tickets').insert({
+      user_email: userEmail,
+      category: 'Affiliate Payout',
+      subject: 'طلب سحب أرباح إحالة $' + amount.toFixed(2) + ' عبر ' + method,
+      message: 'الشريك: ' + userEmail + ' (كود: ' + refCode + ') | المبلغ: $' + amount.toFixed(2) + ' | الوسيلة: ' + method + ' | العنوان/الرقم: ' + address,
+      status: 'open'
+     })
+    ).catch(function() {});
+
+    const amtEl = document.getElementById('aff-payout-amount');
+    if (amtEl) amtEl.value = '';
+    showToast(t('Withdrawal request submitted! Amount deducted from your balance and is now Pending Review (1–24h).', 'تم تسجيل طلب السحب وخصم المبلغ من رصيدك بنجاح! الطلب الآن (في المراجعة) وسيصلك خلال ساعة إلى 24 ساعة.'), 'info');
+    loadAffiliateDashboard(false);
+   }).catch(function(err) {
+    if (submitBtn) submitBtn.disabled = false;
+    showToast(t('Withdrawal error: ', 'حدث خطأ: ') + (err && err.message ? err.message : ''), 'warn');
+   });
+  }
+
+  // ---- OWNER ADMIN: AFFILIATE PAYOUTS MANAGEMENT ----
+  function loadAdminAffiliatePayouts(showNotify) {
+   if (!supabaseClient || !appState.currentUser || appState.currentUser.email.toLowerCase() !== OWNER_ADMIN_EMAIL.toLowerCase()) return;
+   sbExec(
+    supabaseClient.from('affiliate_payouts').select('*').order('created_at', { ascending: false })
+   ).then(function(res) {
+    const rows = (res && Array.isArray(res.data)) ? res.data : [];
+    // Sort pending requests first, then newest
+    rows.sort(function(a, b) {
+     if (a.status === 'pending' && b.status !== 'pending') return -1;
+     if (a.status !== 'pending' && b.status === 'pending') return 1;
+     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+    affiliateState.adminPayouts = rows;
+    renderAdminAffiliatePayoutsTable();
+    if (showNotify) {
+     showToast(t('Affiliate withdrawal requests refreshed.', 'تم تحديث جدول طلبات سحب الشركاء بنجاح.'), 'info');
+    }
+   }).catch(function() {});
+  }
+
+  function copyAdminPayoutAddress(addr) {
+   if (!addr) return;
+   if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(addr).then(function() {
+     showToast(t('Payout address copied!', 'تم نسخ عنوان السحب بنجاح!'), 'info');
+    }).catch(function() {});
+   }
+  }
+
+  function renderAdminAffiliatePayoutsTable() {
+   const tbody = document.getElementById('admin-aff-payouts-tbody');
+   const pendingBadge = document.getElementById('admin-aff-pending-badge');
+   const pendingUsdEl = document.getElementById('admin-aff-pending-usd');
+   const rows = affiliateState.adminPayouts || [];
+   const pendingRows = rows.filter(function(r) { return r.status === 'pending'; });
+   const pendingSum = pendingRows.reduce(function(s, r) { return s + (parseFloat(r.amount_usd) || 0); }, 0);
+
+   if (pendingBadge) {
+    pendingBadge.textContent = pendingRows.length + ' ' + t('Pending', 'في المراجعة');
+    pendingBadge.className = pendingRows.length > 0
+     ? 'text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-amber-500/25 text-amber-300 border border-amber-500/45'
+     : 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30';
+   }
+   if (pendingUsdEl) pendingUsdEl.textContent = '$' + pendingSum.toFixed(2);
+   if (!tbody) return;
+
+   if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="py-5 text-center text-zinc-500">' + t('No affiliate withdrawal requests yet.', 'لا توجد طلبات سحب من الشركاء حتى الآن.') + '</td></tr>';
+    return;
+   }
+
+   tbody.innerHTML = rows.map(function(p) {
+    const isDone = (p.status === 'completed');
+    const safeAddr = escapeHtml(p.payout_address || '');
+    const jsSafeAddr = String(p.payout_address || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    const jsSafeEmail = String(p.referrer_email || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    const statusHtml = isDone
+     ? '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/35 text-[11px] font-bold">' + t('Completed', 'اكتمل السحب') + '</span><div class="text-[10px] text-zinc-500 mt-0.5">' + escapeHtml(formatAffDateTime(p.paid_at)) + '</div>'
+     : '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[11px] font-bold">' + t('Pending Review', 'في المراجعة') + '</span>';
+    const actionHtml = isDone
+     ? '<span class="text-[11px] text-emerald-400 font-semibold">' + t('Paid', 'تم التحويل') + '</span>'
+     : '<button type="button" onclick="adminMarkAffiliatePayoutPaid(' + Number(p.id) + ', \'' + jsSafeEmail + '\', ' + (parseFloat(p.amount_usd) || 0) + ')" class="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-[11px] transition">' + t('Mark Completed', 'تأكيد اكتمال السحب') + '</button>';
+
+    return '<tr class="hover:bg-white/[0.02]">' +
+     '<td class="py-3 px-2"><div class="font-semibold text-white" dir="ltr">' + escapeHtml(p.referrer_email) + '</div><div class="text-[10px] font-mono text-zinc-400">' + escapeHtml(p.ref_code) + '</div></td>' +
+     '<td class="py-3 px-2 font-extrabold text-emerald-400">$' + (parseFloat(p.amount_usd) || 0).toFixed(2) + '</td>' +
+     '<td class="py-3 px-2"><div class="font-semibold text-zinc-200">' + escapeHtml(p.payout_method) + '</div><div class="flex items-center gap-1.5 mt-0.5"><span class="font-mono text-[11px] text-zinc-300 break-all" dir="ltr">' + safeAddr + '</span><button type="button" onclick="copyAdminPayoutAddress(\'' + jsSafeAddr + '\')" class="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] text-white shrink-0">' + t('Copy', 'نسخ') + '</button></div></td>' +
+     '<td class="py-3 px-2 text-zinc-400">' + escapeHtml(formatAffDateTime(p.created_at)) + '</td>' +
+     '<td class="py-3 px-2">' + statusHtml + '</td>' +
+     '<td class="py-3 px-2 text-end">' + actionHtml + '</td>' +
+     '</tr>';
+   }).join('');
+  }
+
+  function adminMarkAffiliatePayoutPaid(payoutId, referrerEmail, amountUsd) {
+   if (!supabaseClient) return;
+   const nowIso = new Date().toISOString();
+   sbExec(
+    supabaseClient.from('affiliate_payouts').update({
+     status: 'completed',
+     paid_at: nowIso
+    }).eq('id', payoutId)
+   ).then(function(res) {
+    if (res && res.error) {
+     showToast(t('Update failed: ', 'تعذر تحديث الطلب: ') + res.error.message, 'warn');
+     return;
+    }
+    // Increment paid_out_usd on affiliate_accounts
+    sbExec(
+     supabaseClient.from('affiliate_accounts').select('paid_out_usd').eq('user_email', String(referrerEmail).toLowerCase()).maybeSingle()
+    ).then(function(accRes) {
+     const prevPaid = (accRes && accRes.data) ? (parseFloat(accRes.data.paid_out_usd) || 0) : 0;
+     const nextPaid = Math.round((prevPaid + (parseFloat(amountUsd) || 0)) * 100) / 100;
+     return sbExec(
+      supabaseClient.from('affiliate_accounts').update({ paid_out_usd: nextPaid }).eq('user_email', String(referrerEmail).toLowerCase())
+     );
+    }).catch(function() {});
+
+    showToast(t('Marked as Completed! The partner now sees Completed with exact timestamp.', 'تم تأكيد اكتمال السحب! سيظهر للشريك فوراً (اكتمل السحب) بالتاريخ والوقت وطريقة السحب.'), 'info');
+    loadAdminAffiliatePayouts(false);
+   });
+  }
+
+  // Capture ?ref=CODE immediately on page load
+  captureAffiliateRefFromUrl();
  </script>
 </body>
 </html>
