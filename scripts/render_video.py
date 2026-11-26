@@ -660,42 +660,66 @@ def generate_story_package(
 # Step 2: Parallel Scene Image Generation (Runware FLUX.1 schnell)
 # ==============================================================================
 def generate_single_image(prompt: str, width: int, height: int, out_path: Path) -> str:
-    payload = [
-        {
-            "taskType": "imageInference",
-            "taskUUID": str(uuid.uuid4()),
-            "model": "runware:100@1",
-            "positivePrompt": prompt[:950],
-            "width": width,
-            "height": height,
-            "steps": 4,
-            "numberResults": 1,
-            "outputType": "URL",
-            "outputFormat": "JPEG",
-            "includeCost": True,
-        }
-    ]
+    # 1. Primary: Runware FLUX.1 schnell (ultra-fast when balance is available)
+    if RUNWARE_API_KEY:
+        payload = [
+            {
+                "taskType": "imageInference",
+                "taskUUID": str(uuid.uuid4()),
+                "model": "runware:100@1",
+                "positivePrompt": prompt[:950],
+                "width": width,
+                "height": height,
+                "steps": 4,
+                "numberResults": 1,
+                "outputType": "URL",
+                "outputFormat": "JPEG",
+                "includeCost": True,
+            }
+        ]
+        for attempt in range(2):
+            try:
+                r = requests.post(
+                    "https://api.runware.ai/v1",
+                    headers={
+                        "Authorization": f"Bearer {RUNWARE_API_KEY}",
+                        "Content-Type": "application/json",
+                    },
+                    json=payload,
+                    timeout=35,
+                )
+                if r.status_code in (401, 402, 403):
+                    print(f"[WARN] Runware balance/auth HTTP {r.status_code} — switching to Free FLUX backup!", flush=True)
+                    break
+                r.raise_for_status()
+                data = r.json().get("data") or []
+                if data and data[0].get("imageURL"):
+                    img_url = data[0]["imageURL"]
+                    img_bytes = requests.get(img_url, timeout=30).content
+                    if len(img_bytes) > 5000:
+                        out_path.write_bytes(img_bytes)
+                        return img_url
+            except Exception as exc:
+                print(f"[WARN] Runware image attempt {attempt+1} failed: {exc}", flush=True)
+
+    # 2. Automatic Free $0 FLUX Backup (Pollinations AI — zero balance required, no watermark)
+    import urllib.parse
+    encoded_p = urllib.parse.quote(prompt[:650], safe="")
     for attempt in range(3):
         try:
-            r = requests.post(
-                "https://api.runware.ai/v1",
-                headers={
-                    "Authorization": f"Bearer {RUNWARE_API_KEY}",
-                    "Content-Type": "application/json",
-                },
-                json=payload,
-                timeout=45,
-            )
-            r.raise_for_status()
-            data = r.json().get("data") or []
-            if data and data[0].get("imageURL"):
-                img_url = data[0]["imageURL"]
-                img_bytes = requests.get(img_url, timeout=30).content
-                out_path.write_bytes(img_bytes)
-                return img_url
+            seed = random.randint(1000, 9999999)
+            free_url = f"https://image.pollinations.ai/prompt/{encoded_p}?width={width}&height={height}&model=flux&nologo=true&seed={seed}"
+            resp = requests.get(free_url, timeout=60)
+            if resp.ok and len(resp.content) > 8000 and "image" in (resp.headers.get("Content-Type") or "").lower():
+                out_path.write_bytes(resp.content)
+                print(f"[OK] Generated scene via Free $0 FLUX backup ({len(resp.content)//1024} KB)", flush=True)
+                return free_url
+            print(f"[WARN] Free FLUX attempt {attempt+1} HTTP {resp.status_code} ({len(resp.content)} bytes)", flush=True)
         except Exception as exc:
-            print(f"[WARN] Image attempt {attempt+1} failed: {exc}", flush=True)
-    raise RuntimeError("Runware image generation failed after 3 retries")
+            print(f"[WARN] Free FLUX attempt {attempt+1} error: {exc}", flush=True)
+        time.sleep(2)
+
+    raise RuntimeError("Image generation failed on both Runware and Free FLUX backup")
 
 
 def generate_all_scenes(scenes: list, style: str, is_vertical: bool, work_dir: Path, niche: str = "") -> tuple[list[Path], list[str]]:
