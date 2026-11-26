@@ -45,6 +45,8 @@ from PIL import Image, ImageDraw, ImageFont, features
 OWNER_ADMIN_EMAIL = "ma1979368@gmail.com"
 JOB_ID = os.environ.get("JOB_ID", "").strip()
 RUNWARE_API_KEY = os.environ.get("RUNWARE_API_KEY", "").strip()
+ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY", "").strip()
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://kljpelpjdzoagpxwdsnr.supabase.co").strip().rstrip("/")
 SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
 GOOGLE_CLIENT_ID = (
@@ -545,40 +547,43 @@ def generate_story_package(
     )
 
     lang_rules = (
-        f"CRITICAL LANGUAGE RULE: Write 'title', 'description', 'tags', and EVERY scene's 'narration' "
+        f"CRITICAL LANGUAGE & STORYTELLING RULES: Write 'title', 'description', 'tags', and EVERY scene's 'narration' "
         f"100% in natural, authentic '{language}' (locale: {voice_locale}). "
         + (
             "ZERO English/Latin words allowed in title, description, or narration (except optional #Shorts at the end of description). "
-            "Write a REAL, captivating original story specifically about the requested topic — NEVER repeat sentences! "
-            "The title MUST be a catchy Arabic viral title about THIS specific story."
+            "PRONUNCIATION PERFECTION: Add light Arabic diacritics (تشكيل) on any ambiguous words and use clear punctuation (commas, periods, exclamation marks) so voice narration sounds 100% human with zero mispronunciations. "
+            "VIRAL STORY STRUCTURE (MANDATORY): Scene 1 MUST start with an irresistible 2-second hook (shocking moment, curious question, or immediate conflict — NEVER start with boring clichés like 'في يوم من الأيام' or 'النهارده هنتكلم عن'). "
+            "Build escalating tension/curiosity in every scene and deliver a memorable emotional payoff or surprising twist in the final scene!"
             if is_ar
-            else "Write a REAL, engaging original story specifically about the requested topic — NEVER write generic filler or repeat sentences! "
-                 "The title MUST be a catchy viral title about THIS specific story."
+            else "VIRAL STORY STRUCTURE (MANDATORY): Scene 1 MUST start with an irresistible 2-second hook (immediate action, shocking fact, or curious conflict — NEVER start with boring clichés like 'Once upon a time' or 'Today we will talk about'). "
+                 "Build escalating curiosity in every scene and deliver a memorable emotional payoff or surprising twist in the final scene!"
         )
     )
 
     system_prompt = (
-        "You are an elite viral YouTube scriptwriter and art director. "
+        "You are a top 1% viral YouTube Shorts & faceless storytelling director (10M+ views style). "
         "Return ONLY valid JSON with no markdown fences and no extra commentary. "
         "NEVER mention any AI tool, website name, or 'Generated automatically' anywhere. "
+        "CHARACTER CONSISTENCY RULE: Define ONE specific recurring main character (exact age/species, hair/fur, outfit colors) and repeat that EXACT character description in EVERY scene's image_prompt so the entire video stars the SAME hero in different camera angles and actions!\n"
         + lang_rules + "\n" + visual_rules
     )
     user_prompt = (
-        f"Create a 100% original, engaging story strictly about this topic: '{niche}'.\n"
+        f"Create a gripping, high-retention 100% original story strictly about this topic: '{niche}'.\n"
         f"Visual style: '{style}' ({style_desc}).\n"
         f"Language & Dialect: '{language}' ({voice_locale}).\n"
         f"Target duration: {duration_sec} seconds (~{approx_words} words total across all scenes).\n"
-        f"Divide the story into EXACTLY {scene_count} distinct sequential scenes that flow smoothly as ONE continuous story.\n"
-        f"Keep each scene's narration punchy (8 to 15 words per scene) so subtitles stay clean and compact.\n"
+        f"Divide the story into EXACTLY {scene_count} fast-paced sequential scenes (Scene 1 = instant hook, middle scenes = rising action/conflict, final scene = unforgettable twist/payoff).\n"
+        f"Keep each scene's narration punchy and dramatic (7 to 13 words per scene) for high retention.\n"
+        f"Keep the SAME recurring hero/subject visually consistent across every scene's image_prompt, varying camera angles (close-up face, medium action shot, wide establishing shot).\n"
         'Also classify the emotional soundtrack mood as ONE of: "epic", "mystery", "sad", "happy", or "calm".\n'
         "Return strict JSON matching this exact schema:\n"
         "{\n"
-        '  "title": "Catchy viral YouTube title strictly in the requested language (max 82 chars)",\n'
+        '  "title": "Irresistible curiosity-gap viral YouTube title strictly in the requested language (max 82 chars)",\n'
         '  "description": "Engaging YouTube description strictly in the requested language with 4 relevant hashtags",\n'
         '  "tags": ["tag1", "tag2", "tag3", "tag4"],\n'
         '  "mood": "epic | mystery | sad | happy | calm",\n'
         '  "scenes": [\n'
-        '    {"narration": "Spoken story line strictly in the requested language/dialect", "image_prompt": "Rich specific English visual prompt matching the exact topic & style, clear expressive faces, vivid lighting, no text in image"}\n'
+        '    {"narration": "Punchy spoken story line strictly in the requested language/dialect", "image_prompt": "Rich specific English visual prompt featuring the consistent main character, clear expressive face, dynamic action, vivid lighting, no text in image"}\n'
         "  ]\n"
         "}"
     )
@@ -898,9 +903,114 @@ def pick_voice(voice_locale: str, voice_gender: str) -> str:
     return VOICE_MAP["ar-EG"][g]
 
 
+def _master_voice_audio(in_path: Path, out_mp3: Path):
+    """Apply warm broadcast studio mastering (removes robotic metallic harshness, adds human warmth & punch)."""
+    tmp_out = out_mp3.with_suffix(".master.mp3")
+    try:
+        subprocess.run(
+            [
+                "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+                "-i", str(in_path),
+                "-af", (
+                    "highpass=f=80,"
+                    "equalizer=f=180:width_type=o:width=1.4:g=2.8,"
+                    "equalizer=f=3200:width_type=o:width=1.2:g=2.0,"
+                    "equalizer=f=6500:width_type=o:width=1.0:g=-1.8,"
+                    "acompressor=threshold=-18dB:ratio=2.8:attack=8:release=110:makeup=2,"
+                    "loudnorm=I=-15:TP=-1.5:LRA=9"
+                ),
+                "-c:a", "libmp3lame", "-b:a", "192k", "-ar", "44100",
+                str(tmp_out),
+            ],
+            check=True,
+        )
+        tmp_out.replace(out_mp3)
+    except Exception:
+        if in_path != out_mp3 and in_path.exists():
+            in_path.replace(out_mp3)
+
+
+def _try_elevenlabs_tts(text: str, is_female: bool, out_mp3: Path) -> bool:
+    if not ELEVENLABS_API_KEY:
+        return False
+    voice_id = "21m00Tcm4TlvDq8ikWAM" if is_female else "pNInz6obpgDQGcFmaJgB"
+    try:
+        r = requests.post(
+            f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
+            headers={
+                "xi-api-key": ELEVENLABS_API_KEY,
+                "Content-Type": "application/json",
+                "Accept": "audio/mpeg",
+            },
+            json={
+                "text": text,
+                "model_id": "eleven_multilingual_v2",
+                "voice_settings": {"stability": 0.48, "similarity_boost": 0.78, "style": 0.35},
+            },
+            timeout=35,
+        )
+        if r.ok and len(r.content) > 2000:
+            raw_mp3 = out_mp3.with_suffix(".raw.mp3")
+            raw_mp3.write_bytes(r.content)
+            _master_voice_audio(raw_mp3, out_mp3)
+            raw_mp3.unlink(missing_ok=True)
+            return True
+    except Exception as exc:
+        print(f"[WARN] ElevenLabs TTS fallback: {exc}", flush=True)
+    return False
+
+
+def _try_gemini_tts(text: str, is_female: bool, out_mp3: Path) -> bool:
+    if not GEMINI_API_KEY:
+        return False
+    import base64
+    voice_name = "Aoede" if is_female else "Charon"
+    try:
+        r = requests.post(
+            f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key={GEMINI_API_KEY}",
+            headers={"Content-Type": "application/json"},
+            json={
+                "contents": [{"parts": [{"text": f"Speak naturally with warm storytelling emotion: {text}"}]}],
+                "generationConfig": {
+                    "responseModalities": ["AUDIO"],
+                    "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": voice_name}}},
+                },
+            },
+            timeout=40,
+        )
+        if r.ok:
+            data = r.json()
+            b64 = data["candidates"][0]["content"]["parts"][0]["inlineData"]["data"]
+            pcm_bytes = base64.b64decode(b64)
+            raw_pcm = out_mp3.with_suffix(".pcm")
+            raw_pcm.write_bytes(pcm_bytes)
+            subprocess.run(
+                [
+                    "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+                    "-f", "s16le", "-ar", "24000", "-ac", "1", "-i", str(raw_pcm),
+                    "-c:a", "libmp3lame", "-b:a", "192k", str(out_mp3),
+                ],
+                check=True,
+            )
+            raw_pcm.unlink(missing_ok=True)
+            _master_voice_audio(out_mp3, out_mp3)
+            return True
+    except Exception as exc:
+        print(f"[WARN] Gemini TTS fallback: {exc}", flush=True)
+    return False
+
+
 async def synth_scene_audio(text: str, voice: str, out_mp3: Path):
-    comm = edge_tts.Communicate(text=text, voice=voice, rate="+5%")
-    await comm.save(str(out_mp3))
+    is_female = any(f in str(voice or "").lower() for f in ["salma", "zariyah", "fatima", "amany", "jenny", "aria", "ava", "emma", "denise", "katja", "elsa", "elvira", "nanami"])
+    if _try_elevenlabs_tts(text, is_female, out_mp3):
+        return
+    if _try_gemini_tts(text, is_female, out_mp3):
+        return
+    raw_mp3 = out_mp3.with_suffix(".edge.mp3")
+    comm = edge_tts.Communicate(text=text, voice=voice, rate="+8%", pitch="+2Hz" if is_female else "-2Hz")
+    await comm.save(str(raw_mp3))
+    _master_voice_audio(raw_mp3, out_mp3)
+    raw_mp3.unlink(missing_ok=True)
 
 
 def get_audio_duration(audio_path: Path) -> float:
@@ -1102,21 +1212,21 @@ def prepare_caption_line(line: str, is_rtl: bool) -> tuple[str, dict]:
 
 
 def split_caption_into_chunks(text: str, is_vertical: bool) -> list[str]:
-    """
-    Split narration into 1–2 short timed chunks so the on-screen subtitle is ALWAYS a compact
-    1–2 line strip (never a huge 3–4 line box covering the scene, and never cuts off any words).
-    """
+    """Split narration into punchy 2-4 word viral TikTok/Shorts caption beats so text feels alive and dynamic."""
     cleaned = re.sub(r"[\U00010000-\U0010ffff\u2600-\u27BF]", "", str(text or "")).strip()
     words = cleaned.split()
-    max_words_per_chunk = 8 if is_vertical else 12
-    if len(words) <= max_words_per_chunk:
-        return [cleaned] if cleaned else []
-    mid = math.ceil(len(words) / 2)
-    return [" ".join(words[:mid]), " ".join(words[mid:])]
+    if not words:
+        return []
+    chunk_size = 3 if is_vertical else 5
+    chunks = [" ".join(words[i:i + chunk_size]) for i in range(0, len(words), chunk_size)]
+    if len(chunks) >= 2 and len(chunks[-1].split()) == 1:
+        chunks[-2] = chunks[-2] + " " + chunks[-1]
+        chunks.pop()
+    return chunks[:4]
 
 
-def render_subtitle_png(text: str, out_png: Path, width: int, height: int):
-    """Renders a sleek, compact, slim subtitle strip at the lower edge so 90%+ of the image stays visible."""
+def render_subtitle_png(text: str, out_png: Path, width: int, height: int, accent_gold: bool = False):
+    """Renders bold, crisp viral Shorts/Reels style pop-up captions (thick black outline + drop shadow, zero clunky box)."""
     img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 
@@ -1131,15 +1241,14 @@ def render_subtitle_png(text: str, out_png: Path, width: int, height: int):
             raw_clean = re.sub(r"\s*[A-Za-z0-9_#\-]+\s*", " ", raw_clean).strip()
             has_lat = False
 
-    # Slim, crisp Shorts-style typography (compact so it never hides the artwork)
-    font_size = 38 if width <= 1080 else 34
+    font_size = 62 if width <= 1080 else 54
     font_path = find_font_path(has_arabic=has_ar, has_latin=has_lat)
     font = ImageFont.truetype(font_path, font_size) if font_path else ImageFont.load_default()
 
     words = raw_clean.split()
     lines = []
     cur = []
-    max_chars = 30 if width <= 1080 else 56
+    max_chars = 22 if width <= 1080 else 40
     for w in words:
         if sum(len(x) + 1 for x in cur) + len(w) > max_chars and cur:
             lines.append(" ".join(cur))
@@ -1153,36 +1262,24 @@ def render_subtitle_png(text: str, out_png: Path, width: int, height: int):
     prepared = [prepare_caption_line(ln, is_rtl=has_ar) for ln in lines]
     metrics = []
     for txt_ln, kwargs in prepared:
-        bbox = draw.textbbox((0, 0), txt_ln, font=font, stroke_width=2, **kwargs)
+        bbox = draw.textbbox((0, 0), txt_ln, font=font, stroke_width=6, **kwargs)
         metrics.append((bbox[2] - bbox[0], bbox[3] - bbox[1], bbox[0], bbox[1]))
 
-    pad_x, pad_y = 24, 11
-    gap = 8
-    max_lw = max((m[0] for m in metrics), default=160)
-    box_w = min(width - 64, max_lw + pad_x * 2)
-    box_h = sum(m[1] for m in metrics) + gap * max(0, len(prepared) - 1) + pad_y * 2
-    box_x = (width - box_w) // 2
-    box_y = int(height * 0.84) - box_h // 2
+    gap = 12
+    total_h = sum(m[1] for m in metrics) + gap * max(0, len(prepared) - 1)
+    y = int(height * 0.74) - total_h // 2
 
-    # Sleek, subtle semi-transparent slim strip (zero bulky box!)
-    draw.rounded_rectangle(
-        [box_x, box_y, box_x + box_w, box_y + box_h],
-        radius=15,
-        fill=(6, 10, 20, 155),
-        outline=(255, 255, 255, 45),
-        width=1,
-    )
-
-    y = box_y + pad_y
+    text_fill = (255, 224, 71, 255) if accent_gold else (255, 255, 255, 255)
     for (txt_ln, kwargs), (lw, lh, bx0, by0) in zip(prepared, metrics):
         x = (width - lw) // 2 - bx0
+        draw.text((x + 4, y - by0 + 6), txt_ln, font=font, fill=(0, 0, 0, 190), stroke_width=6, stroke_fill=(0, 0, 0, 190), **kwargs)
         draw.text(
             (x, y - by0),
             txt_ln,
             font=font,
-            fill=(255, 255, 255, 255),
-            stroke_width=2,
-            stroke_fill=(0, 0, 0, 235),
+            fill=text_fill,
+            stroke_width=6,
+            stroke_fill=(0, 0, 0, 255),
             **kwargs,
         )
         y += lh + gap
@@ -1191,38 +1288,39 @@ def render_subtitle_png(text: str, out_png: Path, width: int, height: int):
 
 
 def get_ken_burns_expr(scene_idx: int, frames: int, W: int, H: int, fps: int) -> str:
-    """
-    Full-frame gentle cinematic camera motions (max 5% zoom, NO dark vignette, NO heavy edge cropping)
-    so the entire artwork stays crisp and visible from edge to edge.
-    """
-    mode = scene_idx % 4
+    """Dynamic, lively 16%-20% cinematic camera motions (zoom-in, zoom-out, diagonal pans, upward/downward reveal)."""
+    mode = scene_idx % 6
     f_den = max(1, frames)
     if mode == 0:
-        # Gentle slow zoom-in (1.00 -> 1.05)
-        z = f"1.0+0.05*on/{f_den}"
+        z = f"1.0+0.18*on/{f_den}"
         x = "iw/2-(iw/zoom/2)"
         y = "ih/2-(ih/zoom/2)"
     elif mode == 1:
-        # Gentle slow zoom-out (1.05 -> 1.00)
-        z = f"1.05-0.05*on/{f_den}"
+        z = f"1.18-0.18*on/{f_den}"
         x = "iw/2-(iw/zoom/2)"
         y = "ih/2-(ih/zoom/2)"
     elif mode == 2:
-        # Gentle pan left-to-right (minimal 5% zoom)
-        z = "1.05"
+        z = f"1.10+0.08*on/{f_den}"
         x = f"(iw-iw/zoom)*on/{f_den}"
-        y = "ih/2-(ih/zoom/2)"
-    else:
-        # Gentle pan right-to-left (minimal 5% zoom)
-        z = "1.05"
+        y = f"(ih-ih/zoom)*0.35*on/{f_den}"
+    elif mode == 3:
+        z = f"1.18-0.08*on/{f_den}"
         x = f"(iw-iw/zoom)*(1-on/{f_den})"
-        y = "ih/2-(ih/zoom/2)"
+        y = f"(ih-ih/zoom)*0.4"
+    elif mode == 4:
+        z = f"1.08+0.10*on/{f_den}"
+        x = "iw/2-(iw/zoom/2)"
+        y = f"(ih-ih/zoom)*(1-on/{f_den})"
+    else:
+        z = f"1.08+0.10*on/{f_den}"
+        x = "iw/2-(iw/zoom/2)"
+        y = f"(ih-ih/zoom)*on/{f_den}"
 
     return (
-        f"scale={W*2}:{H*2}:force_original_aspect_ratio=increase,"
+        f"scale={W*2}:{H*2}:force_original_aspect_ratio=increase:flags=lanczos,"
         f"crop={W*2}:{H*2},"
         f"zoompan=z='{z}':x='{x}':y='{y}':d={frames}:s={W}x{H}:fps={fps},"
-        f"eq=contrast=1.04:saturation=1.10:brightness=0.01,"
+        f"eq=contrast=1.06:saturation=1.14:brightness=0.015,"
         f"setsar=1"
     )
 
@@ -1240,7 +1338,7 @@ def build_1080p_video(
     W, H = (1080, 1920) if is_vertical else (1920, 1080)
     fps = 30
     use_xfade = 2 <= len(scenes) <= 24
-    trans_dur = 0.45 if use_xfade else 0.0
+    trans_dur = 0.35 if use_xfade else 0.0
     segment_files = []
     seg_durations = []
 
@@ -1268,41 +1366,31 @@ def build_1080p_video(
 
         chunks = split_caption_into_chunks(scene.get("narration") or "", is_vertical) if show_subtitles else []
 
-        if len(chunks) == 2:
-            sub1 = work_dir / f"sub_{i:04d}_a.png"
-            sub2 = work_dir / f"sub_{i:04d}_b.png"
-            render_subtitle_png(chunks[0], sub1, W, H)
-            render_subtitle_png(chunks[1], sub2, W, H)
-            mid_t = seg_dur * 0.5
+        if len(chunks) >= 1:
+            sub_inputs = []
+            ov_filters = [f"[0:v]{vf_base}[bg]"]
+            prev_lbl = "bg"
+            step_t = max(0.5, float(dur) / len(chunks))
+            for c_idx, ch_txt in enumerate(chunks):
+                sub_p = work_dir / f"sub_{i:04d}_{c_idx}.png"
+                render_subtitle_png(ch_txt, sub_p, W, H, accent_gold=(c_idx % 2 == 1))
+                sub_inputs.extend(["-loop", "1", "-t", f"{seg_dur:.2f}", "-i", str(sub_p)])
+                t0 = c_idx * step_t
+                t1 = seg_dur if c_idx == len(chunks) - 1 else (c_idx + 1) * step_t
+                next_lbl = "v" if c_idx == len(chunks) - 1 else f"v{c_idx}"
+                tail_fx = f"{fade_str},format=yuv420p" if c_idx == len(chunks) - 1 else ""
+                ov_filters.append(
+                    f"[{prev_lbl}][{c_idx + 1}:v]overlay=0:0:eof_action=repeat:enable='between(t,{t0:.2f},{t1:.2f})'{tail_fx}[{next_lbl}]"
+                )
+                prev_lbl = next_lbl
+            aud_idx = len(chunks) + 1
+            ov_filters.append(f"[{aud_idx}:a]apad=whole_dur={seg_dur:.2f}[a]")
             cmd = [
                 "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
                 *media_in_args,
-                "-loop", "1", "-t", f"{seg_dur:.2f}", "-i", str(sub1),
-                "-loop", "1", "-t", f"{seg_dur:.2f}", "-i", str(sub2),
+                *sub_inputs,
                 "-i", str(aud_p),
-                "-filter_complex",
-                f"[0:v]{vf_base}[bg];"
-                f"[bg][1:v]overlay=0:0:eof_action=repeat:enable='lt(t,{mid_t:.2f})'[v1];"
-                f"[v1][2:v]overlay=0:0:eof_action=repeat:enable='gte(t,{mid_t:.2f})'{fade_str},format=yuv420p[v];"
-                f"[3:a]apad=whole_dur={seg_dur:.2f}[a]",
-                "-map", "[v]", "-map", "[a]",
-                "-c:v", "libx264", "-profile:v", "high", "-level", "4.1", "-pix_fmt", "yuv420p",
-                "-preset", "veryfast", "-crf", "21", "-r", str(fps),
-                "-c:a", "aac", "-b:a", "128k", "-ac", "2", "-ar", "44100",
-                "-t", f"{seg_dur:.2f}",
-                str(seg_out),
-            ]
-        elif len(chunks) == 1:
-            sub_png = work_dir / f"sub_{i:04d}.png"
-            render_subtitle_png(chunks[0], sub_png, W, H)
-            cmd = [
-                "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
-                *media_in_args,
-                "-loop", "1", "-t", f"{seg_dur:.2f}", "-i", str(sub_png),
-                "-i", str(aud_p),
-                "-filter_complex",
-                f"[0:v]{vf_base}[bg];[bg][1:v]overlay=0:0:eof_action=repeat{fade_str},format=yuv420p[v];"
-                f"[2:a]apad=whole_dur={seg_dur:.2f}[a]",
+                "-filter_complex", ";".join(ov_filters),
                 "-map", "[v]", "-map", "[a]",
                 "-c:v", "libx264", "-profile:v", "high", "-level", "4.1", "-pix_fmt", "yuv420p",
                 "-preset", "veryfast", "-crf", "21", "-r", str(fps),
@@ -1332,7 +1420,7 @@ def build_1080p_video(
     voice_video = work_dir / "assembled_voice.mp4"
     transition_times = []
     if use_xfade:
-        transitions = ["fade", "smoothleft", "dissolve", "smoothright", "wipeleft", "fadeblack"]
+        transitions = ["zoomin", "smoothleft", "circleopen", "smoothright", "dissolve", "radial"]
         cmd = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error"]
         for sf in segment_files:
             cmd.extend(["-i", str(sf)])
@@ -1560,20 +1648,28 @@ def main():
     with tempfile.TemporaryDirectory() as tmp:
         work_dir = Path(tmp)
 
+        ai_motion_succeeded = False
         if is_ai_motion:
             final_mp4 = work_dir / "heygen_native_audio.mp4"
-            generate_heygen_video_clip(
-                niche=niche,
-                style=style,
-                language=language,
-                voice_locale=voice_locale,
-                duration_sec=duration_sec,
-                is_vertical=is_vertical,
-                story=story,
-                out_mp4=final_mp4,
-            )
-        else:
-            img_paths, _ = generate_all_scenes(story["scenes"], style, is_vertical, work_dir)
+            try:
+                generate_heygen_video_clip(
+                    niche=niche,
+                    style=style,
+                    language=language,
+                    voice_locale=voice_locale,
+                    duration_sec=duration_sec,
+                    is_vertical=is_vertical,
+                    story=story,
+                    out_mp4=final_mp4,
+                )
+                ai_motion_succeeded = True
+            except Exception as ai_err:
+                print(f"[WARN] AI Motion unavailable ({ai_err}) — auto-falling back to 1080p Cinematic Studio so scheduled publish succeeds!", flush=True)
+                story = generate_story_package(niche, style, language, voice_locale, duration_sec, compute_scene_count(duration_sec), is_vertical)
+                mood = story.get("mood") or detect_story_mood(niche, story["title"])
+
+        if not ai_motion_succeeded:
+            img_paths, _ = generate_all_scenes(story["scenes"], style, is_vertical, work_dir, niche=niche)
 
             update_job({
                 "status": "voicing",
