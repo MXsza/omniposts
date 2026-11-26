@@ -1,6 +1,19 @@
 #!/usr/bin/env python3
 """
 Omniposts.online — 24/7 1080p Cloud Video Worker (Pro Cinema Edition)
+Pipeline:
+  1. Load job & YouTube channel credentials from Supabase (render_jobs + channels)
+  2. Generate a real, gripping localized story script + mood + scene prompts + viral title/description
+     via Runware Chat Completions (with rich dialect-matched fallback stories)
+  3. Generate N scene images in parallel via Runware imageInference (runware:100@1 FLUX.1 schnell)
+     and push live preview image URLs to Supabase render_jobs
+  4. Synthesize natural voiceover in any world language/dialect (Male/Female) via Edge TTS
+  5. Synthesize 100% copyright-free mood-matched cinematic background music & subtle transition whoosh SFX
+     (epic / mystery / sad / happy / calm)
+  6. Assemble Full HD 1080p MP4 with full-frame gentle Ken Burns motion (no edge cropping or dark vignette),
+     smooth xfade transitions, and sleek compact 1–2 line timed subtitles
+  7. Upload MP4 to Supabase Storage (for instant download), upload to YouTube via OAuth 2.0,
+     deduct exact minutes ONLY on success, and update render_jobs + publish_logs.
 """
 
 import asyncio
@@ -26,6 +39,9 @@ import requests
 from bidi.algorithm import get_display
 from PIL import Image, ImageDraw, ImageFont, features
 
+# ==============================================================================
+# Environment & Configuration
+# ==============================================================================
 OWNER_ADMIN_EMAIL = "ma1979368@gmail.com"
 JOB_ID = os.environ.get("JOB_ID", "").strip()
 RUNWARE_API_KEY = os.environ.get("RUNWARE_API_KEY", "").strip()
@@ -46,7 +62,11 @@ SB_HEADERS = {
 
 HAS_RAQM = bool(features.check("raqm"))
 
+# ==============================================================================
+# Comprehensive World Languages & Dialects Voice Map (Edge TTS — Male & Female)
+# ==============================================================================
 VOICE_MAP = {
+    # Arabic Dialects (15 dialects)
     "ar-EG": {"male": "ar-EG-ShakirNeural", "female": "ar-EG-SalmaNeural"},
     "ar-SA": {"male": "ar-SA-HamedNeural", "female": "ar-SA-ZariyahNeural"},
     "ar-AE": {"male": "ar-AE-HamdanNeural", "female": "ar-AE-FatimaNeural"},
@@ -62,11 +82,13 @@ VOICE_MAP = {
     "ar-LY": {"male": "ar-LY-OmarNeural", "female": "ar-LY-ImanNeural"},
     "ar-YE": {"male": "ar-YE-SalehNeural", "female": "ar-YE-MaryamNeural"},
     "ar-OM": {"male": "ar-OM-AbdullahNeural", "female": "ar-OM-AyshaNeural"},
+    # English Dialects
     "en-US": {"male": "en-US-AndrewNeural", "female": "en-US-AvaNeural"},
     "en-GB": {"male": "en-GB-RyanNeural", "female": "en-GB-SoniaNeural"},
     "en-AU": {"male": "en-AU-WilliamNeural", "female": "en-AU-NatashaNeural"},
     "en-CA": {"male": "en-CA-LiamNeural", "female": "en-CA-ClaraNeural"},
     "en-IN": {"male": "en-IN-PrabhatNeural", "female": "en-IN-NeerjaNeural"},
+    # European Languages
     "fr-FR": {"male": "fr-FR-HenriNeural", "female": "fr-FR-DeniseNeural"},
     "fr-CA": {"male": "fr-CA-AntoineNeural", "female": "fr-CA-SylvieNeural"},
     "es-ES": {"male": "es-ES-AlvaroNeural", "female": "es-ES-ElviraNeural"},
@@ -82,6 +104,7 @@ VOICE_MAP = {
     "sv-SE": {"male": "sv-SE-MattiasNeural", "female": "sv-SE-SofieNeural"},
     "el-GR": {"male": "el-GR-NestorasNeural", "female": "el-GR-AthinaNeural"},
     "uk-UA": {"male": "uk-UA-OstapNeural", "female": "uk-UA-PolinaNeural"},
+    # Middle East, Asian & African Languages
     "tr-TR": {"male": "tr-TR-AhmetNeural", "female": "tr-TR-EmelNeural"},
     "fa-IR": {"male": "fa-IR-FaridNeural", "female": "fa-IR-DilaraNeural"},
     "ur-PK": {"male": "ur-PK-AsadNeural", "female": "ur-PK-UzmaNeural"},
@@ -99,6 +122,9 @@ VOICE_MAP = {
 }
 
 
+# ==============================================================================
+# Supabase Helpers (Exact Live Schema Match)
+# ==============================================================================
 def update_job(fields: dict):
     if not JOB_ID or not SUPABASE_KEY:
         return
@@ -196,6 +222,9 @@ def deduct_user_minutes_and_log(job: dict, youtube_video_id: str, youtube_url: s
         print(f"[WARN] publish_logs insert skipped: {exc}", flush=True)
 
 
+# ==============================================================================
+# Step 1: Real Viral Story Script, Mood & Scene Prompt Generator
+# ==============================================================================
 def compute_scene_count(duration_sec: int) -> int:
     duration_sec = max(5, min(3600, int(duration_sec)))
     if duration_sec <= 60:
@@ -240,160 +269,253 @@ def extract_json_object(raw_text: str) -> dict:
     raise ValueError("No valid JSON object found in LLM output")
 
 
+def resolve_visual_style_prompt(style: str, niche: str = "") -> tuple[str, bool]:
+    """
+    Map every selected Omniposts art style (English or Arabic) to a crisp,
+    model-optimized English visual prompt, and detect whether the topic/style
+    should enforce bright, expressive, clear-faced visuals (never dark silhouettes).
+    """
+    st = str(style or "").strip().lower()
+    ni = str(niche or "").strip().lower()
+
+    is_dark_requested = any(k in ni for k in ["horror", "scary", "ghost", "رعب", "مخيف", "أشباح", "جريمة", "crime", "mystery", "غموض"]) or (
+        "dark luxury" in st or "moody" in st or "داكنة" in st
+    )
+    is_kids_or_bright = any(k in ni for k in ["kid", "child", "bedtime", "cartoon", "animal", "funny", "أطفال", "طفل", "كرتون", "مضحك", "قصص أطفال", "هادفة"]) or any(
+        k in st for k in ["pixar", "disney", "storybook", "بيكسار", "قصص مصورة", "ghibli", "anime", "أنمي"]
+    )
+
+    if "pixar" in st or "disney" in st or "بيكسار" in st:
+        base = (
+            "3D Pixar and Disney animated movie still, bright cheerful daylight lighting, "
+            "adorable expressive 3D characters facing the camera with clear detailed faces and big sparkling eyes, "
+            "vibrant rich colors, soft global illumination, Octane 3D render, ultra detailed"
+        )
+        return base, True
+    if "storybook" in st or "قصص مصورة" in st:
+        base = (
+            "Charming colorful children's storybook illustration, warm sunny daylight, "
+            "friendly smiling characters with clear expressive faces, rich vibrant pastel palette, magical whimsical world, crisp art"
+        )
+        return base, True
+    if "anime" in st or "ghibli" in st or "أنمي" in st:
+        base = (
+            "Vibrant Studio Ghibli Japanese anime film still, crisp cel shading, "
+            "expressive anime characters facing the camera with clear detailed faces and eyes, bright lush sky and vivid colors"
+        )
+        return base, (not is_dark_requested)
+    if "historical" in st or "oil painting" in st or "تاريخي" in st:
+        base = (
+            "Epic historical documentary film art, rich museum-grade painting style, "
+            "clear expressive character faces, authentic period clothing, warm dramatic golden lighting, ultra detailed"
+        )
+        return base, False
+    if "dark luxury" in st or "moody" in st or "داكنة" in st:
+        base = (
+            "Sleek luxury editorial 8K cinematography, crisp studio rim lighting, "
+            "sharp clear foreground subject and refined rich colors, modern high-end aesthetic"
+        )
+        return base, False
+    if "realistic" in st or "واقعي" in st or "8k" in st:
+        base = (
+            "Hyper-realistic 8K documentary photography, sharp focus on clear expressive human faces and authentic details, "
+            "natural daylight or clean balanced studio lighting, ARRI Alexa 35mm cinema lens"
+        )
+        return base, (is_kids_or_bright and not is_dark_requested)
+
+    if is_kids_or_bright and not is_dark_requested:
+        return (
+            "Vibrant 3D Pixar style illustration, bright joyful daylight, clear expressive character faces looking toward camera, colorful detailed world"
+        ), True
+
+    return (
+        f"{style or 'Cinematic 8K photography'}, vivid balanced lighting, clear detailed faces and expressive subjects, sharp focus"
+    ), False
+
+
 def build_rich_fallback_story(niche: str, style: str, language: str, voice_locale: str, scene_count: int, short_tag: str) -> dict:
+    """Rich, niche-aware storytelling fallback bank (bright & clear-faced for kids/general, custom-topic aware)."""
+    low = f"{niche} {style}".lower()
     is_ar = is_arabic_language(language, voice_locale)
-    is_eg = ("مصر" in str(language or "")) or str(voice_locale or "").lower() == "ar-eg"
-    nl = str(niche or "").lower()
+    is_eg = "eg" in (voice_locale or "").lower() or "مصر" in (language or "")
+    style_desc, force_bright = resolve_visual_style_prompt(style, niche)
+    bright_suffix = (
+        ", bright sunny daylight, vibrant cheerful colors, clear expressive faces facing camera, no dark shadows, no silhouette, no text, no watermark"
+        if force_bright
+        else ", vivid balanced lighting, clear detailed faces and subjects, no text, no watermark"
+    )
+
+    is_kids = any(k in low for k in ["kid", "child", "bedtime", "أطفال", "طفل", "هادفة", "storybook", "cartoon"])
+    is_horror = any(k in low for k in ["horror", "scary", "ghost", "رعب", "غموض", "مخيف", "جريمة"])
+    is_science = any(k in low for k in ["science", "space", "fact", "tech", "ai", "علم", "فضاء", "حقائق", "معلومات", "تكنولوجيا"])
+    is_money = any(k in low for k in ["money", "business", "wealth", "success", "مال", "أعمال", "نجاح", "ثروة", "تحفيز"])
 
     if is_ar:
-        ar_stories = {
-            "islamic": [
-                {
-                    "mood": "sad",
-                    "title": "سر التاجر الفقير الذي أبكى الخليفة في منتصف الليل!",
-                    "desc": "قصة تاريخية مؤثرة عن الأمانة والفرج بعد الشدة. شاهد النهاية التي غيرت حياة رجل كامل في ليلة واحدة!\n\n#قصص #حكم #قصص_تاريخية #عبرة",
-                    "tags": ["قصص", "حكم", "قصص تاريخية", "عبرة"],
-                    "beats": [
-                        ("في ليلة شتوية قاسية، وقف تاجر فقير أمام المسجد وهو يحمل آخر رغيف خبز.", "Ancient Islamic market street at night, glowing lanterns, humble poor merchant holding warm bread, wide cinematic shot"),
-                        ("وفجأة مر غريب يرتجف من البرد والجوع، فأعطاه التاجر الرغيف دون تردد.", "Merchant kindly giving warm bread to a shivering traveler under a stone archway, warm golden lantern light, full frame"),
-                        ("في الصباح طرق جنود الخليفة باب التاجر، فظن أن مصيبة كبرى قد حلت به.", "Royal guards knocking on a modest wooden door at dawn in an ancient Arabian city, dramatic sunrise light"),
-                        ("لكن المفاجأة أن الغريب كان الخليفة نفسه، وكافأه بمتجر كبير لأمانة قلبه!", "Grand palace courtyard, grateful merchant receiving a royal scroll from the Caliph, golden sunbeams, inspiring mood"),
-                    ],
-                },
-                {
-                    "mood": "calm",
-                    "title": "الحكيم الذي أجاب بثلاث كلمات فقط فأذهل الملك!",
-                    "desc": "حكمة خالدة من التراث العربي تعلمنا كيف نحول أصعب اللحظات إلى أعظم انتصار. اشترك للمزيد من القصص يومياً!\n\n#قصص #حكمة #تاريخ #تطوير_الذات",
-                    "tags": ["قصص", "حكمة", "تراث", "تطوير الذات"],
-                    "beats": [
-                        ("جمع الملك أعظم حكماء مملكته وسألهم عن جملة تفرح الحزين وتُهدئ المغرور.", "Grand ancient throne room with marble pillars, king addressing wise scholars, dramatic shafts of light, wide angle"),
-                        ("سكت الجميع ساعات طويلة، حتى تقدم شيخ بسيط وكتب ثلاث كلمات على خاتم ذهبي.", "Elderly wise man engraving delicate calligraphy onto a glowing golden ring, cinematic warm lighting"),
-                        ("عندما قرأ الملك الكلمات، سالت دموعه وأمر بتعليق الخاتم في قصره للأبد.", "King looking down at the golden ring in awe, emotional expression, warm royal candlelight"),
-                        ("كانت الكلمات: هذا الوقت سيمضي... فلا تحزن على شدة، ولا تغتر بنعمة!", "Golden ring resting on velvet beside an hourglass with flowing sand, epic sunset glow through palace window"),
-                    ],
-                },
-            ],
-            "mystery": [
-                {
-                    "mood": "mystery",
-                    "title": "سر الغرفة المغلقة التي لم يجرؤ أحد على فتحها منذ خمسين عاماً!",
-                    "desc": "لغز غامض ومثير يخطف الأنفاس من اللحظة الأولى. ماذا وجد الشاب خلف الباب الحديدي القديم؟\n\n#قصص_غامضة #تشويق #ألغاز #حكايات",
-                    "tags": ["قصص غامضة", "تشويق", "ألغاز", "حكايات"],
-                    "beats": [
-                        ("في بيت جده القديم، لقى شاب مفتاح نحاس مستخبي ورا ساعة واقفة من خمسين سنة." if is_eg else "في بيت جده القديم، وجد شاب مفتاحاً نحاسياً خلف ساعة توقفت منذ خمسين عاماً.", "Mysterious antique hallway, young man discovering a dusty brass key behind an old stopped pendulum clock, wide shot"),
-                        ("مشي ناحية الباب الحديد في آخر الممر، وقلبه بيدق بسرعة مع كل خطوة في الضلمة." if is_eg else "مشى نحو الباب الحديدي في آخر الممر، وكان صوت خطواته يملأ الظلام.", "Heavy rusty iron door at the end of a foggy dark corridor, flashlight beam cutting through dust"),
-                        ("أول ما فتح الباب، لقى رسالة من جده بتقول: اللي جوه هيغير مستقبلك للأبد." if is_eg else "عندما فتح الباب، وجد رسالة قديمة تقول: ما ستجده هنا سيغير حياتك للأبد.", "Inside a secret hidden study filled with glowing old maps and an open handwritten letter on a wooden desk"),
-                        ("كانت خريطة كنز عائلي قديم، لكن الكنز الحقيقي كان أسرار جده اللي صنعت منه أسطورة!" if is_eg else "كانت خريطة لمشروع عمره، تركها له جده ليبدأ من حيث انتهى ويصنع مجداً جديداً!", "Dramatic glowing treasure chest and leather journals illuminated by moonlight through a tall window"),
-                    ],
-                },
-            ],
-            "space": [
-                {
-                    "mood": "mystery",
-                    "title": "ماذا سيحدث لو اختفت الشمس لثماني دقائق فقط؟ الحقيقة صادمة!",
-                    "desc": "رحلة سريعة ومذهلة في أسرار الفضاء والكون! اكتشف ماذا يحدث للأرض في اللحظة التي تنطفئ فيها الشمس.\n\n#فضاء #علوم #معلومات #الكون",
-                    "tags": ["فضاء", "علوم", "معلومات", "الكون"],
-                    "beats": [
-                        ("تخيل لو الشمس اختفت فجأة... الغريب إننا مش هنحس بأي حاجة لمدة تمن دقايق!" if is_eg else "تخيل لو الشمس اختفت فجأة... الغريب أننا لن نشعر بشيء لمدة ثماني دقائق!", "Epic cinematic view of the Sun vanishing into darkness in deep space while Earth still glows brightly"),
-                        ("السبب إن الضوء والجاذبية بياخدوا تمن دقايق عشان يوصلوا من الشمس للأرض." if is_eg else "السبب أن الضوء والجاذبية يحتاجان ثماني دقائق للوصول من الشمس إلى الأرض.", "Glowing golden beam of light traveling across the dark cosmos from the Sun toward planet Earth"),
-                        ("وبعد الدقيقة التامنة، السما هتتحول لضلمة كاحلة والنجوم هتظهر في عز الضهر!" if is_eg else "وبعد الدقيقة الثامنة، تتحول السماء إلى ظلام دامس وتظهر النجوم نهاراً!", "City skyline suddenly plunging into starry midnight darkness while street lights flicker on"),
-                        ("وخلال أيام هتتجمد المحيطات، ووقتها بس هنعرف إن الشمس أعظم معجزة في الكون!" if is_eg else "وخلال أيام تتجمد المحيطات، لندرك أن الشمس هي أعظم معجزة تحفظ الحياة!", "Frozen glowing Earth drifting through a majestic purple nebula in space, ultra-detailed 8K"),
-                    ],
-                },
-            ],
-            "success": [
-                {
-                    "mood": "epic",
-                    "title": "القاعدة السرية التي حولت شاباً مفلساً إلى مليونير في ثلاث سنوات!",
-                    "desc": "قصة ملهمة عن الانضباط والذكاء المالي ستغير طريقة تفكيرك في النجاح والثروة للأبد.\n\n#نجاح #تطوير_الذات #ثروة #تحفيز",
-                    "tags": ["نجاح", "ثروة", "تطوير الذات", "تحفيز"],
-                    "beats": [
-                        ("في سن الخامسة والعشرين، كان رصيده صفر، وكل الناس حواليه قالوله استسلم." if is_eg else "في سن الخامسة والعشرين، كان رصيده صفراً، ونصحه الجميع بالاستسلام.", "Young determined entrepreneur sitting at a modest desk late at night with a single warm lamp, city rain outside"),
-                        ("لكنه طبق قاعدة بسيطة: ساعة كل يوم يتعلم فيها مهارة واحدة مطلوبة في العالم." if is_eg else "لكنه طبق قاعدة واحدة: ساعة يومياً لإتقان مهارة عالية القيمة دون انقطاع.", "Focused hands writing strategic plans in a leather notebook beside a glowing laptop"),
-                        ("بعد سنة واحدة، المهارة دي فتحتله أبواب ما كانش يحلم بيها وبدأ مشروعه الأول." if is_eg else "بعد عام واحد فقط، فتحت له تلك المهارة أبواباً لم يحلم بها وأطلق مشروعه.", "Modern luxury glass office overlooking a golden city skyline at sunrise, confident silhouette"),
-                        ("الدرس الأهم: النجاح مش ضربة حظ... النجاح قرار صغير بتلتزم بيه كل يوم!" if is_eg else "الدرس الأهم: النجاح ليس ضربة حظ، بل قرار صغير تلتزم به كل يوم!", "Cinematic wide shot of a person standing atop a mountain peak at golden hour sunrise, inspiring atmosphere"),
-                    ],
-                },
-            ],
-            "happy": [
-                {
-                    "mood": "happy",
-                    "title": "المغامرة المضحكة التي علّمت القرية كلها أجمل درس!",
-                    "desc": "قصة ترفيهية ممتعة ومليئة بالبهجة والمفاجآت الجميلة. شاهد النهاية الرائعة!\n\n#قصص_ممتعة #ترفيه #حكايات #مغامرة",
-                    "tags": ["قصص ممتعة", "ترفيه", "حكايات", "مغامرة"],
-                    "beats": [
-                        ("في صباح مشرق، قرر طفل ذكي يخترع آلة صغيرة تساعد كل جيرانه في القرية!" if is_eg else "في صباح مشرق، قرر طفل ذكي اختراع آلة صغيرة تساعد كل سكان قريته!", "Bright colorful 3D Pixar style sunny village square, cheerful kid inventor holding shiny gears, joyful warm daylight"),
-                        ("في أول تجربة، الآلة عملت فوضى مضحكة وخلت الكل يضحك من قلبه!" if is_eg else "في التجربة الأولى، أحدثت الآلة فوضى مضحكة جعلت الجميع يضحكون بشدة!", "Funny colorful animated workshop with floating soap bubbles and laughing friendly villagers, bright lighting"),
-                        ("لكنه ما استسلمش وعدّل ترس واحد صغير، وفجأة الآلة اشتغلت بأجمل شكل!" if is_eg else "لكنه لم يستسلم وعدّل قطعة صغيرة، فبدأت الآلة تعمل ببراعة أذهلت الجميع!", "Magical glowing little invention working smoothly in a sunny garden, amazed happy crowd smiling"),
-                        ("ومن يومها اتعلم الكل إن الفكرة البسيطة لما تتعمل بحب بتسعد الدنيا كلها!" if is_eg else "ومن يومها أدرك الجميع أن الفكرة البسيطة حين تُصنع بحب تسعد العالم كله!", "Festive village celebration under colorful lanterns at golden sunset, warm heartwarming atmosphere"),
-                    ],
-                },
-            ],
-            "default": [
-                {
-                    "mood": "epic",
-                    "title": "القصة التي أذهلت الملايين... شاهد النهاية غير المتوقعة!",
-                    "desc": "حكاية مشوقة ومليئة بالمفاجآت تأخذك في رحلة لا تُنسى من أول ثانية حتى اللحظة الأخيرة.\n\n#قصص #حكايات #تشويق #عبرة",
-                    "tags": ["قصص", "حكايات", "تشويق", "مفاجأة"],
-                    "beats": [
-                        ("في يوم عادي جداً، حصل موقف صغير ما حدش كان يتوقع إنه هيقلب الموازين!" if is_eg else "في يوم عادي تماماً، حدث موقف صغير لم يتوقع أحد أنه سيقلب الموازين!", "Cinematic golden hour street with a dramatic lone figure noticing a mysterious glowing object, wide shot"),
-                        ("الكل كان فاكر إن الحكاية خلصت هنا، لكن الحقيقة كانت لسه بتبدأ دلوقتي." if is_eg else "ظن الجميع أن القصة انتهت هنا، لكن الحقيقة المذهلة كانت تبدأ في تلك اللحظة.", "Dramatic cinematic shot with rich blue and gold lighting, intense sense of discovery and wonder"),
-                        ("ومع كل خطوة، كانت التفاصيل بتتكشف بشكل يخلّي العقل مش مصدق اللي بيحصل." if is_eg else "ومع كل خطوة، تتكشف تفاصيل مدهشة تجعل العقل عاجزاً عن تصديق ما يراه.", "Epic wide cinematic scene of a breathtaking hidden landscape illuminated by dramatic sunrays"),
-                        ("وفي النهاية، اللي صبر وكمل الطريق للنهاية هو الوحيد اللي عرف السر الحقيقي!" if is_eg else "وفي النهاية، وحده من امتلك الشجاعة لإكمال الطريق عرف السر الحقيقي!", "Triumphant cinematic finale under a majestic starlit sky with warm glowing horizon"),
-                    ],
-                },
-            ],
-        }
-
-        if any(k in nl for k in ["islam", "wisdom", "history", "ancient", "تاريخ", "إسلام", "حكم"]):
-            bucket = ar_stories["islamic"]
-        elif any(k in nl for k in ["mystery", "suspense", "night", "horror", "غموض", "رعب", "تشويق"]):
-            bucket = ar_stories["mystery"]
-        elif any(k in nl for k in ["space", "cosmic", "science", "ocean", "فضاء", "علم"]):
-            bucket = ar_stories["space"]
-        elif any(k in nl for k in ["success", "wealth", "stoic", "book", "نجاح", "ثروة", "مال"]):
-            bucket = ar_stories["success"]
-        elif any(k in nl for k in ["pixar", "kids", "moral", "fun", "أطفال", "ترفيه", "ممتع"]):
-            bucket = ar_stories["happy"]
+        if is_kids:
+            title = "الأرنب الشجاع والغابة المضيئة 🐰✨"
+            desc = "قصة أطفال هادفة وممتعة تعلم الشجاعة ومساعدة الأصدقاء! اشترك لمتابعة قصص جديدة يومياً. #قصص_أطفال #حكايات #كرتون"
+            tags = ["قصص أطفال", "حكايات", "بيكسار", "أطفال"]
+            mood = "happy"
+            beats = [
+                ("في غابة مشمسة مليانة ألوان، كان فيه أرنب صغير اسمه بيبو بيحب يساعد كل أصحابه." if is_eg else "في غابة مشمسة مليئة بالألوان، عاش أرنب صغير لطيف يحب مساعدة جميع أصدقائه.",
+                 "Cute cheerful little white bunny wearing a small blue scarf smiling in a bright sunny green meadow filled with colorful flowers, facing camera"),
+                ("في يوم من الأيام، شاف عصفورة صغيرة وقعت من عشها وكانت خايفة جداً." if is_eg else "في أحد الأيام، رأى عصفورة صغيرة سقطت من عشها وكانت تشعر بالخوف.",
+                 "Adorable baby yellow bird sitting on soft grass looking up with big expressive eyes while the friendly little bunny gently approaches in warm morning sunlight"),
+                ("بيبو فكر بسرعة، ونادى على صحابه السنجاب والسلحفاة عشان يتعاونوا سوا." if is_eg else "فكر الأرنب بسرعة، ونادى صديقيه السنجاب والسلحفاة ليتعاونوا معاً.",
+                 "Cute smiling bunny, cheerful orange squirrel, and friendly green turtle talking happily together under a tall sunny oak tree, colorful vibrant world"),
+                ("بالتعاون، عملوا سلم صغير من الفروع ورجعوا العصفورة لأمها في العش بأمان." if is_eg else "بالتعاون والعمل الجماعي، أعادوا العصفورة الصغيرة بأمان إلى أمها في العش.",
+                 "Joyful mother bird hugging her baby bird inside a cozy sunlit tree nest while the bunny and squirrel wave happily below, bright golden daylight"),
+                ("ومن اليوم ده، كل حيوانات الغابة اتعلمت إن التعاون بيخلي أي مستحيل سهل!" if is_eg else "ومنذ ذلك اليوم، تعلمت كل حيوانات الغابة أن التعاون يصنع المعجزات!",
+                 "Happy celebration picnic of cute forest animal friends smiling together under a bright rainbow and sunny blue sky, cheerful warm colors"),
+            ]
+        elif is_horror:
+            title = "الباب المقفول في آخر الممر 🚪"
+            desc = "قصة غموض وتشويق قصيرة لن تنساها! #غموض #قصص #حكايات"
+            tags = ["غموض", "قصص", "تشويق", "شورتس"]
+            mood = "mystery"
+            beats = [
+                ("الساعة كانت اتنين بالليل لما سمع خبط هادي على باب الشقة اللي فوقيه." if is_eg else "كانت الساعة الثانية ليلاً حين سمع طرقاً هادئاً على باب الشقة العلوية.",
+                 "Young man looking up curiously in a warmly lit hallway with wooden doors, clear expressive face, atmospheric evening lighting"),
+                ("الغريب إن الشقة دي مقفولة من عشر سنين ومفيش فيها أي ساكن!" if is_eg else "الغريب أن تلك الشقة مغلقة منذ عشر سنوات ولا يسكنها أحد!",
+                 "Close-up of an antique wooden apartment door with brass handle and soft hallway lamp light, intriguing suspenseful framing"),
+                ("لما طلع يبص، لقى ورقة قديمة تحت الباب مكتوب عليها اسمه بخط واضح." if is_eg else "وعندما صعد ليتفقد الأمر، وجد رسالة قديمة تحت الباب تحمل اسمه.",
+                 "Hand picking up a folded vintage cream envelope from a wooden floor under warm hallway light, crisp cinematic detail"),
+                ("فتح الورقة واتصدم لما عرف إن ده كان مفتاح سر عائلي مدفون من سنين!" if is_eg else "فتح الرسالة واندهش حين اكتشف أنها مفتاح سر عائلي قديم!",
+                 "Surprised young man smiling with realization holding an open letter and a glowing brass key in warm indoor lighting, clear face"),
+            ]
+        elif is_science:
+            title = "معلومة مذهلة عن كوكبنا والعالم 🌍"
+            desc = "حقائق علمية مدهشة في ثوانٍ! اشترك لمزيد من المعلومات اليومية. #معلومات #علوم #حقائق"
+            tags = ["معلومات", "حقائق", "علوم", "شورتس"]
+            mood = "epic"
+            beats = [
+                ("هل تعرف إن المحيطات لسه فيها أكتر من 80% مناطق محدش استكشفها لحد النهارده؟" if is_eg else "هل تعلم أن أكثر من 80% من المحيطات لم يتم استكشافها حتى اليوم؟",
+                 "Crystal clear turquoise tropical ocean from above with bright sunlight shimmering on vibrant coral reefs and colorful fish"),
+                ("تحت المية دي فيه جبال أطول من جبل إيفرست وبحيرات كاملة تحت البحر!" if is_eg else "تحت هذه المياه توجد جبال أطول من قمة إيفرست وبحيرات مائية كاملة!",
+                 "Majestic sunlit underwater mountain ridges and glowing colorful marine life in vivid blue ocean water, ultra crisp"),
+                ("وكل سنة العلماء بيكتشفوا كائنات جديدة بألوان وأشكال كأنها من كوكب تاني." if is_eg else "وكل عام يكتشف العلماء كائنات بحرية جديدة بألوان مدهشة للغاية.",
+                 "Vibrant bioluminescent jellyfish and colorful tropical sea creatures swimming in crystal blue water, clear sharp focus"),
+                ("عالمنا مليان أسرار مدهشة لسه بنكتشفها كل يوم!" if is_eg else "عالمنا مليء بالأسرار الرائعة التي نكتشفها كل يوم!",
+                 "Smiling marine explorer looking through a bright glass research submarine window at colorful reefs, clear expressive face"),
+            ]
+        elif is_money:
+            title = "العادة البسيطة اللي بتغيّر مستقبلك 💡"
+            desc = "خطوة عملية واحدة تصنع فرقاً كبيراً في نجاحك. #نجاح #تطوير_الذات #بيزنس"
+            tags = ["نجاح", "بيزنس", "تحفيز", "تطوير الذات"]
+            mood = "epic"
+            beats = [
+                ("أكبر فرق بين اللي بينجح واللي بيقف مكانه مش الحظ... دي عادة يومية بسيطة." if is_eg else "الفرق الأكبر بين النجاح والتوقف ليس الحظ، بل عادة يومية بسيطة.",
+                 "Confident young entrepreneur smiling at a bright sunlit modern desk with notebook and coffee, clear detailed face, warm daylight"),
+                ("كل يوم يخصّص ساعة واحدة بس يتعلم فيها مهارة جديدة ويطبّقها عملي." if is_eg else "يخصص كل يوم ساعة واحدة لتعلم مهارة جديدة وتطبيقها عملياً.",
+                 "Focused creative person working on a sleek laptop in a bright modern sunlit studio with plants, clear face and warm natural light"),
+                ("بعد شهور قليلة، الساعة اليومية دي بتتحول لمصدر دخل وفرص ما كانش يتخيلها." if is_eg else "وبعد أشهر قليلة، تتحول هذه الساعة اليومية إلى مصدر دخل وفرص حقيقية.",
+                 "Happy smiling business owner celebrating success in a bright modern glass office overlooking a sunny city, crisp sharp detail"),
+                ("ابدأ بساعة واحدة النهارده... وهتشكر نفسك بعد سنة!" if is_eg else "ابدأ بساعة واحدة اليوم، وستشكر نفسك بعد عام!",
+                 "Inspiring bright sunrise over a vibrant modern city with a joyful confident person smiling toward the morning sun, clear face"),
+            ]
         else:
-            bucket = ar_stories["default"]
+            clean_topic = str(niche or "قصة ملهمة").strip()[:60]
+            title = f"{clean_topic}"[:85]
+            desc = f"فيديو مميز عن {clean_topic}. اشترك في القناة لمتابعة كل جديد يومياً! #قصص #محتوى #شورتس"
+            tags = ["قصص", "معلومات", "شورتس", "فيديو"]
+            mood = "happy" if force_bright else "epic"
+            beats = [
+                (f"النهارده هنتكلم عن {clean_topic} بطريقة بسيطة وممتعة هتفاجئك!" if is_eg else f"اليوم سنستكشف {clean_topic} بطريقة شيقة وممتعة!",
+                 f"Bright vivid detailed scene illustrating {clean_topic}, cheerful expressive characters facing camera, clear faces, crisp natural lighting"),
+                ("كتير من الناس ميعرفوش التفاصيل الحقيقية ورا الموضوع ده." if is_eg else "الكثير من الناس لا يعرفون التفاصيل الرائعة خلف هذا الموضوع.",
+                 f"Close-up rich detailed visual exploring {clean_topic}, vibrant balanced colors, clear expressive subjects, ultra sharp"),
+                ("لما تبص للصورة الكاملة، هتكتشف فكرة جديدة تماماً تغيّر نظرتك." if is_eg else "وعندما ترى الصورة الكاملة، ستكتشف فكرة جديدة تغير نظرتك تماماً.",
+                 f"Inspiring dynamic wide scene showcasing the key highlight of {clean_topic}, bright clear lighting, vivid colors"),
+                ("شاركنا رأيك في التعليقات واشترك عشان تشوف الجزء الجاي!" if is_eg else "شاركنا رأيك في التعليقات واشترك لمتابعة المزيد!",
+                 f"Warm uplifting closing scene about {clean_topic}, smiling expressive character looking at camera, sunny golden daylight"),
+            ]
+    else:
+        if is_kids:
+            title = "The Brave Little Bunny's Big Adventure"
+            desc = "A heartwarming 3D kids story about kindness, courage, and teamwork! Subscribe for new bedtime stories every day. #KidsStories #PixarStyle #Shorts"
+            tags = ["KidsStories", "BedtimeStory", "3DAnimation", "Shorts"]
+            mood = "happy"
+            beats = [
+                ("In a sunny meadow bursting with flowers, a tiny bunny named Pip loved helping everyone.",
+                 "Cute joyful little white bunny wearing a blue scarf smiling in a bright sunny colorful flower meadow, facing camera with big sparkling eyes"),
+                ("One bright morning, Pip spotted a little yellow bird who had tumbled out of her cozy nest.",
+                 "Adorable baby yellow bird sitting on lush green grass looking up with big expressive eyes while the friendly bunny gently greets her in warm morning sunlight"),
+                ("Pip quickly called his best friends, a playful squirrel and a wise little turtle, to team up.",
+                 "Cute smiling bunny, cheerful orange squirrel, and happy green turtle talking together excitedly under a sunny oak tree, vibrant cheerful colors"),
+                ("Working together, they built a soft leafy ramp and lifted the baby bird safely back to her mom.",
+                 "Happy mother bird hugging her baby bird in a sunlit cozy tree nest while the bunny and squirrel cheer happily below, bright sunny daylight"),
+                ("That day, the whole forest learned that teamwork turns even the smallest friend into a hero!",
+                 "Joyful celebration picnic of cute forest animal friends smiling together under a bright rainbow and blue sky, vibrant cheerful colors"),
+            ]
+        else:
+            clean_topic = str(niche or "Amazing Story").strip()[:60]
+            title = f"{clean_topic}: What Nobody Told You"[:85]
+            desc = f"Discover the real story behind {clean_topic}. Subscribe for new videos every day! #Storytime #Viral #Shorts"
+            tags = ["Storytime", "Facts", "Viral", "Shorts"]
+            mood = "happy" if force_bright else "epic"
+            beats = [
+                (f"Here is the fascinating truth about {clean_topic} that almost everyone overlooks.",
+                 f"Vivid bright detailed opening scene depicting {clean_topic}, clear expressive faces looking toward camera, crisp balanced lighting"),
+                (f"Look closely at how {clean_topic} actually works behind the scenes.",
+                 f"Detailed colorful close-up illustrating an intriguing aspect of {clean_topic}, sharp focus, bright natural lighting"),
+                (f"Once you see the full picture of {clean_topic}, everything suddenly clicks into place.",
+                 f"Inspiring sunlit wide scene showing the breakthrough moment of {clean_topic}, clear expressive people and vivid colors"),
+                (f"What surprised you most about {clean_topic}? Tell us in the comments!",
+                 f"Uplifting bright closing scene celebrating {clean_topic}, smiling expressive character facing camera, golden daylight"),
+            ]
 
-        picked = random.choice(bucket)
-        beats = picked["beats"]
-        scenes = []
-        for idx in range(scene_count):
-            nar, img_p = beats[idx % len(beats)]
-            scenes.append({
-                "narration": nar,
-                "image_prompt": f"{style}, {img_p}, full frame wide composition, ultra detailed 8K, cinematic lighting, no text, no watermark",
-            })
-        title = picked["title"]
-        if short_tag and "#shorts" not in title.lower():
-            title = f"{title}{short_tag}"[:95]
-        return {
-            "title": title,
-            "description": picked["desc"],
-            "tags": picked["tags"],
-            "mood": picked.get("mood") or detect_story_mood(niche, title),
-            "scenes": scenes,
-        }
-
-    en_beats = [
-        ("On an ordinary evening, one quiet discovery changed everything nobody thought possible.", "Dramatic golden hour street, lone figure discovering a mysterious glowing artifact, wide cinematic shot"),
-        ("Everyone assumed the story ended there—until a hidden clue rewrote the whole truth.", "Moody cinematic scene with rich shadows and amber light, intense sense of mystery and wonder"),
-        ("Step by step, a breathtaking secret unfolded that defied every expectation.", "Breathtaking hidden monumental chamber illuminated by dramatic shafts of sunlight, full frame"),
-        ("In the end, only the one who dared to keep going uncovered the real secret.", "Triumphant cinematic silhouette against a glowing sunrise horizon, epic film look"),
-    ]
     scenes = []
     for idx in range(scene_count):
-        nar, img_p = en_beats[idx % len(en_beats)]
+        nar, img_p = beats[idx % len(beats)]
         scenes.append({
             "narration": nar,
-            "image_prompt": f"{style}, {img_p}, no text, no watermark",
+            "image_prompt": f"{style_desc}, {img_p}{bright_suffix}",
         })
-    title = f"The Untold Secret That Changed Everything{short_tag}"[:95]
-    desc = f"A gripping short story you won't forget. Subscribe for new cinematic stories every day!{short_tag} #Storytime #Viral"
-    return {"title": title, "description": desc, "tags": ["Storytime", "Viral", "Shorts"], "mood": detect_story_mood(niche, title), "scenes": scenes}
+    if short_tag and "#shorts" not in title.lower():
+        title = f"{title}{short_tag}"[:95]
+    return {
+        "title": title,
+        "description": desc,
+        "tags": tags,
+        "mood": mood,
+        "scenes": scenes,
+    }
+
+
+def _parse_llm_story_response(raw: str, niche: str, style: str, is_ar: bool, scene_count: int, short_tag: str) -> dict | None:
+    if not raw or not raw.strip():
+        return None
+    parsed = extract_json_object(raw)
+    scenes = parsed.get("scenes") or []
+    if len(scenes) < 2:
+        return None
+    clean_scenes = []
+    for s in scenes:
+        if not isinstance(s, dict):
+            continue
+        nar = str(s.get("narration") or "").strip()
+        img_p = str(s.get("image_prompt") or "").strip()
+        if nar and img_p:
+            clean_scenes.append({"narration": nar, "image_prompt": img_p})
+    if len(clean_scenes) < 2:
+        return None
+    while len(clean_scenes) < scene_count:
+        clean_scenes.append(clean_scenes[-1])
+    clean_scenes = clean_scenes[:scene_count]
+    title = str(parsed.get("title") or "").strip()[:90]
+    desc = str(parsed.get("description") or title).strip()
+    if is_ar and not re.search(r"[\u0600-\u06FF]", title):
+        return None
+    if short_tag and "#shorts" not in title.lower():
+        title = f"{title}{short_tag}"[:95]
+    mood = detect_story_mood(niche, title, parsed.get("mood") or "")
+    return {
+        "title": title,
+        "description": desc,
+        "tags": parsed.get("tags") or (["قصص", "حكايات", "شورتس"] if is_ar else ["Storytime", "Shorts"]),
+        "mood": mood,
+        "scenes": clean_scenes,
+    }
 
 
 def generate_story_package(
@@ -408,32 +530,45 @@ def generate_story_package(
     approx_words = max(20, min(7500, int(duration_sec * 2.2)))
     short_tag = " #Shorts" if (is_vertical and duration_sec <= 60) else ""
     is_ar = is_arabic_language(language, voice_locale)
+    style_desc, force_bright = resolve_visual_style_prompt(style, niche)
+
+    visual_rules = (
+        "CRITICAL VISUAL PROMPT RULES (for every scene's image_prompt in English):\n"
+        f"- EVERY image_prompt MUST visually depict THIS EXACT topic: '{niche}' in the style: '{style_desc}'.\n"
+        "- Describe concrete, specific characters, objects, actions, facial expressions, and backgrounds directly matching that scene's narration.\n"
+        "- NEVER draw dark silhouettes, faceless figures, people turned away from the camera, or gloomy dark caves unless the topic explicitly asks for horror.\n"
+        + (
+            "- BRIGHTNESS & FACES MANDATORY: Use bright sunny daylight, vibrant joyful colors, and clear cute expressive character faces looking toward the camera with big detailed eyes!\n"
+            if force_bright
+            else "- Keep lighting vivid, balanced, and crisp with clear detailed character faces and distinct visual variety across every scene.\n"
+        )
+    )
 
     lang_rules = (
         f"CRITICAL LANGUAGE RULE: Write 'title', 'description', 'tags', and EVERY scene's 'narration' "
         f"100% in natural, authentic '{language}' (locale: {voice_locale}). "
         + (
             "ZERO English/Latin words allowed in title, description, or narration (except optional #Shorts at the end of description). "
-            "Write a REAL, captivating story with a hook, dramatic plot, and surprising ending — NEVER say 'في المشهد رقم 1' or repeat sentences! "
-            "The title MUST be a catchy Arabic viral story title about THIS specific story (NEVER copy the English niche name!)."
+            "Write a REAL, captivating original story specifically about the requested topic — NEVER repeat sentences! "
+            "The title MUST be a catchy Arabic viral title about THIS specific story."
             if is_ar
-            else "Write a REAL, gripping story with a strong hook, escalating plot, and memorable ending — NEVER write generic filler or repeat sentences! "
-                 "The title MUST be a catchy viral story title about THIS specific story (not just the raw niche name)."
+            else "Write a REAL, engaging original story specifically about the requested topic — NEVER write generic filler or repeat sentences! "
+                 "The title MUST be a catchy viral title about THIS specific story."
         )
     )
 
     system_prompt = (
-        "You are an elite viral YouTube scriptwriter and cinematic director. "
+        "You are an elite viral YouTube scriptwriter and art director. "
         "Return ONLY valid JSON with no markdown fences and no extra commentary. "
         "NEVER mention any AI tool, website name, or 'Generated automatically' anywhere. "
-        + lang_rules
+        + lang_rules + "\n" + visual_rules
     )
     user_prompt = (
-        f"Create an original, gripping story inspired by the theme: '{niche}'.\n"
-        f"Visual style: '{style}'.\n"
+        f"Create a 100% original, engaging story strictly about this topic: '{niche}'.\n"
+        f"Visual style: '{style}' ({style_desc}).\n"
         f"Language & Dialect: '{language}' ({voice_locale}).\n"
         f"Target duration: {duration_sec} seconds (~{approx_words} words total across all scenes).\n"
-        f"Divide the story into EXACTLY {scene_count} sequential scenes that flow smoothly as ONE continuous story.\n"
+        f"Divide the story into EXACTLY {scene_count} distinct sequential scenes that flow smoothly as ONE continuous story.\n"
         f"Keep each scene's narration punchy (8 to 15 words per scene) so subtitles stay clean and compact.\n"
         'Also classify the emotional soundtrack mood as ONE of: "epic", "mystery", "sad", "happy", or "calm".\n'
         "Return strict JSON matching this exact schema:\n"
@@ -443,77 +578,94 @@ def generate_story_package(
         '  "tags": ["tag1", "tag2", "tag3", "tag4"],\n'
         '  "mood": "epic | mystery | sad | happy | calm",\n'
         '  "scenes": [\n'
-        '    {"narration": "Spoken story line strictly in the requested language/dialect", "image_prompt": "Rich detailed English visual prompt matching the style, centered full-frame composition, no text in image"}\n'
+        '    {"narration": "Spoken story line strictly in the requested language/dialect", "image_prompt": "Rich specific English visual prompt matching the exact topic & style, clear expressive faces, vivid lighting, no text in image"}\n'
         "  ]\n"
         "}"
     )
 
-    llm_models = [
-        "minimax:m3@0",
-        "anthropic:claude@haiku-5.5",
+    # 1. Try fast verified Runware LLM models first
+    runware_models = [
+        "deepseek:v4.1@flash",
+        "google:gemini@3.5-flash",
+        "google:gemini@3.1-flash-lite",
+        "minimax:m3.1@flash",
         "alibaba:qwen@4-max",
-        "openai:gpt@6-luna",
-        "openai:gpt@6.2-sol",
     ]
-    for model_id in llm_models:
+    if RUNWARE_API_KEY:
+        for model_id in runware_models:
+            try:
+                resp = requests.post(
+                    "https://api.runware.ai/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {RUNWARE_API_KEY}",
+                        "Content-Type": "application/json",
+                    },
+                    json={
+                        "model": model_id,
+                        "messages": [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": user_prompt},
+                        ],
+                        "temperature": 0.85,
+                    },
+                    timeout=55,
+                )
+                if not resp.ok:
+                    print(f"[WARN] Runware LLM {model_id} HTTP {resp.status_code}: {resp.text[:200]}", flush=True)
+                    continue
+                data = resp.json()
+                raw = (data.get("choices") or [{}])[0].get("message", {}).get("content", "") or ""
+                story_pkg = _parse_llm_story_response(raw, niche, style, is_ar, scene_count, short_tag)
+                if story_pkg:
+                    print(f"[OK] Generated story via Runware LLM ({model_id}) [mood={story_pkg['mood']}]: {story_pkg['title']}", flush=True)
+                    return story_pkg
+                print(f"[WARN] Runware LLM {model_id} returned invalid/non-matching JSON, trying next...", flush=True)
+            except Exception as exc:
+                print(f"[WARN] Runware LLM {model_id} error: {exc}", flush=True)
+
+    # 2. Free Zero-Key Backup LLM (Pollinations OpenAI-compatible API) so custom topics ALWAYS work even on low Runware balance
+    for p_model in ["openai", "mistral"]:
         try:
             resp = requests.post(
-                "https://api.runware.ai/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {RUNWARE_API_KEY}",
-                    "Content-Type": "application/json",
-                },
+                "https://text.pollinations.ai/openai",
+                headers={"Content-Type": "application/json"},
                 json={
-                    "model": model_id,
+                    "model": p_model,
                     "messages": [
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_prompt},
                     ],
                     "temperature": 0.85,
+                    "jsonMode": True,
                 },
-                timeout=60,
+                timeout=45,
             )
             if not resp.ok:
-                print(f"[WARN] Runware LLM {model_id} HTTP {resp.status_code}: {resp.text[:220]}", flush=True)
+                print(f"[WARN] Free Backup LLM ({p_model}) HTTP {resp.status_code}", flush=True)
                 continue
             data = resp.json()
-            raw = data["choices"][0]["message"]["content"].strip()
-            parsed = extract_json_object(raw)
-            scenes = parsed.get("scenes") or []
-            if len(scenes) >= 2:
-                while len(scenes) < scene_count:
-                    scenes.append(scenes[-1])
-                scenes = scenes[:scene_count]
-                title = str(parsed.get("title") or "").strip()[:90]
-                desc = str(parsed.get("description") or title).strip()
-                if is_ar and not re.search(r"[\u0600-\u06FF]", title):
-                    print(f"[WARN] LLM {model_id} returned non-Arabic title, trying next model...", flush=True)
-                    continue
-                if short_tag and "#shorts" not in title.lower():
-                    title = f"{title}{short_tag}"[:95]
-                mood = detect_story_mood(niche, title, parsed.get("mood") or "")
-                print(f"[OK] Generated story via Runware LLM ({model_id}) [mood={mood}]: {title}", flush=True)
-                return {
-                    "title": title,
-                    "description": desc,
-                    "tags": parsed.get("tags") or (["قصص", "حكايات", "شورتس"] if is_ar else ["Storytime", "Shorts"]),
-                    "mood": mood,
-                    "scenes": scenes,
-                }
+            raw = (data.get("choices") or [{}])[0].get("message", {}).get("content", "") or ""
+            story_pkg = _parse_llm_story_response(raw, niche, style, is_ar, scene_count, short_tag)
+            if story_pkg:
+                print(f"[OK] Generated custom story via Free Backup LLM ({p_model}): {story_pkg['title']}", flush=True)
+                return story_pkg
         except Exception as exc:
-            print(f"[WARN] Runware LLM {model_id} error: {exc}", flush=True)
+            print(f"[WARN] Free Backup LLM ({p_model}) error: {exc}", flush=True)
 
-    print("[INFO] Using rich localized story fallback bank.", flush=True)
+    print("[INFO] Using niche-aware localized story fallback bank.", flush=True)
     return build_rich_fallback_story(niche, style, language, voice_locale, scene_count, short_tag)
 
 
+# ==============================================================================
+# Step 2: Parallel Scene Image Generation (Runware FLUX.1 schnell)
+# ==============================================================================
 def generate_single_image(prompt: str, width: int, height: int, out_path: Path) -> str:
     payload = [
         {
             "taskType": "imageInference",
             "taskUUID": str(uuid.uuid4()),
             "model": "runware:100@1",
-            "positivePrompt": prompt[:900],
+            "positivePrompt": prompt[:950],
             "width": width,
             "height": height,
             "steps": 4,
@@ -546,15 +698,27 @@ def generate_single_image(prompt: str, width: int, height: int, out_path: Path) 
     raise RuntimeError("Runware image generation failed after 3 retries")
 
 
-def generate_all_scenes(scenes: list, style: str, is_vertical: bool, work_dir: Path) -> tuple[list[Path], list[str]]:
+def generate_all_scenes(scenes: list, style: str, is_vertical: bool, work_dir: Path, niche: str = "") -> tuple[list[Path], list[str]]:
     w, h = (768, 1344) if is_vertical else (1344, 768)
     total = len(scenes)
     paths: list[Path | None] = [None] * total
     urls: list[str] = []
+    style_desc, force_bright = resolve_visual_style_prompt(style, niche)
 
     def _worker(i: int):
         p = work_dir / f"scene_{i:04d}.jpg"
-        prompt = f"{style}, {scenes[i]['image_prompt']}, cinematic 8K lighting, vivid balanced framing, no text, no watermark"
+        scene_desc = str(scenes[i].get("image_prompt") or "").strip()
+        # Avoid duplicating style_desc if fallback already prepended it
+        if style_desc[:28].lower() in scene_desc.lower():
+            base_prompt = scene_desc
+        else:
+            base_prompt = f"{style_desc}. {scene_desc}"
+        if force_bright:
+            # Strip accidental dark words if kids/bright style is selected
+            base_prompt = re.sub(r"\b(silhouette|darkness|gloomy|shadowy|pitch black|dimly lit)\b", "bright colorful", base_prompt, flags=re.IGNORECASE)
+            prompt = f"{base_prompt}, bright cheerful daylight, clear expressive faces facing camera, vibrant colors, no text, no watermark"
+        else:
+            prompt = f"{base_prompt}, crisp balanced lighting, clear detailed faces and subjects, vivid colors, no text, no watermark"
         url = generate_single_image(prompt, w, h, p)
         return i, p, url
 
@@ -578,6 +742,9 @@ def generate_all_scenes(scenes: list, style: str, is_vertical: bool, work_dir: P
     return [p for p in paths if p is not None], urls
 
 
+# ==============================================================================
+# Step 2B: Native-Audio AI Video (Runware HeyGen Video 1.0 — heygen:video@1.0)
+# ==============================================================================
 def generate_heygen_video_clip(
     niche: str,
     style: str,
@@ -588,6 +755,11 @@ def generate_heygen_video_clip(
     story: dict,
     out_mp4: Path,
 ) -> str:
+    """
+    Generate a complete 5-30s AI video with synchronized native dialogue, lip-sync,
+    ambience, and sound effects in ONE pass using Runware HeyGen Video 1.0 (heygen:video@1.0).
+    Exact 480p dimensions per Runware docs: 480x832 (9:16), 832x480 (16:9).
+    """
     w, h = (480, 832) if is_vertical else (832, 480)
     dur = max(5, min(30, int(duration_sec or 15)))
     scenes = story.get("scenes") or []
@@ -606,7 +778,7 @@ def generate_heygen_video_clip(
         "Authorization": f"Bearer {RUNWARE_API_KEY}",
         "Content-Type": "application/json",
     }
-    last_err = "Unknown AI Video error"
+    last_err = "Unknown HeyGen Video 1.0 error"
     for attempt in range(2):
         task_uuid = str(uuid.uuid4())
         payload = [
@@ -670,23 +842,26 @@ def generate_heygen_video_clip(
                     raise RuntimeError(f"Runware poll error: {err0.get('message', err0)}")
                 for item in (body.get("data") or []):
                     if item.get("status") == "error":
-                        raise RuntimeError(f"AI Video task failed: {item}")
+                        raise RuntimeError(f"HeyGen task failed: {item}")
                     vid_url = item.get("videoURL")
                     if vid_url:
                         vid_bytes = requests.get(vid_url, timeout=90).content
                         if len(vid_bytes) < 5000:
-                            raise RuntimeError("Downloaded MP4 is empty/corrupt")
+                            raise RuntimeError("Downloaded HeyGen MP4 is empty/corrupt")
                         out_mp4.write_bytes(vid_bytes)
-                        print(f"[OK] AI Video clip ready ({len(vid_bytes)//1024} KB)", flush=True)
+                        print(f"[OK] HeyGen Video 1.0 clip ready ({len(vid_bytes)//1024} KB)", flush=True)
                         return vid_url
-            raise RuntimeError("AI Video timed out after 240s")
+            raise RuntimeError("HeyGen Video 1.0 timed out after 240s")
         except Exception as exc:
             last_err = str(exc)
-            print(f"[WARN] AI Video attempt {attempt+1} failed: {last_err}", flush=True)
+            print(f"[WARN] HeyGen Video 1.0 attempt {attempt+1} failed: {last_err}", flush=True)
             time.sleep(2)
-    raise RuntimeError(f"AI Video failed: {last_err}")
+    raise RuntimeError(f"HeyGen Video 1.0 failed: {last_err}")
 
 
+# ==============================================================================
+# Step 3: Multilingual / Multi-Dialect Edge TTS Voiceover (100% Free)
+# ==============================================================================
 def pick_voice(voice_locale: str, voice_gender: str) -> str:
     g = "female" if str(voice_gender or "").lower().startswith("f") else "male"
     entry = VOICE_MAP.get(voice_locale)
@@ -715,40 +890,49 @@ def get_audio_duration(audio_path: Path) -> float:
     return max(1.8, float(out or 4.0))
 
 
+# ==============================================================================
+# Step 3.5: 100% Copyright-Free Mood Soundtrack + Transition Whoosh SFX Engine
+# ==============================================================================
 def generate_mood_soundtrack(mood: str, total_dur: float, transition_times: list[float], out_wav: Path):
+    """
+    Synthesizes a warm, lush, 100% copyright-free cinematic background score matched to the story mood
+    (epic, mystery, sad, happy, calm) PLUS subtle soft whoosh SFX on scene transitions.
+    Uses warm multi-harmonic pads, slow LFO swells, soft plucked notes, and FFmpeg studio reverb/lowpass.
+    """
     sr = 22050
     n_samples = max(sr, int(math.ceil(total_dur * sr)))
 
+    # Chord progressions (Hz) tailored to each mood
     mood_chords = {
         "epic": [
-            (73.42, 146.83, 220.00, 293.66, 349.23),
-            (58.27, 116.54, 174.61, 233.08, 293.66),
-            (65.41, 130.81, 196.00, 261.63, 329.63),
-            (55.00, 110.00, 164.81, 220.00, 277.18),
+            (73.42, 146.83, 220.00, 293.66, 349.23),   # Dm cinematic
+            (58.27, 116.54, 174.61, 233.08, 293.66),   # Bbmaj7
+            (65.41, 130.81, 196.00, 261.63, 329.63),   # Csus2
+            (55.00, 110.00, 164.81, 220.00, 277.18),   # A major lift
         ],
         "mystery": [
-            (55.00, 110.00, 164.81, 220.00, 261.63),
-            (51.91, 103.83, 155.56, 207.65, 246.94),
-            (65.41, 130.81, 196.00, 246.94, 293.66),
-            (61.74, 123.47, 164.81, 220.00, 246.94),
+            (55.00, 110.00, 164.81, 220.00, 261.63),   # Am dark pad
+            (51.91, 103.83, 155.56, 207.65, 246.94),   # Ab/G# tension
+            (65.41, 130.81, 196.00, 246.94, 293.66),   # Cmaj9 eerie
+            (61.74, 123.47, 164.81, 220.00, 246.94),   # Bm7b5 suspense
         ],
         "sad": [
-            (65.41, 130.81, 155.56, 196.00, 261.63),
-            (51.91, 103.83, 155.56, 196.00, 233.08),
-            (77.78, 155.56, 196.00, 233.08, 293.66),
-            (58.27, 116.54, 146.83, 174.61, 233.08),
+            (65.41, 130.81, 155.56, 196.00, 261.63),   # Cm warm melancholic
+            (51.91, 103.83, 155.56, 196.00, 233.08),   # Abmaj7
+            (77.78, 155.56, 196.00, 233.08, 293.66),   # Ebmaj7
+            (58.27, 116.54, 146.83, 174.61, 233.08),   # Bb warm resolve
         ],
         "happy": [
-            (98.00, 196.00, 246.94, 293.66, 392.00),
-            (73.42, 146.83, 220.00, 293.66, 369.99),
-            (82.41, 164.81, 196.00, 246.94, 329.63),
-            (65.41, 130.81, 196.00, 246.94, 329.63),
+            (98.00, 196.00, 246.94, 293.66, 392.00),   # G major bright
+            (73.42, 146.83, 220.00, 293.66, 369.99),   # D major
+            (82.41, 164.81, 196.00, 246.94, 329.63),   # Em7 uplifting
+            (65.41, 130.81, 196.00, 246.94, 329.63),   # Cmaj7
         ],
         "calm": [
-            (87.31, 174.61, 220.00, 261.63, 329.63),
-            (73.42, 146.83, 220.00, 261.63, 329.63),
-            (58.27, 116.54, 174.61, 220.00, 293.66),
-            (65.41, 130.81, 196.00, 261.63, 329.63),
+            (87.31, 174.61, 220.00, 261.63, 329.63),   # Fmaj7 peaceful
+            (73.42, 146.83, 220.00, 261.63, 329.63),   # Dm9
+            (58.27, 116.54, 174.61, 220.00, 293.66),   # Bbmaj7
+            (65.41, 130.81, 196.00, 261.63, 329.63),   # C warm
         ],
     }
 
@@ -759,6 +943,8 @@ def generate_mood_soundtrack(mood: str, total_dur: float, transition_times: list
     raw_wav = out_wav.with_suffix(".raw.wav")
     rng = random.Random(42)
     lp_noise = 0.0
+
+    # Precompute transition sample windows for subtle whoosh SFX
     trans_windows = [(int((t - 0.28) * sr), int((t + 0.18) * sr), int(t * sr)) for t in transition_times]
 
     buf = bytearray()
@@ -769,30 +955,37 @@ def generate_mood_soundtrack(mood: str, total_dur: float, transition_times: list
         local_t = t % chord_len
         chord = chords[c_idx]
 
+        # Smooth chord envelope to eliminate any clicks between chords
         c_env = 1.0
         if local_t < 0.25:
             c_env = local_t / 0.25
         elif local_t > chord_len - 0.25:
             c_env = (chord_len - local_t) / 0.25
 
+        # Warm breathing pad
         lfo = 0.82 + 0.18 * math.sin(two_pi * 0.22 * t)
         val = 0.0
         for idx_f, freq in enumerate(chord):
             w = 0.24 if idx_f == 0 else (0.19 if idx_f == 1 else 0.13)
             val += w * math.sin(two_pi * freq * t)
+            # Soft warm detuned overtone
             if idx_f >= 1:
                 val += (w * 0.28) * math.sin(two_pi * (freq * 1.003) * t)
 
+        # Mood-specific musical character
         if mood == "epic":
+            # Subtle rhythmic cinematic bass pulse
             beat_t = t % (1.0 / pulse_hz)
             pulse = math.exp(-beat_t * 7.5)
             val += 0.22 * pulse * math.sin(two_pi * chord[0] * t)
         elif mood == "happy":
+            # Gentle bright plucked melody notes
             step_t = t % 0.45
             note_idx = int(t / 0.45) % 4
             pluck = math.exp(-step_t * 9.0)
             val += 0.16 * pluck * math.sin(two_pi * (chord[1 + (note_idx % 3)] * 2.0) * t)
         elif mood == "sad":
+            # Soft slow piano-like arpeggio
             step_t = t % 0.95
             note_idx = int(t / 0.95) % 4
             pluck = math.exp(-step_t * 4.5)
@@ -800,6 +993,7 @@ def generate_mood_soundtrack(mood: str, total_dur: float, transition_times: list
 
         sample = val * c_env * lfo * 0.42
 
+        # Soft filtered pink-noise whoosh SFX on scene transitions
         for w_start, w_end, w_peak in trans_windows:
             if w_start <= i <= w_end:
                 white = rng.uniform(-1.0, 1.0)
@@ -809,6 +1003,7 @@ def generate_mood_soundtrack(mood: str, total_dur: float, transition_times: list
                 sample += lp_noise * whoosh_env * 0.35
                 break
 
+        # Global smooth fade-in (1.0s) & fade-out (1.4s)
         if t < 1.0:
             sample *= t
         elif t > total_dur - 1.4:
@@ -823,6 +1018,7 @@ def generate_mood_soundtrack(mood: str, total_dur: float, transition_times: list
         wf.setframerate(sr)
         wf.writeframes(bytes(buf))
 
+    # Apply studio warmth (lowpass + gentle spacious echo) and convert to 44100Hz stereo WAV
     subprocess.run(
         [
             "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
@@ -835,6 +1031,9 @@ def generate_mood_soundtrack(mood: str, total_dur: float, transition_times: list
     )
 
 
+# ==============================================================================
+# Step 4: Compact Sleek Subtitles (1–2 Lines, Timed Chunks) + Full-Frame Montage
+# ==============================================================================
 def find_font_path(has_arabic: bool = True, has_latin: bool = False) -> str:
     if has_arabic and has_latin:
         for c in [
@@ -879,6 +1078,10 @@ def prepare_caption_line(line: str, is_rtl: bool) -> tuple[str, dict]:
 
 
 def split_caption_into_chunks(text: str, is_vertical: bool) -> list[str]:
+    """
+    Split narration into 1–2 short timed chunks so the on-screen subtitle is ALWAYS a compact
+    1–2 line strip (never a huge 3–4 line box covering the scene, and never cuts off any words).
+    """
     cleaned = re.sub(r"[\U00010000-\U0010ffff\u2600-\u27BF]", "", str(text or "")).strip()
     words = cleaned.split()
     max_words_per_chunk = 8 if is_vertical else 12
@@ -889,6 +1092,7 @@ def split_caption_into_chunks(text: str, is_vertical: bool) -> list[str]:
 
 
 def render_subtitle_png(text: str, out_png: Path, width: int, height: int):
+    """Renders a sleek, compact, slim subtitle strip at the lower edge so 90%+ of the image stays visible."""
     img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
 
@@ -903,6 +1107,7 @@ def render_subtitle_png(text: str, out_png: Path, width: int, height: int):
             raw_clean = re.sub(r"\s*[A-Za-z0-9_#\-]+\s*", " ", raw_clean).strip()
             has_lat = False
 
+    # Slim, crisp Shorts-style typography (compact so it never hides the artwork)
     font_size = 38 if width <= 1080 else 34
     font_path = find_font_path(has_arabic=has_ar, has_latin=has_lat)
     font = ImageFont.truetype(font_path, font_size) if font_path else ImageFont.load_default()
@@ -935,6 +1140,7 @@ def render_subtitle_png(text: str, out_png: Path, width: int, height: int):
     box_x = (width - box_w) // 2
     box_y = int(height * 0.84) - box_h // 2
 
+    # Sleek, subtle semi-transparent slim strip (zero bulky box!)
     draw.rounded_rectangle(
         [box_x, box_y, box_x + box_w, box_y + box_h],
         radius=15,
@@ -961,21 +1167,29 @@ def render_subtitle_png(text: str, out_png: Path, width: int, height: int):
 
 
 def get_ken_burns_expr(scene_idx: int, frames: int, W: int, H: int, fps: int) -> str:
+    """
+    Full-frame gentle cinematic camera motions (max 5% zoom, NO dark vignette, NO heavy edge cropping)
+    so the entire artwork stays crisp and visible from edge to edge.
+    """
     mode = scene_idx % 4
     f_den = max(1, frames)
     if mode == 0:
+        # Gentle slow zoom-in (1.00 -> 1.05)
         z = f"1.0+0.05*on/{f_den}"
         x = "iw/2-(iw/zoom/2)"
         y = "ih/2-(ih/zoom/2)"
     elif mode == 1:
+        # Gentle slow zoom-out (1.05 -> 1.00)
         z = f"1.05-0.05*on/{f_den}"
         x = "iw/2-(iw/zoom/2)"
         y = "ih/2-(ih/zoom/2)"
     elif mode == 2:
+        # Gentle pan left-to-right (minimal 5% zoom)
         z = "1.05"
         x = f"(iw-iw/zoom)*on/{f_den}"
         y = "ih/2-(ih/zoom/2)"
     else:
+        # Gentle pan right-to-left (minimal 5% zoom)
         z = "1.05"
         x = f"(iw-iw/zoom)*(1-on/{f_den})"
         y = "ih/2-(ih/zoom/2)"
@@ -1090,6 +1304,7 @@ def build_1080p_video(
         segment_files.append(seg_out)
         seg_durations.append(seg_dur)
 
+    # Assemble video + voice track first
     voice_video = work_dir / "assembled_voice.mp4"
     transition_times = []
     if use_xfade:
@@ -1141,6 +1356,7 @@ def build_1080p_video(
             check=True,
         )
 
+    # Mix mood-matched cinematic soundtrack + subtle transition whoosh SFX under voiceover
     final_mp4 = work_dir / "final_1080p.mp4"
     try:
         total_vid_dur = get_audio_duration(voice_video)
@@ -1174,7 +1390,11 @@ def build_1080p_video(
         return final_mp4
 
 
+# ==============================================================================
+# Step 5: Supabase Storage MP4 Upload + YouTube OAuth 2.0 Resumable Upload
+# ==============================================================================
 def upload_mp4_to_storage(mp4_path: Path, job_id: str) -> str:
+    """Upload rendered 1080p MP4 to Supabase Storage public bucket (videos) for direct client download."""
     try:
         requests.post(
             f"{SUPABASE_URL}/storage/v1/bucket",
@@ -1263,6 +1483,9 @@ def upload_to_youtube(mp4_path: Path, access_token: str, title: str, description
     return vid_id
 
 
+# ==============================================================================
+# Main Pipeline
+# ==============================================================================
 def main():
     if not JOB_ID:
         raise RuntimeError("Missing JOB_ID environment variable")
