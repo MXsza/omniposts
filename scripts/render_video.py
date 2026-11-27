@@ -47,6 +47,7 @@ JOB_ID = os.environ.get("JOB_ID", "").strip()
 RUNWARE_API_KEY = os.environ.get("RUNWARE_API_KEY", "").strip()
 ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY", "").strip()
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
+DEAPI_API_KEY = os.environ.get("DEAPI_API_KEY", "").strip()
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://kljpelpjdzoagpxwdsnr.supabase.co").strip().rstrip("/")
 SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
 GOOGLE_CLIENT_ID = (
@@ -287,6 +288,14 @@ def resolve_visual_style_prompt(style: str, niche: str = "") -> tuple[str, bool]
         k in st for k in ["pixar", "disney", "storybook", "بيكسار", "قصص مصورة", "ghibli", "anime", "أنمي"]
     )
 
+    if "stickman" in st or "ستيك" in st or "stick" in ni or "ستيك" in ni:
+        base = (
+            "Trendy viral YouTube 2D stickman explainer cartoon illustration, "
+            "clean bold black ink stickman character with expressive funny big cartoon eyes and clear face, "
+            "bright clean white and soft pastel yellow comic background, colorful minimal flat doodle icons and arrows, "
+            "crisp modern vector 2D animation art, ultra sharp"
+        )
+        return base, True
     if "pixar" in st or "disney" in st or "بيكسار" in st:
         base = (
             "3D Pixar and Disney animated movie still, bright cheerful daylight lighting, "
@@ -530,6 +539,24 @@ def generate_story_package(
     is_vertical: bool,
 ) -> dict:
     approx_words = max(20, min(7500, int(duration_sec * 2.2)))
+    viral_hooks_ar = [
+        "ابدأ بمفاجأة فورية غير متوقعة في أول ثانية (مثال: الكل ضحك عليه لحد ما شافوا اللي طلعه من جيبه!)",
+        "ابدأ بسؤال مثير للفضول يخلي المشاهد يكمل للآخر عشان يعرف الإجابة",
+        "ابدأ بغلطة صغيرة غيرت مجرى القصة بالكامل في 3 ثواني",
+        "ابدأ بلحظة صمت قبل حدث ضخم ومؤثر جداً",
+        "ابدأ بحقيقة صادمة أو سر غريب محدش كان يعرفه",
+        "ابدأ بتحدي شبه مستحيل وبطل محدش كان مراهن عليه",
+    ]
+    viral_hooks_en = [
+        "Open with an instant unexpected twist in the first 2 seconds (e.g., Everyone laughed until they saw what he pulled out...)",
+        "Open with an irresistible curiosity-gap question that forces viewers to watch till the end",
+        "Open with a tiny 3-second mistake that changed everything forever",
+        "Open in the middle of high-stakes action, then reveal why it happened",
+        "Open with a shocking secret nobody noticed until it was almost too late",
+        "Open with an underdog facing an impossible moment",
+    ]
+    chosen_hook_angle = random.choice(viral_hooks_ar if is_arabic_language(language, voice_locale) else viral_hooks_en)
+    unique_seed_tag = f"UNIQUE_EPISODE_SEED_{random.randint(10000, 99999)}"
     short_tag = " #Shorts" if (is_vertical and duration_sec <= 60) else ""
     is_ar = is_arabic_language(language, voice_locale)
     style_desc, force_bright = resolve_visual_style_prompt(style, niche)
@@ -569,6 +596,8 @@ def generate_story_package(
     )
     user_prompt = (
         f"Create a gripping, high-retention 100% original story strictly about this topic: '{niche}'.\n"
+        f"ANTI-REPETITION SEED ({unique_seed_tag}): Invent a completely fresh plot, fresh character name, and fresh setting — NEVER recycle generic clichés!\n"
+        f"MANDATORY OPENING HOOK STYLE: {chosen_hook_angle}\n"
         f"Visual style: '{style}' ({style_desc}).\n"
         f"Language & Dialect: '{language}' ({voice_locale}).\n"
         f"Target duration: {duration_sec} seconds (~{approx_words} words total across all scenes).\n"
@@ -664,25 +693,36 @@ def generate_story_package(
 # ==============================================================================
 # Step 2: Parallel Scene Image Generation (Runware FLUX.1 schnell)
 # ==============================================================================
-def generate_single_image(prompt: str, width: int, height: int, out_path: Path) -> str:
-    # 1. Primary: Runware FLUX.1 schnell (ultra-fast when balance is available)
+def generate_single_image(prompt: str, width: int, height: int, out_path: Path, reference_image_url: str = "") -> str:
+    # 1. Primary: Modern 2026 FLUX.2 [klein] 9B (runware:400@2 — $0.00143/img, trendy crisp 2026 art) with FLUX.1 fallback
     if RUNWARE_API_KEY:
-        payload = [
-            {
+        neg_prompt = (
+            "blurry, ugly, deformed face, extra limbs, dark faceless silhouette, gloomy muddy lighting, "
+            "low quality, dated stock photo, watermark, text, signature, cropped head"
+        )
+        for rw_model in ("runware:400@2", "runware:100@1"):
+            task_obj = {
                 "taskType": "imageInference",
                 "taskUUID": str(uuid.uuid4()),
-                "model": "runware:100@1",
-                "positivePrompt": prompt[:950],
+                "model": rw_model,
+                "positivePrompt": (
+                    f"Keep the EXACT same main character appearance, face, hair, and outfit from the reference image. {prompt}"
+                    if (reference_image_url and rw_model == "runware:400@2")
+                    else prompt
+                )[:950],
+                "negativePrompt": neg_prompt,
+                "CFGScale": 3.5,
                 "width": width,
                 "height": height,
                 "steps": 4,
                 "numberResults": 1,
                 "outputType": "URL",
-                "outputFormat": "JPEG",
+                "outputFormat": "JPG",
                 "includeCost": True,
             }
-        ]
-        for attempt in range(2):
+            if reference_image_url and rw_model == "runware:400@2":
+                task_obj["inputs"] = {"referenceImages": [reference_image_url]}
+            payload = [task_obj]
             try:
                 r = requests.post(
                     "https://api.runware.ai/v1",
@@ -693,10 +733,12 @@ def generate_single_image(prompt: str, width: int, height: int, out_path: Path) 
                     json=payload,
                     timeout=35,
                 )
-                if r.status_code in (401, 402, 403):
-                    print(f"[WARN] Runware balance/auth HTTP {r.status_code} — switching to Free FLUX backup!", flush=True)
+                if r.status_code in (401, 402, 403) or (r.status_code == 400 and "insufficient" in r.text.lower()):
+                    print(f"[WARN] Runware credits/auth HTTP {r.status_code} — switching to backup!", flush=True)
                     break
-                r.raise_for_status()
+                if not r.ok:
+                    print(f"[WARN] Runware {rw_model} HTTP {r.status_code}, trying fallback model...", flush=True)
+                    continue
                 data = r.json().get("data") or []
                 if data and data[0].get("imageURL"):
                     img_url = data[0]["imageURL"]
@@ -705,7 +747,49 @@ def generate_single_image(prompt: str, width: int, height: int, out_path: Path) 
                         out_path.write_bytes(img_bytes)
                         return img_url
             except Exception as exc:
-                print(f"[WARN] Runware image attempt {attempt+1} failed: {exc}", flush=True)
+                print(f"[WARN] Runware {rw_model} error: {exc}", flush=True)
+
+    # 1B. Automatic Free-Credit Backup: deAPI Flux1schnell ($5 free credits, no credit card -> ~2,600 images!)
+    if DEAPI_API_KEY:
+        size_str = f"{width}x{height}"
+        for attempt in range(3):
+            try:
+                dr = requests.post(
+                    "https://oai.deapi.ai/v1/images/generations",
+                    headers={
+                        "Authorization": f"Bearer {DEAPI_API_KEY}",
+                        "Content-Type": "application/json",
+                    },
+                    json={
+                        "model": "Flux1schnell",
+                        "prompt": prompt[:950],
+                        "size": size_str,
+                        "n": 1,
+                    },
+                    timeout=55,
+                )
+                if dr.ok:
+                    ddata = (dr.json().get("data") or [{}])[0]
+                    if ddata.get("url"):
+                        img_bytes = requests.get(ddata["url"], timeout=35).content
+                        if len(img_bytes) > 5000:
+                            out_path.write_bytes(img_bytes)
+                            print(f"[OK] Generated scene via deAPI Flux1schnell ({len(img_bytes)//1024} KB)", flush=True)
+                            return ddata["url"]
+                    elif ddata.get("b64_json"):
+                        import base64
+                        img_bytes = base64.b64decode(ddata["b64_json"])
+                        if len(img_bytes) > 5000:
+                            out_path.write_bytes(img_bytes)
+                            print(f"[OK] Generated scene via deAPI Flux1schnell b64 ({len(img_bytes)//1024} KB)", flush=True)
+                            return ""
+                else:
+                    print(f"[WARN] deAPI attempt {attempt+1} HTTP {dr.status_code}: {dr.text[:160]}", flush=True)
+                    if dr.status_code in (401, 402, 403):
+                        break
+            except Exception as exc:
+                print(f"[WARN] deAPI attempt {attempt+1} error: {exc}", flush=True)
+            time.sleep(2)
 
     # 2. Automatic Free $0 FLUX Backup (Pollinations AI — zero balance required, no watermark)
     import urllib.parse
@@ -734,41 +818,124 @@ def generate_all_scenes(scenes: list, style: str, is_vertical: bool, work_dir: P
     urls: list[str] = []
     style_desc, force_bright = resolve_visual_style_prompt(style, niche)
 
-    def _worker(i: int):
-        p = work_dir / f"scene_{i:04d}.jpg"
+    def _build_prompt(i: int) -> str:
         scene_desc = str(scenes[i].get("image_prompt") or "").strip()
-        # Avoid duplicating style_desc if fallback already prepended it
         if style_desc[:28].lower() in scene_desc.lower():
             base_prompt = scene_desc
         else:
             base_prompt = f"{style_desc}. {scene_desc}"
         if force_bright:
-            # Strip accidental dark words if kids/bright style is selected
             base_prompt = re.sub(r"\b(silhouette|darkness|gloomy|shadowy|pitch black|dimly lit)\b", "bright colorful", base_prompt, flags=re.IGNORECASE)
-            prompt = f"{base_prompt}, bright cheerful daylight, clear expressive faces facing camera, vibrant colors, no text, no watermark"
-        else:
-            prompt = f"{base_prompt}, crisp balanced lighting, clear detailed faces and subjects, vivid colors, no text, no watermark"
-        url = generate_single_image(prompt, w, h, p)
+            return f"{base_prompt}, bright cheerful daylight, clear expressive faces facing camera, vibrant colors, no text, no watermark"
+        return f"{base_prompt}, crisp balanced lighting, clear detailed faces and subjects, vivid colors, no text, no watermark"
+
+    urls_by_idx: list[str] = [""] * total
+    completed = 0
+    char_ref_url = ""
+
+    # Step 1: Generate Scene #1 first to establish the consistent main character visual reference
+    if total >= 1:
+        p0 = work_dir / "scene_0000.jpg"
+        u0 = generate_single_image(_build_prompt(0), w, h, p0, reference_image_url="")
+        paths[0] = p0
+        urls_by_idx[0] = u0
+        if str(u0).startswith("http"):
+            char_ref_url = u0
+        completed = 1
+        update_job({
+            "status": "imaging",
+            "progress_pct": 20 + int((1 / max(1, total)) * 35),
+            "step_label": f"تم تثبيت شكل البطل — جاري رسم باقي المشاهد ({completed} / {total})...",
+            "preview_images": [u for u in urls_by_idx if u][:12],
+        })
+
+    # Step 2: Generate Scenes #2..N in parallel using Scene #1 as visual character reference!
+    def _worker(i: int):
+        p = work_dir / f"scene_{i:04d}.jpg"
+        url = generate_single_image(_build_prompt(i), w, h, p, reference_image_url=char_ref_url)
         return i, p, url
 
-    completed = 0
-    with ThreadPoolExecutor(max_workers=6) as pool:
-        futs = [pool.submit(_worker, i) for i in range(total)]
-        for fut in as_completed(futs):
-            idx, path, url = fut.result()
-            paths[idx] = path
-            urls.append(url)
-            completed += 1
-            if completed % 2 == 0 or completed == total:
-                pct = 20 + int((completed / total) * 35)
-                update_job({
-                    "status": "imaging",
-                    "progress_pct": pct,
-                    "step_label": f"جاري رسم المشاهد بدقة عالية ({completed} / {total})...",
-                    "preview_images": urls[:12],
-                })
+    if total > 1:
+        with ThreadPoolExecutor(max_workers=5) as pool:
+            futs = [pool.submit(_worker, i) for i in range(1, total)]
+            for fut in as_completed(futs):
+                idx, path, url = fut.result()
+                paths[idx] = path
+                urls_by_idx[idx] = url
+                completed += 1
+                if completed % 2 == 0 or completed == total:
+                    pct = 20 + int((completed / total) * 35)
+                    update_job({
+                        "status": "imaging",
+                        "progress_pct": pct,
+                        "step_label": f"جاري رسم المشاهد بنفس الشخصية ({completed} / {total})...",
+                        "preview_images": [u for u in urls_by_idx if u][:12],
+                    })
+    urls = [u for u in urls_by_idx if u]
 
     return [p for p in paths if p is not None], urls
+
+
+
+def animate_hook_scene_i2v(first_img_url: str, scene_prompt: str, is_vertical: bool, out_mp4: Path) -> bool:
+    """
+    Hybrid Viral Motion: Animate Scene #1 (first 5-second Hook) using ByteDance Seedance 1.0 Pro Fast
+    (bytedance:2@2 at 480p = $0.00607/s -> only ~$0.03 for 5 seconds!).
+    Silent natural character motion (no talking) so narrator voiceover sits cleanly on top with zero lip-sync conflict.
+    """
+    if not RUNWARE_API_KEY or not first_img_url or not str(first_img_url).startswith("http"):
+        return False
+    w, h = (480, 864) if is_vertical else (864, 480)
+    task_uuid = str(uuid.uuid4())
+    headers = {"Authorization": f"Bearer {RUNWARE_API_KEY}", "Content-Type": "application/json"}
+    payload = [
+        {
+            "taskType": "videoInference",
+            "taskUUID": task_uuid,
+            "deliveryMethod": "async",
+            "model": "bytedance:2@2",
+            "positivePrompt": (
+                "Subtle natural living character motion, gentle eye blinking, soft breathing, slight natural head turn, "
+                "no talking, mouth closed or gentle smile, smooth cinematic camera push-in, "
+                + str(scene_prompt or "")[:360]
+            ),
+            "inputs": {
+                "frameImages": [{"frame": "first", "image": first_img_url}]
+            },
+            "duration": 5,
+            "width": w,
+            "height": h,
+            "outputFormat": "MP4",
+            "includeCost": True,
+        }
+    ]
+    try:
+        init = requests.post("https://api.runware.ai/v1", headers=headers, json=payload, timeout=30)
+        if not init.ok:
+            print(f"[INFO] Seedance 5s Hook skipped (HTTP {init.status_code}) — continuing with 1080p dynamic motion.", flush=True)
+            return False
+        deadline = time.time() + 100
+        while time.time() < deadline:
+            time.sleep(4)
+            poll = requests.post("https://api.runware.ai/v1", headers=headers, json=[{"taskType": "getResponse", "taskUUID": task_uuid}], timeout=25)
+            if not poll.ok:
+                continue
+            body = poll.json()
+            if body.get("errors"):
+                return False
+            for item in (body.get("data") or []):
+                if item.get("status") == "error":
+                    return False
+                vurl = item.get("videoURL")
+                if vurl:
+                    vb = requests.get(vurl, timeout=60).content
+                    if len(vb) > 10000:
+                        out_mp4.write_bytes(vb)
+                        print(f"[OK] Seedance 1.0 Pro Fast 5s Hook animation ready ({len(vb)//1024} KB, ~$0.03)!", flush=True)
+                        return True
+    except Exception as exc:
+        print(f"[INFO] Seedance 5s Hook skipped ({exc}) — continuing with 1080p dynamic motion.", flush=True)
+    return False
 
 
 # ==============================================================================
@@ -1027,7 +1194,44 @@ def get_audio_duration(audio_path: Path) -> float:
 # ==============================================================================
 # Step 3.5: 100% Copyright-Free Mood Soundtrack + Transition Whoosh SFX Engine
 # ==============================================================================
+def _try_download_royalty_free_bgm(mood: str, total_dur: float, out_wav: Path) -> bool:
+    """Download real, 100% royalty-free cinematic BGM tracks matched to story mood (cached locally)."""
+    track_urls = {
+        "happy": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Carefree.mp3",
+        "epic": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Impact%20Moderato.mp3",
+        "mystery": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Controlled%20Chaos.mp3",
+        "sad": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Touching%20Moments%20Two%20-%20Higher.mp3",
+        "calm": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Fluidscape.mp3",
+    }
+    url = track_urls.get(mood, track_urls["epic"])
+    tmp_mp3 = out_wav.with_suffix(".bgm.mp3")
+    try:
+        r = requests.get(url, timeout=20, headers={"User-Agent": "OmnipostsStudio/2.0"})
+        if r.ok and len(r.content) > 50000:
+            tmp_mp3.write_bytes(r.content)
+            fade_out_st = max(0.5, total_dur - 1.2)
+            subprocess.run(
+                [
+                    "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+                    "-stream_loop", "-1", "-i", str(tmp_mp3),
+                    "-t", f"{total_dur:.2f}",
+                    "-af", f"afade=t=in:st=0:d=0.8,afade=t=out:st={fade_out_st:.2f}:d=1.2,loudnorm=I=-22:TP=-2",
+                    "-ac", "2", "-ar", "44100",
+                    str(out_wav),
+                ],
+                check=True,
+            )
+            tmp_mp3.unlink(missing_ok=True)
+            print(f"[OK] Loaded real royalty-free cinematic BGM track (mood={mood})", flush=True)
+            return True
+    except Exception as exc:
+        print(f"[INFO] BGM download skipped ({exc}) — using built-in synth soundtrack.", flush=True)
+    return False
+
+
 def generate_mood_soundtrack(mood: str, total_dur: float, transition_times: list[float], out_wav: Path):
+    if _try_download_royalty_free_bgm(mood, total_dur, out_wav):
+        return
     """
     Synthesizes a warm, lush, 100% copyright-free cinematic background score matched to the story mood
     (epic, mystery, sad, happy, calm) PLUS subtle soft whoosh SFX on scene transitions.
@@ -1288,39 +1492,52 @@ def render_subtitle_png(text: str, out_png: Path, width: int, height: int, accen
 
 
 def get_ken_burns_expr(scene_idx: int, frames: int, W: int, H: int, fps: int) -> str:
-    """Dynamic, lively 16%-20% cinematic camera motions (zoom-in, zoom-out, diagonal pans, upward/downward reveal)."""
+    """
+    Pro Viral Camera Motion:
+    - Snappy Ease-Out Whip-Zoom entry in the first 0.35s (feels reactive to story beats!)
+    - Organic handheld camera breathing via smooth sine micro-motion (never stiff/robotic!)
+    - 6 alternating cinematic angles + crisp vivid color grade.
+    """
     mode = scene_idx % 6
     f_den = max(1, frames)
+    whip_f = max(8, int(fps * 0.35))
+    # Fast ease-out entry boost (0.06 zoom punch in first 0.35s) + continuous cinematic drift
     if mode == 0:
-        z = f"1.0+0.18*on/{f_den}"
-        x = "iw/2-(iw/zoom/2)"
-        y = "ih/2-(ih/zoom/2)"
+        # Snappy Whip-In + continuous push-in
+        z = f"1.02+0.06*min(1,on/{whip_f})+0.14*on/{f_den}"
+        x = "iw/2-(iw/zoom/2)+sin(on*0.08)*8"
+        y = "ih/2-(ih/zoom/2)+cos(on*0.07)*6"
     elif mode == 1:
-        z = f"1.18-0.18*on/{f_den}"
-        x = "iw/2-(iw/zoom/2)"
-        y = "ih/2-(ih/zoom/2)"
+        # Dramatic Pull-Back Reveal with subtle organic sway
+        z = f"1.22-0.06*min(1,on/{whip_f})-0.14*on/{f_den}"
+        x = "iw/2-(iw/zoom/2)+cos(on*0.08)*8"
+        y = "ih/2-(ih/zoom/2)+sin(on*0.06)*6"
     elif mode == 2:
-        z = f"1.10+0.08*on/{f_den}"
+        # Energetic Diagonal Pan Left->Right + Zoom-In
+        z = f"1.12+0.10*on/{f_den}"
         x = f"(iw-iw/zoom)*on/{f_den}"
-        y = f"(ih-ih/zoom)*0.35*on/{f_den}"
+        y = f"(ih-ih/zoom)*(0.25+0.30*on/{f_den})"
     elif mode == 3:
-        z = f"1.18-0.08*on/{f_den}"
+        # Energetic Diagonal Pan Right->Left + Pull-Back
+        z = f"1.22-0.10*on/{f_den}"
         x = f"(iw-iw/zoom)*(1-on/{f_den})"
-        y = f"(ih-ih/zoom)*0.4"
+        y = f"(ih-ih/zoom)*(0.55-0.25*on/{f_den})"
     elif mode == 4:
-        z = f"1.08+0.10*on/{f_den}"
-        x = "iw/2-(iw/zoom/2)"
+        # Upward Hero Tilt + Whip-In
+        z = f"1.08+0.05*min(1,on/{whip_f})+0.09*on/{f_den}"
+        x = "iw/2-(iw/zoom/2)+sin(on*0.09)*6"
         y = f"(ih-ih/zoom)*(1-on/{f_den})"
     else:
-        z = f"1.08+0.10*on/{f_den}"
-        x = "iw/2-(iw/zoom/2)"
+        # Downward Action Reveal + Zoom-In
+        z = f"1.08+0.05*min(1,on/{whip_f})+0.09*on/{f_den}"
+        x = "iw/2-(iw/zoom/2)+cos(on*0.09)*6"
         y = f"(ih-ih/zoom)*on/{f_den}"
 
     return (
         f"scale={W*2}:{H*2}:force_original_aspect_ratio=increase:flags=lanczos,"
         f"crop={W*2}:{H*2},"
         f"zoompan=z='{z}':x='{x}':y='{y}':d={frames}:s={W}x{H}:fps={fps},"
-        f"eq=contrast=1.06:saturation=1.14:brightness=0.015,"
+        f"eq=contrast=1.07:saturation=1.15:brightness=0.015,"
         f"setsar=1"
     )
 
@@ -1344,7 +1561,7 @@ def build_1080p_video(
 
     for i, (scene, media_p, aud_p, dur) in enumerate(zip(scenes, img_paths, audio_paths, durations)):
         seg_out = work_dir / f"seg_{i:04d}.mp4"
-        seg_dur = max(3.2, float(dur)) + (trans_dur if (use_xfade and i < len(scenes) - 1) else 0.0)
+        seg_dur = max(2.6, float(dur)) + (trans_dur if (use_xfade and i < len(scenes) - 1) else 0.0)
         frames = max(96, int(math.ceil(seg_dur * fps)))
         is_video_clip = str(media_p).lower().endswith(".mp4")
         if is_video_clip:
@@ -1480,7 +1697,10 @@ def build_1080p_video(
                 "-i", str(voice_video),
                 "-i", str(bgm_wav),
                 "-filter_complex",
-                "[0:a]volume=1.08[v_a];[1:a]volume=0.14[bg_a];[v_a][bg_a]amix=inputs=2:duration=first:dropout_transition=2:normalize=0[aout]",
+                "[0:a]volume=1.12,asplit=2[v_main][v_sc];"
+                "[1:a]volume=0.30[bg_raw];"
+                "[bg_raw][v_sc]sidechaincompress=threshold=0.025:ratio=6:attack=30:release=320[bg_ducked];"
+                "[v_main][bg_ducked]amix=inputs=2:duration=first:dropout_transition=2:normalize=0[aout]",
                 "-map", "0:v", "-map", "[aout]",
                 "-c:v", "copy",
                 "-c:a", "aac", "-b:a", "160k", "-ac", "2", "-ar", "44100",
@@ -1669,7 +1889,12 @@ def main():
                 mood = story.get("mood") or detect_story_mood(niche, story["title"])
 
         if not ai_motion_succeeded:
-            img_paths, _ = generate_all_scenes(story["scenes"], style, is_vertical, work_dir, niche=niche)
+            img_paths, img_urls = generate_all_scenes(story["scenes"], style, is_vertical, work_dir, niche=niche)
+            # Hybrid Viral Motion ($0.03 Seedance 1.0 Pro Fast on Scene #1 Hook -> 41%-75% profit margin across all plans!)
+            if img_paths and img_urls:
+                hook_mp4 = work_dir / "scene_0000_hook.mp4"
+                if animate_hook_scene_i2v(img_urls[0], story["scenes"][0].get("image_prompt", ""), is_vertical, hook_mp4):
+                    img_paths[0] = hook_mp4
 
             update_job({
                 "status": "voicing",
@@ -1683,7 +1908,7 @@ def main():
                 mp3_p = work_dir / f"aud_{idx:04d}.mp3"
                 asyncio.run(synth_scene_audio(sc["narration"], voice_name, mp3_p))
                 audio_paths.append(mp3_p)
-                min_per_scene = max(3.5, duration_sec / max(1, len(story["scenes"])))
+                min_per_scene = max(2.6, duration_sec / max(1, len(story["scenes"])))
                 durations.append(max(min_per_scene, get_audio_duration(mp3_p) + 0.3))
 
             update_job({
